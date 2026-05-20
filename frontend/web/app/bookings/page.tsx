@@ -416,6 +416,7 @@ function BookingsContent() {
               </Button>
             </div>
           </div>
+        </div>
       )}
     </div>
   );

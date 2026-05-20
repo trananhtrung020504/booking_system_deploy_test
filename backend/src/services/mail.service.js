@@ -1,40 +1,48 @@
 import nodemailer from 'nodemailer';
 import { ENV_VARS } from '../config/env_vars.js';
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: ENV_VARS.EMAIL_USER,
-        pass: ENV_VARS.EMAIL_PASS,
-    },
-});
-
 export const sendMail = async (options) => {
     try {
-        const message = {
-            from: `"BookingSystem" <${ENV_VARS.EMAIL_USER}>`,
-            to: options.email,
-            subject: options.subject,
-            html: options.html
-        };
-        
-        // Bỏ qua gửi email thật trên môi trường Production (Render free tier chặn port 465)
-        if (ENV_VARS.NODE_ENV === 'production') {
-            console.log(`[MailService] Bỏ qua gửi mail thật tới ${options.email} trên production (tránh chặn port).`);
+        if (!ENV_VARS.BREVO_API_KEY) {
+            console.log(`[MailService] Thiếu BREVO_API_KEY, giả lập gửi email tới ${options.email}`);
             return { messageId: 'simulated-message-id-' + Date.now() };
         }
 
-        console.log(`[MailService] Đang gửi email qua tài khoản SMTP: ${ENV_VARS.EMAIL_USER}`);
-        const info = await transporter.sendMail(message);
-        console.log(`[MailService] Email đã được gửi thành công: ${info.messageId}`);
-        return info;
-    } catch (error) {
-        console.error(`[MailService] LỖI CỤ THỂ KHI GỬI EMAIL:`, {
-            name: error.name,
-            message: error.message,
-            code: error.code,
-            command: error.command
+        const payload = {
+            sender: {
+                name: "RoPhim Booking",
+                email: ENV_VARS.EMAIL_USER // Email đã đăng ký và verify trên Brevo
+            },
+            to: [
+                { email: options.email }
+            ],
+            subject: options.subject,
+            htmlContent: options.html
+        };
+
+        console.log(`[MailService] Đang gửi email qua Brevo API tới: ${options.email}`);
+        
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': ENV_VARS.BREVO_API_KEY,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(payload)
         });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error(`[MailService] Lỗi từ Brevo:`, errorData);
+            throw new Error(`Brevo API Error: ${errorData.message}`);
+        }
+
+        const data = await response.json();
+        console.log(`[MailService] Email đã được gửi thành công qua Brevo: ${data.messageId}`);
+        return data;
+    } catch (error) {
+        console.error(`[MailService] LỖI CỤ THỂ KHI GỬI EMAIL:`, error);
         throw error;
     }
 };

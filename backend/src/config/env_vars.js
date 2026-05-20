@@ -9,6 +9,7 @@ export const ENV_VARS = {
     PORT: process.env.PORT || 5000,
     EMAIL_USER: process.env.EMAIL_USER,
     EMAIL_PASS: process.env.EMAIL_PASS,
+    BREVO_API_KEY: process.env.BREVO_API_KEY,
     OTP_SECRET: process.env.OTP_SECRET || 'otp_secret',
     ZALOPAY_APP_ID: process.env.ZALOPAY_APP_ID,
     ZALOPAY_KEY1: process.env.ZALOPAY_KEY1,

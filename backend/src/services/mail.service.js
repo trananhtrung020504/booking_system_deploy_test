@@ -10,13 +10,26 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendMail = async (options) => {
-    const message = {
-        from: `"BookingSystem" <${ENV_VARS.EMAIL_USER}>`,
-        to: options.email,
-        subject: options.subject,
-        html: options.html
-    };
-    return await transporter.sendMail(message);
+    try {
+        const message = {
+            from: `"BookingSystem" <${ENV_VARS.EMAIL_USER}>`,
+            to: options.email,
+            subject: options.subject,
+            html: options.html
+        };
+        console.log(`[MailService] Đang gửi email qua tài khoản SMTP: ${ENV_VARS.EMAIL_USER}`);
+        const info = await transporter.sendMail(message);
+        console.log(`[MailService] Email đã được gửi thành công: ${info.messageId}`);
+        return info;
+    } catch (error) {
+        console.error(`[MailService] LỖI CỤ THỂ KHI GỬI EMAIL:`, {
+            name: error.name,
+            message: error.message,
+            code: error.code,
+            command: error.command
+        });
+        throw error;
+    }
 };
 
 export const sendOTPtoEmail = async (email, otp) => {

@@ -107,14 +107,21 @@ export const sendOtp = async (req, res) => {
         const expires = Date.now() + ttl;
         const data = `${email}.${otp}.${expires}`;
         const hashedOTP = OtpUtils.hashOTP(data);
+        console.log(`[sendOtp] Bắt đầu gọi hàm sendOTPtoEmail cho email: ${email}`);
         await sendOTPtoEmail(email, otp);
+        console.log(`[sendOtp] Gửi email thành công tới: ${email}`);
         res.json({
             hash: `${hashedOTP}.${expires}`,
             email,
             message: "OTP sent to email successfully"
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error(`[sendOtp] LỖI CHI TIẾT KHI GỬI OTP:`, error);
+        res.status(500).json({ 
+            message: "Lỗi chi tiết khi gửi mail: " + error.message,
+            error_code: error.code,
+            error_command: error.command
+        });
     }
 };
 

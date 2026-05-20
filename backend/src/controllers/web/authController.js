@@ -8,6 +8,10 @@ import { ENV_VARS } from '../../config/env_vars.js';
 const getCookieOptions = (maxAge = null) => {
     const isProd = ENV_VARS.NODE_ENV === 'production';
     const cookieDomain = ENV_VARS.COOKIE_DOMAIN;
+    // Cấu hình cookie tối ưu cho cả production (custom domain & default domain) và development (localhost):
+    // - Nếu có custom domain chung (cookieDomain): dùng 'Lax' để bảo mật và tránh bị trình duyệt chặn ở tab ẩn danh.
+    // - Nếu ở Production nhưng khác domain (Vercel & Render mặc định): dùng 'None' và 'secure' để truyền cookie chéo trang.
+    // - Nếu ở local development (localhost): dùng 'Lax' để chạy bình thường.
     return {
         ...(maxAge && { maxAge }),
         httpOnly: true,

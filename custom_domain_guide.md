@@ -44,9 +44,11 @@ Chào Trung! Mình thấy bạn đang sở hữu tên miền **`trananhtrung.me`
 Mình đã cập nhật sẵn code Backend để hỗ trợ chia sẻ cookie thông qua biến môi trường. Giờ bạn chỉ cần vào cấu hình trên giao diện là xong:
 
 ### 1. Trên Render (Backend):
-Vào mục **Environment Variables** của Backend và thêm biến sau:
+Vào mục **Environment Variables** của Backend và cấu hình các biến sau:
 *   **Key:** `COOKIE_DOMAIN`
-*   **Value:** `.trananhtrung.me` *(Chú ý: Phải có dấu chấm `.` ở đằng trước để cookie dùng chung được cho cả tên miền gốc và subdomain).*
+    *   **Value:** `.trananhtrung.me` *(Chú ý: Phải có dấu chấm `.` ở đằng trước để cookie dùng chung được cho cả tên miền gốc và subdomain).*
+*   **Key:** `NGROK_URL`
+    *   **Value:** `https://api.trananhtrung.me` *(Đổi từ link .onrender.com cũ sang domain mới để ZaloPay/VNPay gửi kết quả callback thanh toán về đúng địa chỉ).*
 
 ### 2. Trên Vercel (Frontend):
 Vào mục **Settings** -> **Environment Variables** và cập nhật lại các biến sau cho trỏ về tên miền mới:

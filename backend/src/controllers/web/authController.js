@@ -101,7 +101,7 @@ export const sendOtp = async (req, res) => {
             return res.status(400).json({ message: "Email đã được đăng ký trên hệ thống, vui lòng đăng nhập" });
         }
 
-        const otp = process.env.NODE_ENV === 'production' ? OtpUtils.generateOTP() : '1234';
+        const otp = OtpUtils.generateOTP().toString();
         const ttl = 1000 * 60 * 5; // 5 minutes TTL for web signup OTP
         const expires = Date.now() + ttl;
         const data = `${email}.${otp}.${expires}`;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   Ticket, 
@@ -34,7 +34,7 @@ import { useAppSelector } from '@/store/hooks';
 import { getSocket } from '@/lib/socket';
 import { toast } from 'sonner';
 
-export default function PaymentPage() {
+function PaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -749,5 +749,13 @@ export default function PaymentPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function PaymentPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#050507] flex items-center justify-center"><Loader2 className="animate-spin h-10 w-10 text-primary" /></div>}>
+      <PaymentContent />
+    </Suspense>
   );
 }

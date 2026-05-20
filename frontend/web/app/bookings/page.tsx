@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Film, Calendar, Clock, MapPin, Ticket, ChevronRight, CheckCircle2, XCircle, AlertCircle, Loader2, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -48,7 +48,7 @@ function BookingCountdown({ createdAt }: { createdAt: string }) {
   );
 }
 
-export default function BookingsPage() {
+function BookingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const statusParam = searchParams.get('status');
@@ -416,8 +416,15 @@ export default function BookingsPage() {
               </Button>
             </div>
           </div>
-        </div>
       )}
     </div>
+  );
+}
+
+export default function BookingsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin h-10 w-10 text-primary" /></div>}>
+      <BookingsContent />
+    </Suspense>
   );
 }

@@ -57,7 +57,7 @@ interface ChatMessage {
   isInterrupted?: boolean;
 }
 
-const API_BASE_URL = 'http://localhost:5000/api/v1/web/chatbot';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/chatbot` : 'http://localhost:5000/api/v1/web/chatbot';
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);

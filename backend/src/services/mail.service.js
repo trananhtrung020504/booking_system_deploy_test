@@ -1,6 +1,30 @@
 import nodemailer from 'nodemailer';
 import { ENV_VARS } from '../config/env_vars.js';
 
+/* =========================================
+ * GIỮ LẠI LOGIC NODEMAILER CŨ (ĐÃ COMMENT)
+ * Để dùng khi chạy local hoặc sau này cần lại
+ * =========================================
+ * const transporter = nodemailer.createTransport({
+ *     service: 'gmail',
+ *     auth: {
+ *         user: ENV_VARS.EMAIL_USER,
+ *         pass: ENV_VARS.EMAIL_PASS,
+ *     },
+ * });
+ *
+ * export const sendMailNodemailer = async (options) => {
+ *     const message = {
+ *         from: `"BookingSystem" <${ENV_VARS.EMAIL_USER}>`,
+ *         to: options.email,
+ *         subject: options.subject,
+ *         html: options.html
+ *     };
+ *     return await transporter.sendMail(message);
+ * };
+ * ========================================= */
+
+
 export const sendMail = async (options) => {
     try {
         if (!ENV_VARS.BREVO_API_KEY) {

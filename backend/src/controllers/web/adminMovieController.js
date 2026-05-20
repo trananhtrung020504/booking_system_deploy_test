@@ -91,6 +91,7 @@ export const createMovie = async (req, res) => {
                     where: { movieId: movie.id }
                 });
             } catch (err) {
+        console.error(`[Controller Error] [web/adminMovieController.js]:`, err);
                 console.error("Error uploading poster:", err);
                 // Continue without poster rather than fail
             }
@@ -101,6 +102,7 @@ export const createMovie = async (req, res) => {
             movie
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminMovieController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -122,6 +124,7 @@ export const getMovieById = async (req, res) => {
 
         res.json({ movie });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminMovieController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -171,6 +174,7 @@ export const getAllMovies = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminMovieController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -282,6 +286,7 @@ export const updateMovie = async (req, res) => {
                     where: { movieId: id }
                 });
             } catch (err) {
+        console.error(`[Controller Error] [web/adminMovieController.js]:`, err);
                 console.error("Error uploading poster:", err);
             }
         }
@@ -291,6 +296,7 @@ export const updateMovie = async (req, res) => {
             movie
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminMovieController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -312,6 +318,7 @@ export const deleteMovie = async (req, res) => {
             movie
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminMovieController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -345,6 +352,7 @@ export const hardDeleteMovie = async (req, res) => {
             movie
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminMovieController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -395,6 +403,7 @@ export const getMovieAnalytics = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminMovieController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };

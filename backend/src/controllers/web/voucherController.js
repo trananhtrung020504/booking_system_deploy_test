@@ -56,6 +56,7 @@ export const getAllVouchers = async (req, res) => {
             vouchers
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/voucherController.js]:`, error);
         console.error('Get vouchers error:', error);
         res.status(500).json({ success: false, message: error.message });
     }

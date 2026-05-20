@@ -70,6 +70,7 @@ export const getAllBookings = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminBookingController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -101,6 +102,7 @@ export const getBookingDetail = async (req, res) => {
 
         res.json(booking);
     } catch (error) {
+        console.error(`[Controller Error] [web/adminBookingController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -151,6 +153,7 @@ export const cancelBooking = async (req, res) => {
             reason: reason || "Cancelled by admin"
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminBookingController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -305,6 +308,7 @@ export const getDashboardStats = async (req, res) => {
             topTheaters: topTheatersWithStats
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminBookingController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -405,6 +409,7 @@ export const getBookingsReport = async (req, res) => {
             data: grouping
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminBookingController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -472,6 +477,7 @@ export const getRevenueReport = async (req, res) => {
             transactions: transactions.slice(0, 50) // Limit to first 50 for display
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminBookingController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };

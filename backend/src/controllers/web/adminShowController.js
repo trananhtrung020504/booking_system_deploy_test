@@ -93,6 +93,7 @@ export const createShow = async (req, res) => {
             show
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminShowController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -159,6 +160,7 @@ export const getAllShows = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminShowController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -183,6 +185,7 @@ export const getShowById = async (req, res) => {
 
         res.json(show);
     } catch (error) {
+        console.error(`[Controller Error] [web/adminShowController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -214,6 +217,7 @@ export const updateShow = async (req, res) => {
             show
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminShowController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -235,6 +239,7 @@ export const deleteShow = async (req, res) => {
             show
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminShowController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -255,6 +260,7 @@ export const hardDeleteShow = async (req, res) => {
             show
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminShowController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -322,6 +328,7 @@ export const getShowAnalytics = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminShowController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -389,6 +396,7 @@ export const getShowSeatsStatus = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminShowController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };

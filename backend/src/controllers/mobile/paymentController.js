@@ -104,6 +104,7 @@ export const createVNPayPayment = async (req, res) => {
 
         res.json({ success: true, ...result });
     } catch (error) {
+        console.error(`[Controller Error] [mobile/paymentController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -187,6 +188,7 @@ export const vnpayReturn = async (req, res) => {
             res.redirect('http://localhost:3000/bookings?status=failed');
         }
     } catch (error) {
+        console.error(`[Controller Error] [mobile/paymentController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -277,6 +279,7 @@ export const createZaloPay = async (req, res) => {
             res.status(400).json({ message: response.data.return_message });
         }
     } catch (error) {
+        console.error(`[Controller Error] [mobile/paymentController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -345,6 +348,7 @@ export const zaloPayCallback = async (req, res) => {
         }
         res.json({ return_code: 1 });
     } catch (error) {
+        console.error(`[Controller Error] [mobile/paymentController.js]:`, error);
         res.json({ return_code: 0 });
     }
 };

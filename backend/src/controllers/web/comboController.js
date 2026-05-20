@@ -21,6 +21,7 @@ export const getCombos = async (req, res) => {
         });
         res.json(combos);
     } catch (error) {
+        console.error(`[Controller Error] [web/comboController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -55,6 +56,7 @@ export const createCombo = async (req, res) => {
 
         res.status(201).json({ message: "Combo created successfully", combo });
     } catch (error) {
+        console.error(`[Controller Error] [web/comboController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -82,6 +84,7 @@ export const updateCombo = async (req, res) => {
                 try {
                     await deleteFromR2(oldKey);
                 } catch (err) {
+        console.error(`[Controller Error] [web/comboController.js]:`, err);
                     console.error("Failed to delete old R2 key:", oldKey, err);
                 }
             }
@@ -96,6 +99,7 @@ export const updateCombo = async (req, res) => {
                     try {
                         await deleteFromR2(oldKey);
                     } catch (err) {
+        console.error(`[Controller Error] [web/comboController.js]:`, err);
                         console.error("Failed to delete old R2 key:", oldKey, err);
                     }
                 }
@@ -116,6 +120,7 @@ export const updateCombo = async (req, res) => {
 
         res.json({ message: "Combo updated successfully", combo });
     } catch (error) {
+        console.error(`[Controller Error] [web/comboController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -137,6 +142,7 @@ export const deleteCombo = async (req, res) => {
             try {
                 await deleteFromR2(oldKey);
             } catch (err) {
+        console.error(`[Controller Error] [web/comboController.js]:`, err);
                 console.error("Failed to delete old R2 key:", oldKey, err);
             }
         }
@@ -147,6 +153,7 @@ export const deleteCombo = async (req, res) => {
 
         res.json({ message: "Combo deleted successfully" });
     } catch (error) {
+        console.error(`[Controller Error] [web/comboController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };

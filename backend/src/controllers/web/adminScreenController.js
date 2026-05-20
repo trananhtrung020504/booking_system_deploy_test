@@ -36,6 +36,7 @@ export const createScreen = async (req, res) => {
             screen
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminScreenController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -58,6 +59,7 @@ export const getTheaterScreens = async (req, res) => {
 
         res.json(screens);
     } catch (error) {
+        console.error(`[Controller Error] [web/adminScreenController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -76,6 +78,7 @@ export const getScreenById = async (req, res) => {
 
         res.json(screen);
     } catch (error) {
+        console.error(`[Controller Error] [web/adminScreenController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };

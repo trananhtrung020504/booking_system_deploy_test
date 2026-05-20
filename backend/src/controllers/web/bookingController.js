@@ -24,6 +24,7 @@ export const applyVoucher = async (req, res) => {
 
         res.json({ success: true, discount, voucherId: voucher.id });
     } catch (error) {
+        console.error(`[Controller Error] [web/bookingController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -129,6 +130,7 @@ export const createBooking = async (req, res) => {
 
         res.status(201).json({ success: true, booking: result });
     } catch (error) {
+        console.error(`[Controller Error] [web/bookingController.js]:`, error);
         res.status(400).json({ message: error.message });
     }
 };
@@ -159,6 +161,7 @@ export const confirmBooking = async (req, res) => {
         }
         res.json({ success: true, booking: updatedBooking });
     } catch (error) {
+        console.error(`[Controller Error] [web/bookingController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -222,6 +225,7 @@ export const checkAndExpireBookings = async (userId, io) => {
             }
         }
     } catch (error) {
+        console.error(`[Controller Error] [web/bookingController.js]:`, error);
         console.error("Error checking/expiring bookings:", error);
     }
 };
@@ -253,6 +257,7 @@ export const getUserBookings = async (req, res) => {
         ]);
         res.json({ bookings, pagination: { page: pageNum, limit: limitNum, total, totalPages: Math.ceil(total / limitNum) } });
     } catch (error) {
+        console.error(`[Controller Error] [web/bookingController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -270,6 +275,7 @@ export const getBookingDetail = async (req, res) => {
         if (!booking) return res.status(404).json({ message: "Booking not found" });
         res.json(booking);
     } catch (error) {
+        console.error(`[Controller Error] [web/bookingController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -310,6 +316,7 @@ export const cancelBooking = async (req, res) => {
         }
         res.json({ success: true, booking: updatedBooking });
     } catch (error) {
+        console.error(`[Controller Error] [web/bookingController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -415,6 +422,7 @@ export const holdSeats = async (req, res) => {
 
         res.json({ success: true, expiresAt });
     } catch (error) {
+        console.error(`[Controller Error] [web/bookingController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };

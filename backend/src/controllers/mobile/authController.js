@@ -18,6 +18,7 @@ export const sendOtp = async (req, res) => {
         try {
             await OtpUtils.sendOTPtoEmail(email, otp);
         } catch (error) {
+        console.error(`[Controller Error] [mobile/authController.js]:`, error);
             console.error(error);
             return res.status(500).json({ message: "Error sending OTP to email" });
         }
@@ -28,6 +29,7 @@ export const sendOtp = async (req, res) => {
             message: "OTP sent to email successfully"
         });
     } catch (error) {
+        console.error(`[Controller Error] [mobile/authController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -67,6 +69,7 @@ export const verifyOtp = async (req, res) => {
             user
         });
     } catch (error) {
+        console.error(`[Controller Error] [mobile/authController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -83,6 +86,7 @@ export const refreshToken = async (req, res) => {
         try {
             decoded = TokenUtils.verifyRefreshToken(oldRefreshToken);
         } catch (error) {
+        console.error(`[Controller Error] [mobile/authController.js]:`, error);
             return res.status(401).json({ message: "Invalid or expired refresh token" });
         }
 
@@ -102,6 +106,7 @@ export const refreshToken = async (req, res) => {
             refreshToken
         });
     } catch (error) {
+        console.error(`[Controller Error] [mobile/authController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -114,6 +119,7 @@ export const logout = async (req, res) => {
         await TokenUtils.deleteRefreshToken(id);
         res.json({ message: "Logged out successfully" });
     } catch (error) {
+        console.error(`[Controller Error] [mobile/authController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };

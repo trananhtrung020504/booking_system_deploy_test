@@ -55,6 +55,7 @@ export const getMovies = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/movieController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -78,6 +79,7 @@ export const getMovie = async (req, res) => {
         if (!movie) return res.status(404).json({ message: "Movie not found" });
         res.json(movie);
     } catch (error) {
+        console.error(`[Controller Error] [web/movieController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -91,6 +93,7 @@ export const getGenres = async (req, res) => {
         const allGenres = [...new Set(movies.flatMap(m => m.genre))].sort();
         res.json(allGenres);
     } catch (error) {
+        console.error(`[Controller Error] [web/movieController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };

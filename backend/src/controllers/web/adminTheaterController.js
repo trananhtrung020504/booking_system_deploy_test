@@ -24,6 +24,7 @@ export const createTheater = async (req, res) => {
                 });
                 theater.logo = await prisma.theaterLogo.findUnique({ where: { theaterId: theater.id } });
             } catch (err) {
+        console.error(`[Controller Error] [web/adminTheaterController.js]:`, err);
                 console.error("Error uploading logo:", err);
             }
         }
@@ -37,6 +38,7 @@ export const createTheater = async (req, res) => {
 
         res.status(201).json({ message: "Theater, Screen and Seats created successfully", theater });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminTheaterController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -72,6 +74,7 @@ export const getAllTheaters = async (req, res) => {
             pagination: { page: pageNum, limit: limitNum, total, totalPages: Math.ceil(total / limitNum) }
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminTheaterController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -85,6 +88,7 @@ export const getCities = async (req, res) => {
         });
         res.json(theaters.map(t => t.city));
     } catch (error) {
+        console.error(`[Controller Error] [web/adminTheaterController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -115,12 +119,14 @@ export const updateTheater = async (req, res) => {
                 });
                 theater.logo = await prisma.theaterLogo.findUnique({ where: { theaterId: id } });
             } catch (err) {
+        console.error(`[Controller Error] [web/adminTheaterController.js]:`, err);
                 console.error("Error uploading logo:", err);
             }
         }
 
         res.json({ message: "Theater updated successfully", theater });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminTheaterController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -136,6 +142,7 @@ export const deleteTheater = async (req, res) => {
         const theater = await prisma.theater.delete({ where: { id } });
         res.json({ message: "Theater deleted successfully", theater });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminTheaterController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -185,6 +192,7 @@ export const getTheaterAnalytics = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/adminTheaterController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };

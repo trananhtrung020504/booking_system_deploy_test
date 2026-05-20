@@ -10,6 +10,7 @@ export const getShows = async (req, res) => {
         });
         res.json(shows);
     } catch (error) {
+        console.error(`[Controller Error] [mobile/showController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -23,6 +24,7 @@ export const getShow = async (req, res) => {
         if (!show) return res.status(404).json({ message: "Show not found" });
         res.json(show);
     } catch (error) {
+        console.error(`[Controller Error] [mobile/showController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -35,6 +37,7 @@ export const getShowsByMovie = async (req, res) => {
         });
         res.json(shows);
     } catch (error) {
+        console.error(`[Controller Error] [mobile/showController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };

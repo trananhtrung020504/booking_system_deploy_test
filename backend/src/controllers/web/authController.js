@@ -36,6 +36,7 @@ export const login = async (req, res) => {
         const { password: _, refreshToken: __, ...safeUser } = user;
         res.json({ message: "Login successful", user: safeUser });
     } catch (error) {
+        console.error(`[Controller Error] [web/authController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -86,6 +87,7 @@ export const signup = async (req, res) => {
         const { password: _, refreshToken: __, ...safeUser } = user;
         res.json({ message: "Signup successful", user: safeUser });
     } catch (error) {
+        console.error(`[Controller Error] [web/authController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -116,6 +118,7 @@ export const sendOtp = async (req, res) => {
             message: "OTP sent to email successfully"
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/authController.js]:`, error);
         console.error(`[sendOtp] LỖI CHI TIẾT KHI GỬI OTP:`, error);
         res.status(500).json({ 
             message: "Lỗi chi tiết khi gửi mail: " + error.message,
@@ -137,6 +140,7 @@ export const refreshToken = async (req, res) => {
         try {
             decoded = TokenUtils.verifyRefreshToken(oldRefreshToken);
         } catch (error) {
+        console.error(`[Controller Error] [web/authController.js]:`, error);
             return res.status(401).json({ message: "TokenExpiredError" });
         }
 
@@ -166,6 +170,7 @@ export const refreshToken = async (req, res) => {
 
         res.json({ message: "Tokens refreshed" });
     } catch (error) {
+        console.error(`[Controller Error] [web/authController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -184,6 +189,7 @@ export const getMe = async (req, res) => {
         const { password, refreshToken, ...safeUser } = user;
         res.json(safeUser);
     } catch (error) {
+        console.error(`[Controller Error] [web/authController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -204,6 +210,7 @@ export const logout = async (req, res) => {
         res.clearCookie('refreshToken', cookieOptions);
         res.json({ message: "Logged out successfully" });
     } catch (error) {
+        console.error(`[Controller Error] [web/authController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };

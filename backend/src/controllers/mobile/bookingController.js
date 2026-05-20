@@ -47,6 +47,7 @@ export const createBooking = async (req, res) => {
         });
 
     } catch (error) {
+        console.error(`[Controller Error] [mobile/bookingController.js]:`, error);
         res.status(400).json({ message: error.message });
     }
 };
@@ -67,6 +68,7 @@ export const getUserBookings = async (req, res) => {
         });
         res.json(bookings);
     } catch (error) {
+        console.error(`[Controller Error] [mobile/bookingController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };

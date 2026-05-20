@@ -38,6 +38,7 @@ export const createMovie = async (req, res) => {
         });
 
     } catch (error) {
+        console.error(`[Controller Error] [mobile/movieController.js]:`, error);
         if (movieUploadData?.key) {
             await deleteFromR2(movieUploadData.key);
         }
@@ -52,6 +53,7 @@ export const getMovies = async (req, res) => {
         });
         res.json(movies);
     } catch (error) {
+        console.error(`[Controller Error] [mobile/movieController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -65,6 +67,7 @@ export const getMovie = async (req, res) => {
         if (!movie) return res.status(404).json({ message: "Movie not found" });
         res.json(movie);
     } catch (error) {
+        console.error(`[Controller Error] [mobile/movieController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };

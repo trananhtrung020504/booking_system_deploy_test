@@ -35,6 +35,7 @@ export const getShows = async (req, res) => {
 
         res.json(shows);
     } catch (error) {
+        console.error(`[Controller Error] [web/showController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -69,6 +70,7 @@ export const getShow = async (req, res) => {
             bookedSeats
         });
     } catch (error) {
+        console.error(`[Controller Error] [web/showController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -115,6 +117,7 @@ export const getShowsByMovie = async (req, res) => {
 
         res.json({ movieId, theaters: Object.values(groupedByTheater) });
     } catch (error) {
+        console.error(`[Controller Error] [web/showController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -135,6 +138,7 @@ export const getAvailableDates = async (req, res) => {
 
         res.json(dates);
     } catch (error) {
+        console.error(`[Controller Error] [web/showController.js]:`, error);
         res.status(500).json({ message: error.message });
     }
 };

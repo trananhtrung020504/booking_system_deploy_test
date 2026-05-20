@@ -11,9 +11,9 @@
     "prisma:migrate": "npx prisma migrate dev",
     "db:reset": "npx prisma migrate reset --force",
     "db:seed": "node src/scripts/seed.js",
-    "db:fresh": "npx prisma migrate reset --force && node src/scripts/seed.js && node src/scripts/resetES.js",
+    "db:fresh": "npx prisma migrate reset --force && node src/scripts/seed.js && node src/scripts/resetOS.js",
     "db:studio": "npx prisma studio",
-    "es:reset": "node src/scripts/resetES.js"
+    "es:reset": "node src/scripts/resetOS.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",

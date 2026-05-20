@@ -1,0 +1,20 @@
+import express from 'express';
+import * as adminMovieController from '../../controllers/web/adminMovieController.js';
+import { verifyAdminRole } from '../../middleware/web/adminAuth.js';
+import { uploadPoster } from '../../middleware/handle_multer.js';
+
+const router = express.Router();
+
+// All admin routes require admin role verification
+router.use(verifyAdminRole);
+
+// Movie management
+router.post('/', uploadPoster.single('poster'), adminMovieController.createMovie);
+router.get('/', adminMovieController.getAllMovies);
+router.get('/:id', adminMovieController.getMovieById);
+router.put('/:id', uploadPoster.single('poster'), adminMovieController.updateMovie);
+router.delete('/:id', adminMovieController.deleteMovie); // Soft delete
+router.delete('/:id/hard', adminMovieController.hardDeleteMovie); // Permanent delete
+router.get('/:id/analytics', adminMovieController.getMovieAnalytics);
+
+export default router;

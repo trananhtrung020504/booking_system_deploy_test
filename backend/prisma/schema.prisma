@@ -1,0 +1,344 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Roles {
+  ADMIN
+  USER
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String?
+  phone        String?
+  password     String?
+  role         Roles         @default(USER)
+  refreshToken String?
+  avatar       UserAvatar?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  bookings     Booking[]
+  transactions Transaction[]
+  seatHolds    SeatHold[]
+  chatThreads  ChatThread[]
+  chatMessages ChatMessage[]
+
+  @@map("users")
+}
+
+model UserAvatar {
+  id        String   @id @default(uuid())
+  publicId  String   @unique
+  source    String
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_avatars")
+}
+
+model Movie {
+  id            String        @id @default(uuid())
+  title         String
+  description   String        @db.Text
+  duration      Int           // Duration in minutes
+  genre         String[]
+  releaseDate   DateTime
+  languages     String[]
+  certification String
+  poster        MoviePoster?
+  rating        Float?
+  votes         Int?          @default(0)
+  format        String[]
+  trailerUrl    String?
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  shows         Show[]
+
+  @@index([isActive])
+  @@index([releaseDate])
+  @@map("movies")
+}
+
+model MoviePoster {
+  id        String   @id @default(uuid())
+  publicId  String   @unique
+  source    String
+  movieId   String   @unique
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("movie_posters")
+}
+
+model Theater {
+  id        String       @id @default(uuid())
+  name      String
+  location  String
+  logo      TheaterLogo?
+  city      String
+  state     String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  screens   Screen[]     // Một rạp có nhiều phòng chiếu
+  shows     Show[]
+
+  @@index([city])
+  @@map("theaters")
+}
+
+model TheaterLogo {
+  id        String   @id @default(uuid())
+  publicId  String   @unique
+  source    String
+  theaterId String   @unique
+  theater   Theater  @relation(fields: [theaterId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("theater_logos")
+}
+
+model Screen {
+  id        String   @id @default(uuid())
+  name      String   // VD: "Phòng chiếu 01", "IMAX"
+  theaterId String
+  theater   Theater  @relation(fields: [theaterId], references: [id], onDelete: Cascade)
+  rows      Int      @default(10)
+  cols      Int      @default(12)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  seats     Seat[]
+  shows     Show[]
+
+  @@map("screens")
+}
+
+enum SeatType {
+  STANDARD
+  VIP
+  SWEETBOX
+}
+
+model Seat {
+  id        String   @id @default(uuid())
+  screenId  String
+  screen    Screen   @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  row       String   // A, B, C...
+  column    Int
+  type      SeatType @default(STANDARD)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Quan hệ ngược để tra cứu (nếu cần)
+  seatHolds SeatHold[]
+  bookings  Booking[]
+
+  @@unique([screenId, row, column])
+  @@map("seats")
+}
+
+model Show {
+  id         String     @id @default(uuid())
+  movieId    String
+  theaterId  String
+  screenId   String     // Thay cho screenName String
+  format     String
+  startTime  DateTime
+  endTime    DateTime
+  priceMap   Json       // { "STANDARD": 95000, "VIP": 125000, "SWEETBOX": 250000 }
+  isActive   Boolean    @default(true)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  movie      Movie      @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  theater    Theater    @relation(fields: [theaterId], references: [id], onDelete: Cascade)
+  screen     Screen     @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  bookings   Booking[]
+  seatHolds  SeatHold[]
+
+  @@index([movieId])
+  @@index([theaterId])
+  @@index([screenId])
+  @@index([startTime])
+  @@index([movieId, startTime])
+  @@map("shows")
+}
+
+// Temporary seat hold — expires after TTL (e.g. 7 minutes)
+// Stored in DB for persistence, Redis for fast lookup + TTL
+model SeatHold {
+  id        String   @id @default(uuid())
+  showId    String
+  userId    String
+  seats     Seat[]   // Liên kết trực tiếp tới thực thể Seat
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  show      Show     @relation(fields: [showId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([showId, userId])
+  @@index([showId])
+  @@index([expiresAt])
+  @@map("seat_holds")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  EXPIRED
+}
+
+enum VoucherType {
+  PERCENT
+  FIXED
+}
+
+model Voucher {
+  id            String      @id @default(uuid())
+  code          String      @unique
+  type          VoucherType @default(FIXED)
+  value         Float
+  minOrder      Float       @default(0)
+  maxDiscount   Float?
+  expiresAt     DateTime
+  isActive      Boolean     @default(true)
+  usageLimit    Int         @default(100)
+  usedCount     Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  bookings      Booking[]
+
+  @@map("vouchers")
+}
+
+model Combo {
+  id          String         @id @default(uuid())
+  name        String
+  description String
+  price       Float
+  image       String?
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  bookings    BookingCombo[]
+
+  @@map("combos")
+}
+
+model BookingCombo {
+  id        String  @id @default(uuid())
+  bookingId String
+  comboId   String
+  quantity  Int
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  combo     Combo   @relation(fields: [comboId], references: [id], onDelete: Cascade)
+
+  @@map("booking_combos")
+}
+
+model Booking {
+  id              String         @id @default(uuid())
+  bookingRef      String         @unique
+  userId          String
+  showId          String
+  voucherId       String?
+  seats           Seat[]
+  combos          BookingCombo[]
+  status          BookingStatus  @default(PENDING)
+  bookingDateTime DateTime       @default(now())
+  paymentId       String?
+  paymentMethod   String
+  ticketPrice     Float
+  discountAmount  Float          @default(0)
+  total           Float
+  convenience     Float          @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  show            Show           @relation(fields: [showId], references: [id], onDelete: Cascade)
+  voucher         Voucher?       @relation(fields: [voucherId], references: [id], onDelete: SetNull)
+  transaction     Transaction?   @relation(fields: [paymentId], references: [transactionCode])
+
+  @@index([userId])
+  @@index([showId])
+  @@index([status])
+  @@map("bookings")
+}
+
+enum TransactionType {
+  DEPOSIT
+  SPEND
+  REFUND
+}
+
+enum TransactionStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model Transaction {
+  id              String            @id @default(uuid())
+  userId          String
+  type            TransactionType   @default(SPEND)
+  status          TransactionStatus @default(PENDING)
+  paymentMethod   String
+  transactionCode String            @unique
+  transactionNo   String?
+  amount          Float
+  paidAt          DateTime?
+  balanceAfter    Float?
+  orderUrl        String?           @db.Text
+  zpTransToken    String?           @db.Text
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings        Booking[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("transactions")
+}
+
+// Chat Thread - Manages conversation sessions
+model ChatThread {
+  id           String         @id @default(uuid())
+  userId       String?        // Optional - allows anonymous guests
+  threadIdLang String         @unique @map("thread_id_lang") // LangGraph thread_id for state management
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  messages     ChatMessage[]
+  user         User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("chat_threads")
+}
+
+// Chat Message - Stores individual messages
+model ChatMessage {
+  id        String   @id @default(uuid())
+  threadId  String
+  userId    String?  // User who sent (null if bot)
+  sender    String   @default("user") // "user" | "bot"
+  text      String   @db.Text // The actual message
+  metadata  Json?    // For storing movies[], showtimes[], bookings[], etc
+  createdAt DateTime @default(now())
+  thread    ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([threadId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("chat_messages")
+}

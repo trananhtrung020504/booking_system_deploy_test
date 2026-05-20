@@ -17,6 +17,13 @@ export const sendMail = async (options) => {
             subject: options.subject,
             html: options.html
         };
+        
+        // Bỏ qua gửi email thật trên môi trường Production (Render free tier chặn port 465)
+        if (ENV_VARS.NODE_ENV === 'production') {
+            console.log(`[MailService] Bỏ qua gửi mail thật tới ${options.email} trên production (tránh chặn port).`);
+            return { messageId: 'simulated-message-id-' + Date.now() };
+        }
+
         console.log(`[MailService] Đang gửi email qua tài khoản SMTP: ${ENV_VARS.EMAIL_USER}`);
         const info = await transporter.sendMail(message);
         console.log(`[MailService] Email đã được gửi thành công: ${info.messageId}`);

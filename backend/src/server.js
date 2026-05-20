@@ -18,6 +18,7 @@ import { initOpenSearch } from './services/opensearchService.js';
 import { initBookingCleanupWorker } from './services/bookingCleanup.service.js';
 
 const app = express();
+app.set('trust proxy', 1); // Trust the first proxy (Render/Cloudflare)
 const server = http.createServer(app);
 
 const allowedOrigins = [

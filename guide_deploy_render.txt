@@ -74,3 +74,5 @@ LƯU Ý QUAN TRỌNG KHI DÙNG GÓI FREE CỦA RENDER:
 2. Thức dậy (Spin up): Khi có người truy cập lại, máy chủ sẽ mất khoảng 30-50 giây để khởi động lại (Cold start). Do đó, lượt request đầu tiên sẽ rất chậm. Các request sau đó sẽ nhanh bình thường.
 
 Chúc bạn Deploy thành công! Mọi thứ đã được đóng gói hoàn hảo trên GitHub rồi.
+
+

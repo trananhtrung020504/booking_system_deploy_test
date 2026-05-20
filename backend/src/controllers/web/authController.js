@@ -3,6 +3,19 @@ import * as TokenUtils from '../../utils/token.js';
 import prisma from '../../config/database.js';
 import bcrypt from 'bcryptjs';
 import { sendOTPtoEmail } from '../../services/mail.service.js';
+import { ENV_VARS } from '../../config/env_vars.js';
+
+const getCookieOptions = (maxAge = null) => {
+    const isProd = ENV_VARS.NODE_ENV === 'production';
+    const cookieDomain = ENV_VARS.COOKIE_DOMAIN;
+    return {
+        ...(maxAge && { maxAge }),
+        httpOnly: true,
+        secure: isProd,
+        sameSite: cookieDomain ? 'Lax' : (isProd ? 'None' : 'Lax'),
+        ...(cookieDomain && { domain: cookieDomain })
+    };
+};
 
 export const login = async (req, res) => {
     try {
@@ -21,18 +34,8 @@ export const login = async (req, res) => {
         const { accessToken, refreshToken } = TokenUtils.generateTokens({ id: user.id, email: user.email });
         await TokenUtils.storeRefreshToken(user.id, refreshToken);
 
-        res.cookie('accessToken', accessToken, {
-            maxAge: 1000 * 60 * 60,
-            httpOnly: true,
-            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-            secure: process.env.NODE_ENV === 'production'
-        });
-        res.cookie('refreshToken', refreshToken, {
-            maxAge: 1000 * 60 * 60 * 24 * 7,
-            httpOnly: true,
-            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-            secure: process.env.NODE_ENV === 'production'
-        });
+        res.cookie('accessToken', accessToken, getCookieOptions(1000 * 60 * 60));
+        res.cookie('refreshToken', refreshToken, getCookieOptions(1000 * 60 * 60 * 24 * 7));
         const { password: _, refreshToken: __, ...safeUser } = user;
         res.json({ message: "Login successful", user: safeUser });
     } catch (error) {
@@ -72,18 +75,8 @@ export const signup = async (req, res) => {
         });
         const { accessToken, refreshToken } = TokenUtils.generateTokens({ id: user.id, email: user.email });
         await TokenUtils.storeRefreshToken(user.id, refreshToken);
-        res.cookie('accessToken', accessToken, {
-            maxAge: 1000 * 60 * 60,
-            httpOnly: true,
-            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-            secure: process.env.NODE_ENV === 'production'
-        });
-        res.cookie('refreshToken', refreshToken, {
-            maxAge: 1000 * 60 * 60 * 24 * 7,
-            httpOnly: true,
-            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-            secure: process.env.NODE_ENV === 'production'
-        });
+        res.cookie('accessToken', accessToken, getCookieOptions(1000 * 60 * 60));
+        res.cookie('refreshToken', refreshToken, getCookieOptions(1000 * 60 * 60 * 24 * 7));
         const { password: _, refreshToken: __, ...safeUser } = user;
         res.json({ message: "Signup successful", user: safeUser });
     } catch (error) {
@@ -155,18 +148,8 @@ export const refreshToken = async (req, res) => {
         const { accessToken, refreshToken } = TokenUtils.generateTokens({ id: user.id, email: user.email });
         await TokenUtils.storeRefreshToken(user.id, refreshToken);
 
-        res.cookie('accessToken', accessToken, {
-            maxAge: 1000 * 60 * 60,
-            httpOnly: true,
-            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-            secure: process.env.NODE_ENV === 'production'
-        });
-        res.cookie('refreshToken', refreshToken, {
-            maxAge: 1000 * 60 * 60 * 24 * 7,
-            httpOnly: true,
-            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-            secure: process.env.NODE_ENV === 'production'
-        });
+        res.cookie('accessToken', accessToken, getCookieOptions(1000 * 60 * 60));
+        res.cookie('refreshToken', refreshToken, getCookieOptions(1000 * 60 * 60 * 24 * 7));
 
         res.json({ message: "Tokens refreshed" });
     } catch (error) {
@@ -201,11 +184,7 @@ export const logout = async (req, res) => {
             await TokenUtils.deleteRefreshToken(id);
         }
 
-        const cookieOptions = {
-            httpOnly: true,
-            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-            secure: process.env.NODE_ENV === 'production'
-        };
+        const cookieOptions = getCookieOptions();
         res.clearCookie('accessToken', cookieOptions);
         res.clearCookie('refreshToken', cookieOptions);
         res.json({ message: "Logged out successfully" });

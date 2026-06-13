@@ -2,15 +2,15 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { 
-  Ticket, 
-  MapPin, 
-  Calendar, 
-  Clock, 
-  CreditCard, 
-  Wallet, 
-  ChevronRight, 
-  ShieldCheck, 
+import {
+  Ticket,
+  MapPin,
+  Calendar,
+  Clock,
+  CreditCard,
+  Wallet,
+  ChevronRight,
+  ShieldCheck,
   AlertCircle,
   Film,
   Sparkles,
@@ -37,7 +37,7 @@ import { toast } from 'sonner';
 function PaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+
   // Params for both flows
   const bookingId = searchParams.get('bookingId');
   const showId = searchParams.get('showId');
@@ -172,8 +172,11 @@ function PaymentContent() {
   }, [isAuthenticated, isAuthLoading, router]);
 
   // Case B: Auto-create pending booking if they came from quick booking flow
+  const creationAttempted = useRef(false);
+
   useEffect(() => {
-    if (!bookingId && showId && selectedSeats.length > 0 && show?.screen?.seats) {
+    if (!bookingId && showId && selectedSeats.length > 0 && show?.screen?.seats && !creationAttempted.current) {
+      creationAttempted.current = true;
       const autoCreatePendingBooking = async () => {
         try {
           const seatIds = selectedSeats.map(label => {
@@ -226,7 +229,7 @@ function PaymentContent() {
     if (!booking) return;
     const createdAt = new Date((booking as any).bookingDateTime || booking.createdAt).getTime();
     const expiresAt = createdAt + 10 * 60 * 1000;
-    
+
     const leftInitial = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
     setTimeLeft(leftInitial);
 
@@ -294,26 +297,26 @@ function PaymentContent() {
 
   const handleConfirmCancel = async () => {
     if (!activeBooking) return;
-    
+
     // Prevent multiple calls
     if (isConfirmingCancel || isRedirecting) {
       return;
     }
-    
+
     setIsConfirmingCancel(true);
     try {
       const res = await cancelBooking(activeBooking.id).unwrap();
       console.log("Cancel booking success:", res);
-      
+
       // Set redirecting first to block all interactions
       setIsRedirecting(true);
-      
+
       // Close dialogs
       setShowCancelDialog(false);
       setShowQrModal(false);
-      
+
       toast.success("✅ Đã hủy giao dịch và giải phóng ghế thành công!");
-      
+
       // Redirect after short delay
       setTimeout(() => {
         router.replace(`/booking/${activeShow?.id || activeBooking.showId || ''}`);
@@ -356,21 +359,21 @@ function PaymentContent() {
       const paymentData = await paymentRes.json();
 
       if (paymentData.success) {
-         toast.info("Đang chuyển hướng sang cổng thanh toán an toàn...");
-         const form = document.createElement('form');
-         form.method = 'POST';
-         form.action = paymentData.checkoutURL;
-         
-         Object.keys(paymentData.checkoutFormfields).forEach(key => {
-             const input = document.createElement('input');
-             input.type = 'hidden';
-             input.name = key;
-             input.value = paymentData.checkoutFormfields[key];
-             form.appendChild(input);
-         });
-         
-         document.body.appendChild(form);
-         form.submit();
+        toast.info("Đang chuyển hướng sang cổng thanh toán an toàn...");
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = paymentData.checkoutURL;
+
+        Object.keys(paymentData.checkoutFormfields).forEach(key => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = paymentData.checkoutFormfields[key];
+          form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
       } else {
         toast.error(paymentData.message || 'Lỗi khởi tạo cổng thanh toán');
         setIsProcessingPayment(false);
@@ -417,7 +420,7 @@ function PaymentContent() {
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#050507] py-20 px-6">
-      <div 
+      <div
         className="absolute inset-0 z-0 scale-110 animate-subtle-zoom"
         style={{
           backgroundImage: `url(${activeMovie?.poster?.source || '/login-bg.png'})`,
@@ -428,7 +431,7 @@ function PaymentContent() {
       />
       <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-[#050507]/80 to-[#050507]" />
 
-      <button 
+      <button
         onClick={() => {
           if (showCancelDialog || isRedirecting || isConfirmingCancel) return;
           console.log("Click top-left cancel button");
@@ -444,7 +447,7 @@ function PaymentContent() {
 
       <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
         {mounted && particles.map((p) => (
-          <div 
+          <div
             key={p.id}
             className="absolute bg-white/20 rounded-full blur-xl animate-float-particle"
             style={{
@@ -461,155 +464,154 @@ function PaymentContent() {
 
       <div className="relative z-20 w-full max-w-[1100px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-7 space-y-6">
-           <div className="relative group overflow-hidden rounded-[3rem] border border-white/10 bg-black/40 backdrop-blur-[40px] p-8 md:p-12 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-cinema-gold/5 pointer-events-none" />
-              <div className="relative space-y-10">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3"><div className="w-1.5 h-6 bg-primary rounded-full" /><span className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/40">Phương thức thanh toán</span></div>
-                  <h1 className="text-4xl font-bold uppercase tracking-tighter text-white">Xác nhận thanh toán</h1>
-                </div>
+          <div className="relative group overflow-hidden rounded-[3rem] border border-white/10 bg-black/40 backdrop-blur-[40px] p-8 md:p-12 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-cinema-gold/5 pointer-events-none" />
+            <div className="relative space-y-10">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3"><div className="w-1.5 h-6 bg-primary rounded-full" /><span className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/40">Phương thức thanh toán</span></div>
+                <h1 className="text-4xl font-bold uppercase tracking-tighter text-white">Xác nhận thanh toán</h1>
+              </div>
 
-                <div className="grid grid-cols-1 gap-4">
-                  {[
-                    { id: 'SEPAY', name: 'Thanh toán Quét mã QR (Hỗ trợ 40+ Ngân Hàng, MoMo, ZaloPay)', icon: Wallet, color: 'text-blue-500' }
-                  ].map((m) => (
-                    <div 
-                      key={m.id} 
-                      onClick={() => setPaymentMethod(m.id as any)}
-                      className={`relative p-6 rounded-3xl border transition-all cursor-pointer flex flex-col gap-4 group ${paymentMethod === m.id ? 'bg-white/10 border-primary shadow-[0_0_20px_rgba(239,68,68,0.2)]' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
-                    >
-                      <div className={`w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center ${paymentMethod === m.id ? m.color : 'text-white/20'}`}>
-                        <m.icon className="w-6 h-6" />
-                      </div>
-                      <span className={`text-xs font-bold uppercase tracking-wider transition-colors ${paymentMethod === m.id ? 'text-white' : 'text-white/40'}`}>{m.name}</span>
-                      {paymentMethod === m.id && <div className="absolute top-4 right-4"><ShieldCheck className="w-4 h-4 text-primary" /></div>}
+              <div className="grid grid-cols-1 gap-4">
+                {[
+                  { id: 'SEPAY', name: 'Thanh toán Quét mã QR (Hỗ trợ 40+ Ngân Hàng, MoMo, ZaloPay)', icon: Wallet, color: 'text-blue-500' }
+                ].map((m) => (
+                  <div
+                    key={m.id}
+                    onClick={() => setPaymentMethod(m.id as any)}
+                    className={`relative p-6 rounded-3xl border transition-all cursor-pointer flex flex-col gap-4 group ${paymentMethod === m.id ? 'bg-white/10 border-primary shadow-[0_0_20px_rgba(239,68,68,0.2)]' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
+                  >
+                    <div className={`w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center ${paymentMethod === m.id ? m.color : 'text-white/20'}`}>
+                      <m.icon className="w-6 h-6" />
                     </div>
-                  ))}
-                </div>
+                    <span className={`text-xs font-bold uppercase tracking-wider transition-colors ${paymentMethod === m.id ? 'text-white' : 'text-white/40'}`}>{m.name}</span>
+                    {paymentMethod === m.id && <div className="absolute top-4 right-4"><ShieldCheck className="w-4 h-4 text-primary" /></div>}
+                  </div>
+                ))}
+              </div>
 
-                <div className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-4">
-                  <div className="flex items-center gap-3 text-white/40"><ShieldCheck className="w-5 h-5 text-green-500" /> <span className="text-[10px] font-bold uppercase tracking-widest leading-relaxed">Thông tin của bạn được bảo mật tuyệt đối với hệ thống mã hóa 256-bit chuẩn quốc tế.</span></div>
-                </div>
+              <div className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-4">
+                <div className="flex items-center gap-3 text-white/40"><ShieldCheck className="w-5 h-5 text-green-500" /> <span className="text-[10px] font-bold uppercase tracking-widest leading-relaxed">Thông tin của bạn được bảo mật tuyệt đối với hệ thống mã hóa 256-bit chuẩn quốc tế.</span></div>
+              </div>
 
-                {seatsConflict.length > 0 && (
-                  <div className="p-6 rounded-3xl bg-destructive/20 border border-destructive/50 space-y-3 animate-pulse">
-                    <div className="flex items-start gap-3">
-                      <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
-                      <div className="flex flex-col gap-2">
-                        <span className="text-xs font-bold uppercase tracking-widest text-destructive">Cảnh báo: Ghế không còn trống!</span>
-                        <span className="text-[10px] text-white/60">{conflictWarning}</span>
-                      </div>
+              {seatsConflict.length > 0 && (
+                <div className="p-6 rounded-3xl bg-destructive/20 border border-destructive/50 space-y-3 animate-pulse">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-bold uppercase tracking-widest text-destructive">Cảnh báo: Ghế không còn trống!</span>
+                      <span className="text-[10px] text-white/60">{conflictWarning}</span>
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                <Button 
-                  onClick={handlePayment}
-                  disabled={isProcessingPayment || seatsConflict.length > 0 || isRedirecting || isConfirmingCancel}
-                  className={`w-full h-16 rounded-[2rem] font-bold uppercase tracking-widest text-xs gap-4 transition-all ${
-                    seatsConflict.length > 0
-                      ? 'bg-gray-600 text-white/60 cursor-not-allowed opacity-50'
-                      : isRedirecting || isConfirmingCancel
+              <Button
+                onClick={handlePayment}
+                disabled={isProcessingPayment || seatsConflict.length > 0 || isRedirecting || isConfirmingCancel}
+                className={`w-full h-16 rounded-[2rem] font-bold uppercase tracking-widest text-xs gap-4 transition-all ${seatsConflict.length > 0
+                    ? 'bg-gray-600 text-white/60 cursor-not-allowed opacity-50'
+                    : isRedirecting || isConfirmingCancel
                       ? 'bg-gray-600 text-white/60 cursor-not-allowed opacity-50'
                       : 'bg-primary text-white shadow-[0_15px_40px_rgba(239,68,68,0.3)] hover:shadow-[0_20px_50px_rgba(239,68,68,0.5)] hover:scale-[1.02] active:scale-[0.98]'
                   }`}
-                >
-                  {isProcessingPayment ? (
-                    <Loader2 className="animate-spin h-6 w-6 text-white" />
-                  ) : seatsConflict.length > 0 ? (
-                    <>
-                      ❌ Không thể thanh toán <AlertTriangle className="w-5 h-5" />
-                    </>
-                  ) : (
-                    <>
-                      Thanh toán an toàn ngay <ChevronRight className="w-5 h-5" />
-                    </>
-                  )}
-                </Button>
-              </div>
-           </div>
+              >
+                {isProcessingPayment ? (
+                  <Loader2 className="animate-spin h-6 w-6 text-white" />
+                ) : seatsConflict.length > 0 ? (
+                  <>
+                    ❌ Không thể thanh toán <AlertTriangle className="w-5 h-5" />
+                  </>
+                ) : (
+                  <>
+                    Thanh toán an toàn ngay <ChevronRight className="w-5 h-5" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
 
         <div className="lg:col-span-5 space-y-6">
-           <div className="relative group overflow-hidden rounded-[3rem] border border-white/10 bg-black/60 backdrop-blur-[40px] p-8 md:p-10 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
-              <div className="absolute inset-0 bg-gradient-to-br from-cinema-gold/5 via-transparent to-primary/5 pointer-events-none" />
-              <div className="relative space-y-8">
+          <div className="relative group overflow-hidden rounded-[3rem] border border-white/10 bg-black/60 backdrop-blur-[40px] p-8 md:p-10 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+            <div className="absolute inset-0 bg-gradient-to-br from-cinema-gold/5 via-transparent to-primary/5 pointer-events-none" />
+            <div className="relative space-y-8">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/40">Tóm tắt đơn hàng</span>
+                <Badge className="bg-primary/20 text-primary border-primary/20 animate-pulse">{formatTime(timeLeft)}</Badge>
+              </div>
+
+              <div className="flex gap-6 items-start">
+                <div className="w-24 h-32 rounded-2xl overflow-hidden border border-white/10 flex-shrink-0 bg-zinc-900 flex items-center justify-center">
+                  {activeMovie?.poster?.source ? (
+                    <img src={activeMovie.poster.source} className="w-full h-full object-cover" alt={activeMovie.title} />
+                  ) : (
+                    <Film className="h-8 w-8 text-white/20 animate-pulse" />
+                  )}
+                </div>
+                <div className="space-y-3">
+                  <h2 className="text-xl font-bold uppercase tracking-tight text-white leading-tight">{activeMovie?.title}</h2>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline" className="bg-white/5 border-white/10 text-[9px] font-bold uppercase">{activeShow?.format}</Badge>
+                    <Badge variant="outline" className="bg-primary/20 border-primary/20 text-primary text-[9px] font-bold uppercase">{activeMovie?.certification}</Badge>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-6 border-t border-white/5">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-3 text-white/40 font-bold uppercase"><MapPin className="w-4 h-4 text-cinema-gold" /> Rạp</div>
+                  <span className="text-white font-bold uppercase">{activeTheater?.name}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-3 text-white/40 font-bold uppercase"><Calendar className="w-4 h-4 text-blue-400" /> Ngày</div>
+                  <span className="text-white font-bold uppercase">
+                    {activeShow?.startTime ? new Date(activeShow.startTime).toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-3 text-white/40 font-bold uppercase"><Clock className="w-4 h-4 text-primary" /> Suất chiếu</div>
+                  <span className="text-white font-bold uppercase">
+                    {activeShow?.startTime ? new Date(activeShow.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-3 text-white/40 font-bold uppercase"><Ticket className="w-4 h-4 text-primary" /> Ghế chọn</div>
+                  <span className="text-primary font-bold uppercase">{seatLabels.join(', ')}</span>
+                </div>
+              </div>
+
+              <div className="pt-8 border-t border-white/10 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/40">Tóm tắt đơn hàng</span>
-                  <Badge className="bg-primary/20 text-primary border-primary/20 animate-pulse">{formatTime(timeLeft)}</Badge>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Số tiền cần trả</span>
+                  <span className="text-3xl font-bold text-white uppercase tracking-tighter">{activeBooking.total.toLocaleString()} VNĐ</span>
                 </div>
+              </div>
 
-                <div className="flex gap-6 items-start">
-                  <div className="w-24 h-32 rounded-2xl overflow-hidden border border-white/10 flex-shrink-0 bg-zinc-900 flex items-center justify-center">
-                    {activeMovie?.poster?.source ? (
-                      <img src={activeMovie.poster.source} className="w-full h-full object-cover" alt={activeMovie.title} />
-                    ) : (
-                      <Film className="h-8 w-8 text-white/20 animate-pulse" />
-                    )}
+              {/* Timer Info Box */}
+              <div className="pt-6 border-t border-white/10">
+                <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-primary" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Thông tin thời gian</span>
                   </div>
-                  <div className="space-y-3">
-                    <h2 className="text-xl font-bold uppercase tracking-tight text-white leading-tight">{activeMovie?.title}</h2>
-                    <div className="flex flex-wrap gap-2">
-                       <Badge variant="outline" className="bg-white/5 border-white/10 text-[9px] font-bold uppercase">{activeShow?.format}</Badge>
-                       <Badge variant="outline" className="bg-primary/20 border-primary/20 text-primary text-[9px] font-bold uppercase">{activeMovie?.certification}</Badge>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4 pt-6 border-t border-white/5">
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-3 text-white/40 font-bold uppercase"><MapPin className="w-4 h-4 text-cinema-gold" /> Rạp</div>
-                    <span className="text-white font-bold uppercase">{activeTheater?.name}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-3 text-white/40 font-bold uppercase"><Calendar className="w-4 h-4 text-blue-400" /> Ngày</div>
-                    <span className="text-white font-bold uppercase">
-                      {activeShow?.startTime ? new Date(activeShow.startTime).toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-3 text-white/40 font-bold uppercase"><Clock className="w-4 h-4 text-primary" /> Suất chiếu</div>
-                    <span className="text-white font-bold uppercase">
-                      {activeShow?.startTime ? new Date(activeShow.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-3 text-white/40 font-bold uppercase"><Ticket className="w-4 h-4 text-primary" /> Ghế chọn</div>
-                    <span className="text-primary font-bold uppercase">{seatLabels.join(', ')}</span>
-                  </div>
-                </div>
-
-                <div className="pt-8 border-t border-white/10 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Số tiền cần trả</span>
-                    <span className="text-3xl font-bold text-white uppercase tracking-tighter">{activeBooking.total.toLocaleString()} VNĐ</span>
-                  </div>
-                </div>
-
-                {/* Timer Info Box */}
-                <div className="pt-6 border-t border-white/10">
-                  <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-primary" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Thông tin thời gian</span>
-                    </div>
-                    <div className="space-y-1.5 text-[9px] text-white/70">
-                      <p>⏱️ Bạn có <span className="text-primary font-bold">{formatTime(timeLeft)}</span> để hoàn tất thanh toán</p>
-                      <p>🔓 Hết thời gian sẽ <span className="font-bold">tự động giải phóng ghế</span> cho người khác</p>
-                      <p>↩️ Chuyển hướng về trang <span className="font-bold">chọn ghế</span> để bạn thực hiện thanh toán lại</p>
-                    </div>
+                  <div className="space-y-1.5 text-[9px] text-white/70">
+                    <p>⏱️ Bạn có <span className="text-primary font-bold">{formatTime(timeLeft)}</span> để hoàn tất thanh toán</p>
+                    <p>🔓 Hết thời gian sẽ <span className="font-bold">tự động giải phóng ghế</span> cho người khác</p>
+                    <p>↩️ Chuyển hướng về trang <span className="font-bold">chọn ghế</span> để bạn thực hiện thanh toán lại</p>
                   </div>
                 </div>
               </div>
-           </div>
+            </div>
+          </div>
 
-           <div className="p-8 rounded-[2.5rem] border border-white/5 bg-white/5 flex items-center gap-5 group hover:bg-white/10 transition-all cursor-help">
-              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><Sparkles className="w-6 h-6" /></div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-white uppercase tracking-widest">Tiết kiệm hơn với ưu đãi</span>
-                <span className="text-[9px] font-medium text-white/40 uppercase tracking-widest mt-1">Đăng nhập thành viên để nhận điểm thưởng</span>
-              </div>
-           </div>
+          <div className="p-8 rounded-[2.5rem] border border-white/5 bg-white/5 flex items-center gap-5 group hover:bg-white/10 transition-all cursor-help">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><Sparkles className="w-6 h-6" /></div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-white uppercase tracking-widest">Tiết kiệm hơn với ưu đãi</span>
+              <span className="text-[9px] font-medium text-white/40 uppercase tracking-widest mt-1">Đăng nhập thành viên để nhận điểm thưởng</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -618,7 +620,7 @@ function PaymentContent() {
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-300">
           <div className="relative w-full max-w-md overflow-hidden rounded-[3rem] border border-white/10 bg-black/60 backdrop-blur-[50px] p-8 md:p-10 shadow-[0_0_100px_rgba(239,68,68,0.2)] text-center space-y-6">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-cinema-gold/10 pointer-events-none" />
-            
+
             <div className="space-y-2">
               <h2 className="text-2xl font-bold uppercase tracking-tight text-white">Quét mã thanh toán</h2>
               <p className="text-xs text-white/40 uppercase tracking-widest">
@@ -644,7 +646,7 @@ function PaymentContent() {
               </div>
 
               <p className="text-[9px] text-white/30 uppercase tracking-wider">Hệ thống tự động chuyển hướng khi thanh toán thành công</p>
-              
+
               {/* Timer Explanation */}
               <div className="mt-3 pt-3 border-t border-white/10 space-y-1.5">
                 <p className="text-[8px] font-bold uppercase tracking-widest text-white/40">💡 Lưu ý thời gian:</p>
@@ -674,7 +676,7 @@ function PaymentContent() {
               >
                 Hủy thanh toán & Chọn lại ghế
               </Button>
-              
+
               <Button
                 onClick={() => {
                   if (isRedirecting || isConfirmingCancel) return;
@@ -703,12 +705,12 @@ function PaymentContent() {
               </DialogTitle>
             </div>
             <DialogDescription className="text-sm text-white/70 leading-relaxed">
-              {cancelAction === 'cancel-payment' 
+              {cancelAction === 'cancel-payment'
                 ? "Nếu hủy lúc này, bạn sẽ quay lại sơ đồ chọn ghế. Các ghế hiện tại sẽ được giải phóng trong 7 phút để những người khác có thể chọn."
                 : "Nếu hủy, giao dịch thanh toán sẽ bị hủy và toàn bộ ghế sẽ được giải phóng ngay lập tức. Bạn có thể quay lại chọn ghế khác."}
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="bg-white/5 border border-white/10 rounded-lg p-4 space-y-2">
             <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">Sẽ quay lại trang:</p>
             <p className="text-sm font-bold text-white">📍 Sơ đồ chọn ghế</p>

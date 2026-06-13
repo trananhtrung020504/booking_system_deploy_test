@@ -58,10 +58,10 @@ function BookingsContent() {
   const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
   const [selectedQrBooking, setSelectedQrBooking] = useState<any | null>(null);
 
-  const { data, isLoading } = useGetUserBookingsQuery({ 
-    page, 
-    limit: 10, 
-    status: activeTab === 'ALL' ? undefined : activeTab 
+  const { data, isLoading } = useGetUserBookingsQuery({
+    page,
+    limit: 10,
+    status: activeTab === 'ALL' ? undefined : activeTab
   });
   const [cancelBooking, { isLoading: isCancelling }] = useCancelBookingMutation();
 
@@ -126,11 +126,10 @@ function BookingsContent() {
             <button
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
-              className={`flex-1 py-3 text-xs md:text-sm font-bold uppercase tracking-wider rounded-xl transition-all duration-300 ${
-                isActive 
-                  ? 'bg-gradient-to-r from-primary to-rose-400 text-white shadow-lg shadow-primary/20 scale-105 z-10' 
+              className={`flex-1 py-3 text-xs md:text-sm font-bold uppercase tracking-wider rounded-xl transition-all duration-300 ${isActive
+                  ? 'bg-gradient-to-r from-primary to-rose-400 text-white shadow-lg shadow-primary/20 scale-105 z-10'
                   : 'text-white/40 hover:text-white/85 hover:bg-white/[0.04]'
-              }`}
+                }`}
             >
               {tab.label}
             </button>
@@ -143,7 +142,7 @@ function BookingsContent() {
           {data.bookings.map((booking, index) => {
             const show = booking.show;
             const isFuture = show ? new Date(show.startTime) > new Date() : false;
-            
+
             let status = statusConfig[booking.status];
             if (booking.status === 'CONFIRMED' && !isFuture) {
               status = {
@@ -162,24 +161,35 @@ function BookingsContent() {
                 className="overflow-hidden animate-fade-in bg-card/80 border-border/50"
                 style={{ animationDelay: `${index * 80}ms` }}
               >
-                <CardContent className="p-0">
-                  <div className="flex flex-col sm:flex-row">
+                <CardContent className="p-4 sm:p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
                     {/* Poster */}
                     {movie?.poster?.source && (
-                      <div className="w-full sm:w-28 shrink-0">
+                      <div
+                        className="relative w-full sm:w-[130px] shrink-0 overflow-hidden rounded-xl shadow-xl border border-white/5 cursor-pointer group"
+                        onClick={() => movie?.id && router.push(`/movies/${movie.id}`)}
+                      >
                         <img
                           src={movie.poster.source}
                           alt={movie.title}
-                          className="w-full h-32 sm:h-full object-cover"
+                          className="w-full aspect-[2/3] object-cover group-hover:scale-110 group-hover:blur-[2px] transition-all duration-500"
                         />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                          <span className="text-[9px] font-bold text-white uppercase tracking-widest px-3 py-1.5 border border-white/40 bg-black/40 backdrop-blur-sm rounded-full">Xem phim</span>
+                        </div>
                       </div>
                     )}
 
                     {/* Info */}
-                    <div className="flex-1 p-4 space-y-3">
+                    <div className="flex-1 space-y-4">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <h3 className="font-semibold text-base">{movie?.title}</h3>
+                          <h3
+                            className="font-semibold text-lg cursor-pointer hover:text-primary hover:underline transition-colors"
+                            onClick={() => movie?.id && router.push(`/movies/${movie.id}`)}
+                          >
+                            {movie?.title}
+                          </h3>
                           <p className="text-xs text-muted-foreground mt-0.5">
                             Mã vé: {booking.bookingRef}
                           </p>
@@ -199,115 +209,145 @@ function BookingsContent() {
                       </div>
 
                       {show && (
-                        <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1.5">
-                            <Calendar className="h-3.5 w-3.5" />
-                            {format(new Date(show.startTime), 'dd/MM/yyyy')}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-muted-foreground bg-white/5 rounded-xl p-3.5 border border-white/5">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-blue-400" />
+                            <span className="font-medium text-white/80">{format(new Date(show.startTime), 'dd/MM/yyyy')}</span>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <Clock className="h-3.5 w-3.5" />
-                            {format(new Date(show.startTime), 'HH:mm')}
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-primary" />
+                            <span className="font-medium text-white/80">{format(new Date(show.startTime), 'HH:mm')}</span>
                           </div>
-                          <div className="flex items-center gap-1.5 col-span-2">
-                            <MapPin className="h-3.5 w-3.5" />
-                            {theater?.name} • {show.screen?.name}
+                          <div className="flex items-center gap-2 sm:col-span-2">
+                            <MapPin className="h-4 w-4 text-cinema-gold shrink-0" />
+                            <span className="font-medium text-white/80 truncate">{theater?.name} • <span className="text-white/50">{show.screen?.name}</span></span>
                           </div>
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex flex-wrap gap-1">
-                          {booking.seats?.map((seat: any) => (
-                            <Badge key={seat.id || seat} variant="outline" className="text-xs">
-                              {typeof seat === 'object' ? `${seat.row}${seat.column}` : seat}
-                            </Badge>
-                          ))}
+                      <div className="flex items-center justify-between pt-1">
+                        <div className="flex items-center gap-2">
+                          <Ticket className="h-4 w-4 text-primary shrink-0" />
+                          <div className="flex flex-wrap gap-1">
+                            {booking.seats?.map((seat: any) => (
+                              <Badge key={seat.id || seat} variant="outline" className="text-[10px] font-bold bg-white/5 border-white/10 uppercase tracking-widest text-primary/90">
+                                {typeof seat === 'object' ? `${seat.row}${seat.column}` : seat}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
-                        <span className="font-bold text-primary">
+                        <span className="font-bold text-xl text-white tracking-tighter">
                           {booking.total.toLocaleString('vi-VN')}đ
                         </span>
                       </div>
 
-                      {booking.status === 'PENDING' && (
-                        <div className="text-[11px] text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 font-medium flex items-start gap-2">
-                          <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-400" />
-                          <span>
-                            Lưu ý: Vé sẽ tự động hủy nếu không được hoàn tất thanh toán trong vòng 10 phút từ thời điểm khởi tạo.
-                          </span>
-                        </div>
-                      )}
+                    </div>
+                  </div>
 
-                      {/* Actions */}
-                      {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') && (
-                        <div className="flex gap-2 pt-1">
-                          {confirmCancelId === booking.id ? (
+                  {/* Bottom Action Area */}
+                  <div className="mt-5 pt-4 border-t border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    {/* Status Message Side */}
+                    <div className="flex-1">
+                      {confirmCancelId === booking.id ? (
+                        <p className="text-xs font-bold uppercase tracking-widest text-destructive animate-pulse flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4" /> Bạn chắc chắn muốn hủy?
+                        </p>
+                      ) : booking.status === 'PENDING' ? (
+                        <div className="text-[10px] text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-xl p-2.5 font-medium flex items-center gap-2 w-fit">
+                          <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                          <span>Tự động hủy nếu không thanh toán trong 10 phút.</span>
+                        </div>
+                      ) : booking.status === 'CONFIRMED' && isFuture ? (
+                        <div className="text-[10px] text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-2.5 font-medium flex items-center gap-2 w-fit">
+                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                          <span>Thanh toán thành công. Vui lòng chuẩn bị vé QR khi vào rạp.</span>
+                        </div>
+                      ) : booking.status === 'CONFIRMED' && !isFuture ? (
+                        <div className="text-[10px] text-zinc-400 bg-white/5 border border-white/10 rounded-xl p-2.5 font-medium flex items-center gap-2 w-fit">
+                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-zinc-400" />
+                          <span>Suất chiếu đã kết thúc. Cảm ơn bạn đã sử dụng dịch vụ!</span>
+                        </div>
+                      ) : booking.status === 'CANCELLED' ? (
+                        <div className="text-[10px] text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl p-2.5 font-medium flex items-center gap-2 w-fit">
+                          <XCircle className="h-3.5 w-3.5 shrink-0 text-red-400" />
+                          <span>Giao dịch đã bị hủy. Chỗ ngồi đã được giải phóng.</span>
+                        </div>
+                      ) : booking.status === 'EXPIRED' ? (
+                        <div className="text-[10px] text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl p-2.5 font-medium flex items-center gap-2 w-fit">
+                          <XCircle className="h-3.5 w-3.5 shrink-0 text-red-400" />
+                          <span>Giao dịch quá hạn thanh toán và đã bị hệ thống tự động hủy.</span>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {/* Buttons side */}
+                    <div className="flex flex-wrap gap-2 shrink-0">
+                      {confirmCancelId === booking.id ? (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="text-xs font-bold rounded-xl uppercase tracking-wider"
+                            onClick={() => handleCancel(booking.id)}
+                            disabled={isCancelling}
+                          >
+                            {isCancelling ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+                            Xác nhận hủy
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs rounded-xl uppercase tracking-wider"
+                            onClick={() => setConfirmCancelId(null)}
+                            disabled={isCancelling}
+                          >
+                            Quay lại
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          {booking.status === 'PENDING' && (
                             <>
                               <Button
                                 size="sm"
-                                variant="destructive"
-                                className="text-xs font-bold rounded-xl"
-                                onClick={() => handleCancel(booking.id)}
-                                disabled={isCancelling}
+                                className="text-[10px] bg-primary hover:bg-primary/90 text-white font-bold rounded-xl uppercase tracking-widest px-4"
+                                onClick={() => router.push(`/payment?bookingId=${booking.id}`)}
                               >
-                                {isCancelling ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
-                                Xác nhận hủy
+                                Thanh toán ngay
                               </Button>
                               <Button
-                                size="sm"
                                 variant="outline"
-                                className="text-xs rounded-xl"
-                                onClick={() => setConfirmCancelId(null)}
-                                disabled={isCancelling}
+                                size="sm"
+                                className="text-[10px] text-white/60 hover:text-white border-white/10 hover:bg-white/5 rounded-xl uppercase tracking-widest px-4"
+                                onClick={() => setConfirmCancelId(booking.id)}
                               >
-                                Quay lại
+                                Hủy vé
                               </Button>
                             </>
-                          ) : (
+                          )}
+                          {booking.status === 'CONFIRMED' && (
                             <>
-                              {booking.status === 'PENDING' && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    className="text-xs bg-primary hover:bg-primary/90 text-white font-bold rounded-xl"
-                                    onClick={() => router.push(`/payment?bookingId=${booking.id}`)}
-                                  >
-                                    Thanh toán ngay
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="text-xs text-destructive hover:text-destructive rounded-xl"
-                                    onClick={() => setConfirmCancelId(booking.id)}
-                                  >
-                                    Hủy vé
-                                  </Button>
-                                </>
-                              )}
-                              {booking.status === 'CONFIRMED' && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    className="text-xs bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl gap-1.5"
-                                    onClick={() => setSelectedQrBooking(booking)}
-                                  >
-                                    <QrCode className="h-3.5 w-3.5" />
-                                    Xem vé QR
-                                  </Button>
-                                  {isFuture && (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="text-xs text-destructive hover:text-destructive rounded-xl"
-                                      onClick={() => setConfirmCancelId(booking.id)}
-                                    >
-                                      Hủy vé
-                                    </Button>
-                                  )}
-                                </>
+                              <Button
+                                size="sm"
+                                className="text-[10px] bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl uppercase tracking-widest px-4 gap-1.5"
+                                onClick={() => setSelectedQrBooking(booking)}
+                              >
+                                <QrCode className="h-3.5 w-3.5" />
+                                Xem vé QR
+                              </Button>
+                              {isFuture && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-[10px] text-destructive hover:text-destructive rounded-xl border-destructive/20 hover:bg-destructive/10 uppercase tracking-widest px-4"
+                                  onClick={() => setConfirmCancelId(booking.id)}
+                                >
+                                  Hủy vé
+                                </Button>
                               )}
                             </>
                           )}
-                        </div>
+                        </>
                       )}
                     </div>
                   </div>
@@ -347,9 +387,9 @@ function BookingsContent() {
           <h3 className="text-lg font-bold mb-2">Không tìm thấy vé</h3>
           <p className="text-white/40 mb-6 text-sm">
             {activeTab === 'ALL' ? 'Bạn chưa thực hiện bất kỳ giao dịch đặt vé nào.' :
-             activeTab === 'CONFIRMED' ? 'Bạn không có vé nào ở trạng thái đã xác nhận.' :
-             activeTab === 'PENDING' ? 'Bạn không có vé nào đang chờ thanh toán.' :
-             'Bạn không có vé nào ở trạng thái đã hủy.'}
+              activeTab === 'CONFIRMED' ? 'Bạn không có vé nào ở trạng thái đã xác nhận.' :
+                activeTab === 'PENDING' ? 'Bạn không có vé nào đang chờ thanh toán.' :
+                  'Bạn không có vé nào ở trạng thái đã hủy.'}
           </p>
           {activeTab === 'ALL' && (
             <Button onClick={() => router.push('/movies')} className="rounded-xl">
@@ -362,16 +402,16 @@ function BookingsContent() {
 
       {/* QR Ticket Modal */}
       {selectedQrBooking && (
-        <div 
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in" 
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in"
           onClick={() => setSelectedQrBooking(null)}
         >
-          <div 
+          <div
             className="relative w-full max-w-sm bg-zinc-950 border border-white/10 rounded-[2.5rem] p-8 space-y-6 shadow-2xl text-center overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-cinema-gold/5 pointer-events-none" />
-            
+
             <div className="space-y-2">
               <h2 className="text-xl font-bold uppercase tracking-tight text-white">{selectedQrBooking.show?.movie?.title}</h2>
               <p className="text-xs text-muted-foreground uppercase tracking-widest">
@@ -380,9 +420,9 @@ function BookingsContent() {
             </div>
 
             <div className="flex flex-col items-center justify-center p-6 bg-white rounded-[2rem] shadow-inner max-w-[220px] mx-auto">
-              <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(selectedQrBooking.bookingRef)}`} 
-                alt="Ticket QR Code" 
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(selectedQrBooking.bookingRef)}`}
+                alt="Ticket QR Code"
                 className="w-full h-auto object-contain"
               />
               <span className="text-[10px] font-bold text-zinc-900 mt-3 tracking-widest uppercase">{selectedQrBooking.bookingRef}</span>
@@ -408,7 +448,7 @@ function BookingsContent() {
                 Vui lòng xuất trình mã QR này tại quầy soát vé để quét check-in trước khi vào phòng chiếu.
               </p>
 
-              <Button 
+              <Button
                 onClick={() => setSelectedQrBooking(null)}
                 className="w-full h-12 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold uppercase tracking-widest border border-white/5"
               >

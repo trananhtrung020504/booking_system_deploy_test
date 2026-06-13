@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Film, Mail, User, Phone, Lock, ArrowRight, Loader2, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -37,6 +37,8 @@ export default function SignupPage() {
   const [otpHash, setOtpHash] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
 
+  const handledRedirect = useRef(false);
+
   useEffect(() => {
     const newParticles = Array.from({ length: 15 }).map((_, i) => ({
       id: i,
@@ -50,8 +52,16 @@ export default function SignupPage() {
     setParticles(newParticles);
     setMounted(true);
 
-    if (isAuthenticated) {
-      router.replace('/');
+    if (isAuthenticated && !handledRedirect.current) {
+      handledRedirect.current = true;
+      const pendingBooking = sessionStorage.getItem('pending_booking');
+      if (pendingBooking) {
+        const { showId, seats } = JSON.parse(pendingBooking);
+        sessionStorage.removeItem('pending_booking');
+        router.replace(`/payment?showId=${showId}&seats=${seats.join(',')}`);
+      } else {
+        router.replace('/');
+      }
     }
   }, [isAuthenticated, router]);
 
@@ -129,15 +139,7 @@ export default function SignupPage() {
       }).unwrap();
       dispatch(setUser(result.user));
       toast.success('Gia nhập RoPhim thành công!');
-      
-      const pendingBooking = sessionStorage.getItem('pending_booking');
-      if (pendingBooking) {
-        const { showId, seats } = JSON.parse(pendingBooking);
-        sessionStorage.removeItem('pending_booking');
-        router.replace(`/payment?showId=${showId}&seats=${seats.join(',')}`);
-      } else {
-        router.replace('/');
-      }
+      // Việc redirect sẽ được xử lý tự động bởi useEffect khi isAuthenticated chuyển thành true.
     } catch (error: any) {
       toast.error(error?.data?.message || 'Đăng ký tài khoản thất bại hoặc mã OTP không chính xác');
     }

@@ -12,7 +12,7 @@ export const getMovies = async (req, res) => {
 
         if (genre) where.genre = { has: genre };
         if (search) where.title = { contains: search, mode: 'insensitive' };
-        
+
         if (status === 'now-showing') {
             where.releaseDate = { lte: now };
         } else if (status === 'coming-soon') {

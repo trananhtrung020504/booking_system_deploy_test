@@ -13,6 +13,24 @@ import { adminBookingAPI } from './api/adminBookingAPI';
 import { authSlice } from './slice/authSlice';
 import { bookingSlice } from './slice/bookingSlice';
 import { adminSlice } from './slice/adminSlice';
+import { uiSlice, incrementLoading, decrementLoading } from './slice/uiSlice';
+import { isPending, isFulfilled, isRejected } from '@reduxjs/toolkit';
+
+const rtkQueryLoadingMiddleware = (storeAPI: any) => (next: any) => (action: any) => {
+  const isSearchAction = 
+    action.meta?.arg?.endpointName === 'getMovies' && 
+    action.meta?.arg?.originalArgs?.search !== undefined;
+
+  if (!isSearchAction) {
+    if (isPending(action) && action.type.includes('execute')) {
+      storeAPI.dispatch(incrementLoading());
+    }
+    if ((isFulfilled(action) || isRejected(action)) && action.type.includes('execute')) {
+      storeAPI.dispatch(decrementLoading());
+    }
+  }
+  return next(action);
+};
 
 export const makeStore = () => {
   return configureStore({
@@ -31,6 +49,7 @@ export const makeStore = () => {
       [adminTheaterAPI.reducerPath]: adminTheaterAPI.reducer,
       [adminShowAPI.reducerPath]: adminShowAPI.reducer,
       [adminBookingAPI.reducerPath]: adminBookingAPI.reducer,
+      ui: uiSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
@@ -47,7 +66,8 @@ export const makeStore = () => {
         adminMovieAPI.middleware,
         adminTheaterAPI.middleware,
         adminShowAPI.middleware,
-        adminBookingAPI.middleware
+        adminBookingAPI.middleware,
+        rtkQueryLoadingMiddleware
       ),
   });
 };

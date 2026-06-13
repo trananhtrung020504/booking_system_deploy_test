@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Film, Mail, Lock, ArrowRight, Loader2, Sparkles, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -36,6 +36,8 @@ export default function LoginPage() {
     }
   }, []);
 
+  const handledRedirect = useRef(false);
+
   useEffect(() => {
     const newParticles = Array.from({ length: 15 }).map((_, i) => ({
       id: i,
@@ -49,7 +51,8 @@ export default function LoginPage() {
     setParticles(newParticles);
     setMounted(true);
 
-    if (isAuthenticated) {
+    if (isAuthenticated && !handledRedirect.current) {
+      handledRedirect.current = true;
       const pendingBooking = sessionStorage.getItem('pending_booking');
       if (pendingBooking) {
         const { showId, seats } = JSON.parse(pendingBooking);
@@ -72,15 +75,7 @@ export default function LoginPage() {
       const result = await login({ email, password }).unwrap();
       dispatch(setUser(result.user));
       toast.success('Chào mừng bạn quay trở lại!');
-      
-      const pendingBooking = sessionStorage.getItem('pending_booking');
-      if (pendingBooking) {
-        const { showId, seats } = JSON.parse(pendingBooking);
-        sessionStorage.removeItem('pending_booking');
-        router.replace(`/payment?showId=${showId}&seats=${seats.join(',')}`);
-      } else {
-        router.replace(redirectUrl);
-      }
+      // Việc redirect sẽ được xử lý tự động bởi useEffect khi isAuthenticated chuyển thành true.
     } catch (error: any) {
       toast.error(error?.data?.message || 'Thông tin đăng nhập không chính xác');
     }

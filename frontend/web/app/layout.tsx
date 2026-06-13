@@ -6,6 +6,8 @@ import AuthInitializer from "@/components/providers/AuthInitializer";
 import Navbar from "@/components/layout/Navbar";
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
 import { Toaster } from "@/components/ui/sonner";
+import GlobalLoading from "@/components/GlobalLoading";
+import NextTopLoader from 'nextjs-toploader';
 
 const inter = Inter({
   variable: "--font-inter",
@@ -36,6 +38,7 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${inter.variable} ${outfit.variable} ${beVietnam.variable} dark`} data-scroll-behavior="smooth">
       <body className="min-h-screen flex flex-col font-be-vietnam">
+        <NextTopLoader color="#ef4444" showSpinner={false} height={2} shadow="0 0 10px #ef4444,0 0 5px #ef4444" />
         <StoreProvider>
           <AuthInitializer>
             <LayoutWrapper>
@@ -43,6 +46,7 @@ export default function RootLayout({
             </LayoutWrapper>
           </AuthInitializer>
           <Toaster richColors position="top-right" />
+          <GlobalLoading />
         </StoreProvider>
       </body>
     </html>

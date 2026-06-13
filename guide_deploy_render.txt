@@ -23,7 +23,7 @@ Bạn cần điền chính xác các thông tin sau để Render hiểu cách ch
 - Branch (Nhánh): `main`
 - Root Directory (Thư mục gốc): Bắt buộc điền là `backend` (Vì mã nguồn Node.js của bạn nằm trong thư mục này, không phải thư mục ngoài cùng).
 - Runtime (Môi trường chạy): `Node`
-- Build Command (Lệnh cài đặt): `npm install`
+- Build Command (Lệnh cài đặt): `npm install && npx prisma generate`
 - Start Command (Lệnh khởi động): `npm start` (Lệnh này Render sẽ gọi vào `node src/server.js` mà chúng ta đã cấu hình trong package.json).
 
 - Instance Type (Loại máy chủ): Chọn gói `Free` (Miễn phí).

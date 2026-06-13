@@ -26,8 +26,12 @@ async function main() {
         const hashedPassword = await bcrypt.hash('123456', 10);
         await prisma.user.createMany({
             data: [
-                { email: 'anhtrung02052004@gmail.com', name: 'Trung Admin', phone: '0766908557', password: hashedPassword, role: 'ADMIN' },
-                { email: 'user@gmail.com', name: 'Khách hàng mẫu', phone: '0911111111', password: hashedPassword, role: 'USER' }
+                { email: 'admin@gmail.com', name: 'Admin', phone: '0988123456', password: hashedPassword, role: 'ADMIN' },
+                { email: 'khach1@gmail.com', name: 'Khách Test 1', phone: '0911000001', password: hashedPassword, role: 'USER' },
+                { email: 'khach2@gmail.com', name: 'Khách Test 2', phone: '0911000002', password: hashedPassword, role: 'USER' },
+                { email: 'khach3@gmail.com', name: 'Khách Test 3', phone: '0911000003', password: hashedPassword, role: 'USER' },
+                { email: 'khach4@gmail.com', name: 'Khách Test 4', phone: '0911000004', password: hashedPassword, role: 'USER' },
+                { email: 'khach5@gmail.com', name: 'Khách Test 5', phone: '0911000005', password: hashedPassword, role: 'USER' }
             ]
         });
 
@@ -143,7 +147,7 @@ async function main() {
                 description: 'Một nhóm bạn thân đi du lịch trên một hòn đảo hoang sơ và vô tình bị cuốn vào những sự kiện bí ẩn và rùng rợn.',
                 duration: 110,
                 genre: ['Kinh Dị', 'Bí Ẩn'],
-                releaseDate: new Date('2026-12-23'),
+                releaseDate: new Date('2023-12-23'),
                 languages: ['Tiếng Việt'],
                 certification: 'T18',
                 rating: 8.5,
@@ -156,7 +160,7 @@ async function main() {
                 description: 'Dựa trên câu chuyện cổ tích quen thuộc nhưng được khai thác dưới góc nhìn kinh dị và đen tối hơn.',
                 duration: 105,
                 genre: ['Kinh Dị', 'Thần Thoại'],
-                releaseDate: new Date('2026-10-31'),
+                releaseDate: new Date('2023-10-31'),
                 languages: ['Tiếng Việt'],
                 certification: 'T18',
                 rating: 8.7,
@@ -169,7 +173,7 @@ async function main() {
                 description: 'Bộ phim hoạt hình dễ thương dành cho gia đình và trẻ em.',
                 duration: 90,
                 genre: ['Hoạt Hình', 'Gia Đình'],
-                releaseDate: new Date('2026-06-01'),
+                releaseDate: new Date('2023-06-01'),
                 languages: ['Tiếng Việt', 'Lồng Tiếng'],
                 certification: 'P',
                 rating: 9.0,
@@ -204,13 +208,13 @@ async function main() {
             movies.push(movie);
         }
 
-        console.log("⏳ Đang tạo suất chiếu cho 7 ngày tới...");
+        console.log("⏳ Đang tạo suất chiếu cho 200 ngày tới (hơn 6 tháng)...");
         const now = new Date();
         const nowShowing = movies.filter(m => m.releaseDate < now);
 
         for (const m of nowShowing) {
-            // Tạo suất chiếu cho 7 ngày tới
-            for (let i = 0; i < 7; i++) {
+            // Tạo suất chiếu cho 200 ngày tới
+            for (let i = 0; i < 200; i++) {
                 const date = new Date();
                 date.setDate(now.getDate() + i);
 

@@ -57,7 +57,7 @@ function PaymentContent() {
   const [cancelBooking] = useCancelBookingMutation();
 
   const { isAuthenticated, isLoading: isAuthLoading, user } = useAppSelector((state) => state.auth);
-  const [paymentMethod, setPaymentMethod] = useState<'ZALOPAY' | 'MOMO' | 'ATM'>('ZALOPAY');
+  const [paymentMethod, setPaymentMethod] = useState<'ZALOPAY' | 'MOMO' | 'ATM' | 'SEPAY'>('SEPAY');
   const [mounted, setMounted] = useState(false);
   const [particles, setParticles] = useState<any[]>([]);
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
@@ -343,17 +343,11 @@ function PaymentContent() {
       return;
     }
 
-    if (paymentMethod === 'MOMO') {
-      toast.error('Ví MoMo hiện tại chưa được hỗ trợ. Vui lòng chọn ATM hoặc ZaloPay!');
-      return;
-    }
-
     setIsProcessingPayment(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1/web';
-      const paymentPath = paymentMethod === 'ATM' ? '/payment/vnpay' : '/payment/zalopay';
 
-      const paymentRes = await fetch(`${apiUrl}${paymentPath}`, {
+      const paymentRes = await fetch(`${apiUrl}/payment/sepay`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: booking.total, bookingId: booking.id }),
@@ -362,21 +356,27 @@ function PaymentContent() {
       const paymentData = await paymentRes.json();
 
       if (paymentData.success) {
-        // Generate QR code URL
-        const qr = paymentMethod === 'ZALOPAY' 
-          ? paymentData.qrCode 
-          : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(paymentData.paymentUrl)}`;
-        
-        setPaymentQrUrl(qr);
-        setPaymentUrl(paymentData.paymentUrl);
-        setShowQrModal(true);
-        toast.info("Đã tạo mã QR thanh toán! Hãy mở App để quét.");
+         toast.info("Đang chuyển hướng sang cổng thanh toán an toàn...");
+         const form = document.createElement('form');
+         form.method = 'POST';
+         form.action = paymentData.checkoutURL;
+         
+         Object.keys(paymentData.checkoutFormfields).forEach(key => {
+             const input = document.createElement('input');
+             input.type = 'hidden';
+             input.name = key;
+             input.value = paymentData.checkoutFormfields[key];
+             form.appendChild(input);
+         });
+         
+         document.body.appendChild(form);
+         form.submit();
       } else {
         toast.error(paymentData.message || 'Lỗi khởi tạo cổng thanh toán');
+        setIsProcessingPayment(false);
       }
     } catch (error) {
       toast.error('Đã xảy ra lỗi khi kết nối với cổng thanh toán');
-    } finally {
       setIsProcessingPayment(false);
     }
   };
@@ -469,10 +469,9 @@ function PaymentContent() {
                   <h1 className="text-4xl font-bold uppercase tracking-tighter text-white">Xác nhận thanh toán</h1>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   {[
-                    { id: 'ZALOPAY', name: 'Ví ZaloPay', icon: Wallet, color: 'text-blue-500' },
-                    { id: 'ATM', name: 'Thẻ ATM / VNPay', icon: CreditCard, color: 'text-cinema-gold' }
+                    { id: 'SEPAY', name: 'Thanh toán Quét mã QR (Hỗ trợ 40+ Ngân Hàng, MoMo, ZaloPay)', icon: Wallet, color: 'text-blue-500' }
                   ].map((m) => (
                     <div 
                       key={m.id} 

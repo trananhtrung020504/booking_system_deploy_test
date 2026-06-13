@@ -55,15 +55,16 @@ export const createSepayPayment = async (req, res) => {
 
         // 3. Initialize SePay PG Checkout
         const checkoutURL = client.checkout.initCheckoutUrl();
+        const frontendUrl = req.headers.origin || process.env.FRONTEND_URL || 'http://localhost:3000';
         const checkoutFormfields = client.checkout.initOneTimePaymentFields({
             payment_method: 'BANK_TRANSFER',
             order_invoice_number: transactionCode,
             order_amount: Number(amount),
             currency: 'VND',
             order_description: `Thanh toan ve xem phim ${bookingId}`,
-            success_url: 'http://localhost:3000/bookings?status=success',
-            error_url: 'http://localhost:3000/bookings?status=failed',
-            cancel_url: 'http://localhost:3000/bookings?status=failed',
+            success_url: `${frontendUrl}/bookings?status=success`,
+            error_url: `${frontendUrl}/bookings?status=failed`,
+            cancel_url: `${frontendUrl}/bookings?status=failed`,
         });
 
         // Save generated payment details to cache (expires when booking expires)

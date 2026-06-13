@@ -141,41 +141,39 @@ export default function HomePage() {
   });
 
   useEffect(() => {
-    if (isAuthenticated) {
-      console.log('Attempting to connect socket for home page (Cookie mode)...');
-      const socket = connectSocket();
+    console.log('Attempting to connect socket for home page (Cookie mode)...');
+    const socket = connectSocket();
 
-      socket.on('connect', () => {
-        console.log('Socket connected successfully (Home)!');
+    socket.on('connect', () => {
+      console.log('Socket connected successfully (Home)!');
+    });
+
+    socket.on('disconnect', (reason) => {
+      console.log('Socket disconnected (Home):', reason);
+      if (reason === 'io server disconnect') {
+        socket.connect();
+      }
+    });
+
+    socket.on('show:seats-update', ({ held, booked, selecting, viewerCount: count }) => {
+      setHeldSeats(held);
+      setBookedSeats(booked);
+      setViewerCount(count);
+
+      const map: { [uid: string]: string[] } = {};
+      selecting?.forEach((item: any) => {
+        map[item.userId] = item.seatIds;
       });
+      setSelectingSeatsMap(map);
+    });
 
-      socket.on('disconnect', (reason) => {
-        console.log('Socket disconnected (Home):', reason);
-        if (reason === 'io server disconnect') {
-          socket.connect();
-        }
-      });
-
-      socket.on('show:seats-update', ({ held, booked, selecting, viewerCount: count }) => {
-        setHeldSeats(held);
-        setBookedSeats(booked);
-        setViewerCount(count);
-
-        const map: { [uid: string]: string[] } = {};
-        selecting?.forEach((item: any) => {
-          map[item.userId] = item.seatIds;
-        });
-        setSelectingSeatsMap(map);
-      });
-
-      return () => {
-        socket.off('connect');
-        socket.off('disconnect');
-        socket.off('show:seats-update');
-        if (selectedShowId) socket.emit('show:leave', selectedShowId);
-      };
-    }
-  }, [isAuthenticated, selectedShowId]);
+    return () => {
+      socket.off('connect');
+      socket.off('disconnect');
+      socket.off('show:seats-update');
+      if (selectedShowId) socket.emit('show:leave', selectedShowId);
+    };
+  }, [selectedShowId]);
 
   useEffect(() => {
     if (selectedShowId && modalStep === 'seats') {

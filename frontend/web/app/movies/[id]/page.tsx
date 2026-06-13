@@ -49,43 +49,41 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
 
 
   useEffect(() => {
-    if (isAuthenticated) {
-      console.log('Attempting to connect socket for detail page (Cookie mode)...');
-      const socket = connectSocket();
-      
-      socket.on('connect', () => {
-        console.log('Socket connected successfully!');
-      });
+    console.log('Attempting to connect socket for detail page (Cookie mode)...');
+    const socket = connectSocket();
+    
+    socket.on('connect', () => {
+      console.log('Socket connected successfully!');
+    });
 
-      socket.on('disconnect', (reason) => {
-        console.log('Socket disconnected:', reason);
-        if (reason === 'io server disconnect') {
-          // the disconnection was initiated by the server, you need to reconnect manually
-          socket.connect();
-        }
-      });
-      
-      socket.on('show:seats-update', ({ held, booked, selecting, viewerCount: count }) => {
-        console.log('Received seats update:', { held: held.length, booked: booked.length });
-        setHeldSeats(held);
-        setBookedSeats(booked);
-        setViewerCount(count);
+    socket.on('disconnect', (reason) => {
+      console.log('Socket disconnected:', reason);
+      if (reason === 'io server disconnect') {
+        // the disconnection was initiated by the server, you need to reconnect manually
+        socket.connect();
+      }
+    });
+    
+    socket.on('show:seats-update', ({ held, booked, selecting, viewerCount: count }) => {
+      console.log('Received seats update:', { held: held.length, booked: booked.length });
+      setHeldSeats(held);
+      setBookedSeats(booked);
+      setViewerCount(count);
 
-        const map: { [uid: string]: string[] } = {};
-        selecting?.forEach((item: any) => {
-          map[item.userId] = item.seatIds;
-        });
-        setSelectingSeatsMap(map);
+      const map: { [uid: string]: string[] } = {};
+      selecting?.forEach((item: any) => {
+        map[item.userId] = item.seatIds;
       });
+      setSelectingSeatsMap(map);
+    });
 
-      return () => {
-        socket.off('connect');
-        socket.off('disconnect');
-        socket.off('show:seats-update');
-        if (activeShowId) socket.emit('show:leave', activeShowId);
-      };
-    }
-  }, [isAuthenticated, activeShowId]);
+    return () => {
+      socket.off('connect');
+      socket.off('disconnect');
+      socket.off('show:seats-update');
+      if (activeShowId) socket.emit('show:leave', activeShowId);
+    };
+  }, [activeShowId]);
 
   useEffect(() => {
     if (activeShowId && modalStep === 'seats') {

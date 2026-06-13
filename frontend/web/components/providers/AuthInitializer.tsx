@@ -7,17 +7,17 @@ import { setUser, clearUser, setLoading } from '@/store/slice/authSlice';
 
 export default function AuthInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
-  const { data: user, isLoading, isError } = useGetMeQuery();
+  const { data: user, isLoading, isFetching, isError, isSuccess } = useGetMeQuery();
 
   useEffect(() => {
-    if (isLoading) {
+    if (isLoading || isFetching) {
       dispatch(setLoading(true));
-    } else if (user) {
+    } else if (isSuccess && user) {
       dispatch(setUser(user));
-    } else {
+    } else if (isError) {
       dispatch(clearUser());
     }
-  }, [user, isLoading, isError, dispatch]);
+  }, [user, isLoading, isFetching, isError, isSuccess, dispatch]);
 
   return <>{children}</>;
 }

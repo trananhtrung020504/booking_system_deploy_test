@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
-import { useGetUserBookingsQuery, useCancelBookingMutation } from '@/store/api/bookingAPI';
+import { useGetUserBookingsQuery, useCancelBookingMutation, useConfirmBookingMutation } from '@/store/api/bookingAPI';
 import { useAppSelector } from '@/store/hooks';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -52,18 +52,22 @@ function BookingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const statusParam = searchParams.get('status');
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, isLoading: isAuthLoading } = useAppSelector((state) => state.auth);
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState<'ALL' | 'CONFIRMED' | 'PENDING' | 'CANCELLED'>('ALL');
   const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
   const [selectedQrBooking, setSelectedQrBooking] = useState<any | null>(null);
 
-  const { data, isLoading } = useGetUserBookingsQuery({
+  const { data, isLoading, refetch } = useGetUserBookingsQuery({
     page,
     limit: 10,
     status: activeTab === 'ALL' ? undefined : activeTab
   });
   const [cancelBooking, { isLoading: isCancelling }] = useCancelBookingMutation();
+  const [confirmBooking] = useConfirmBookingMutation();
+
+  const bookingIdParam = searchParams.get('bookingId');
+  const txParam = searchParams.get('tx');
 
   const handleTabChange = (tab: 'ALL' | 'CONFIRMED' | 'PENDING' | 'CANCELLED') => {
     setActiveTab(tab);
@@ -71,10 +75,10 @@ function BookingsContent() {
   };
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthLoading && !isAuthenticated) {
       router.replace('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isAuthLoading, router]);
 
   useEffect(() => {
     if (statusParam === 'expired_paid') {
@@ -82,8 +86,22 @@ function BookingsContent() {
         duration: 8000
       });
       router.replace('/bookings');
+    } else if (statusParam === 'success' && bookingIdParam && txParam) {
+      // Mock webhook handling for local development since SePay can't reach localhost
+      const confirmLocal = async () => {
+        try {
+          await confirmBooking({ bookingId: bookingIdParam, transactionCode: txParam }).unwrap();
+          toast.success("Thanh toán thành công! Vé của bạn đã được xác nhận.");
+          refetch();
+        } catch (error) {
+          // Might already be confirmed or failed
+          refetch();
+        }
+        router.replace('/bookings');
+      };
+      confirmLocal();
     }
-  }, [statusParam, router]);
+  }, [statusParam, bookingIdParam, txParam, confirmBooking, refetch, router]);
 
   const handleCancel = async (bookingId: string) => {
     try {

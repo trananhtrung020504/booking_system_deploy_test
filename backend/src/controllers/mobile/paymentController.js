@@ -62,7 +62,7 @@ export const createSepayPayment = async (req, res) => {
             order_amount: Number(amount),
             currency: 'VND',
             order_description: `Thanh toan ve xem phim ${bookingId}`,
-            success_url: `${frontendUrl}/bookings?status=success`,
+            success_url: `${frontendUrl}/bookings?status=success&bookingId=${bookingId}&tx=${transactionCode}`,
             error_url: `${frontendUrl}/bookings?status=failed`,
             cancel_url: `${frontendUrl}/bookings?status=failed`,
         });
@@ -81,10 +81,10 @@ export const createSepayPayment = async (req, res) => {
 export const sepayWebhook = async (req, res) => {
     try {
         console.log("SEPAY WEBHOOK NHAN DUOC DATA:", req.body);
-        
+
         // SePay IPN parameters might differ, but generally it contains order_invoice_number and payment_status
         const { order_invoice_number, payment_status, reference_number } = req.body;
-        
+
         // If standard SePay (not PG) hits this endpoint:
         const code = req.body.code || reference_number;
         const transactionCode = order_invoice_number || req.body.content;
@@ -116,13 +116,13 @@ export const sepayWebhook = async (req, res) => {
                     await emitShowUpdate(io, booking.showId);
                     broadcastGlobalNotification(io, `Chúc mừng ${booking.user.name || 'khách hàng'} vừa đặt thành công ${booking.seats.length} vé phim ${booking.show.movie.title}!`, 'success');
                 }
-                
+
                 if (booking?.user?.email) await sendBookingConfirmationEmail(booking.user.email, booking);
 
                 await redis.del(`payment_link:${booking.id}:SEPAY`);
             }
         }
-        
+
         // Always return success to acknowledge receipt
         res.json({ success: true, message: 'Webhook processed' });
     } catch (error) {

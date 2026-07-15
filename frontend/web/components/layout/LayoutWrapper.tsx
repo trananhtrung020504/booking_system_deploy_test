@@ -3,6 +3,8 @@
 import { usePathname } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Chatbot from '@/components/layout/Chatbot';
+import SiteFooter from '@/components/layout/SiteFooter';
+import FloatingPromoWidget from '@/components/layout/FloatingPromoWidget';
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -13,14 +15,11 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   }
 
   return (
-    <div className="min-h-screen flex flex-col w-full max-w-full overflow-x-hidden relative">
+    <div className="relative flex min-h-screen w-full max-w-full flex-col overflow-x-hidden">
       <Navbar />
       <main className="flex-1 w-full max-w-full overflow-x-hidden">{children}</main>
-      <footer className="border-t border-border/40 py-6 mt-auto w-full">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2026 TrungBooking. Đặt vé xem phim trực tuyến.</p>
-        </div>
-      </footer>
+      <SiteFooter />
+      <FloatingPromoWidget />
       <Chatbot />
     </div>
   );

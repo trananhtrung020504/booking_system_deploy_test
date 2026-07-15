@@ -20,6 +20,14 @@ export const GraphStateAnnotation = Annotation.Root({
   tool_call_count: Annotation({
     reducer: (x, y) => y ?? x,
     default: () => 0
+  }),
+  conversationSummary: Annotation({
+    reducer: (x, y) => y ?? x,
+    default: () => ''
+  }),
+  recentContext: Annotation({
+    reducer: (x, y) => y ?? x,
+    default: () => ''
   })
 });
 
@@ -46,15 +54,24 @@ graph.addNode('movie_missing_name_node', movieMissingNameNode, {
     'movie_detail_node',
     'movie_node',
     'movie_missing_name_node',
-    'showtime_node',
     'booking_node',
+    'showtime_node',
     'app_question_node',
     'human_node',
     'unknown_node'
   ]
 });
 graph.addNode('showtime_node', showtimeNode);
-graph.addNode('booking_node', bookingNode);
+graph.addNode('booking_node', bookingNode, {
+  ends: [
+    'booking_node',
+    'movie_node',
+    'showtime_node',
+    'app_question_node',
+    'human_node',
+    'unknown_node'
+  ]
+});
 graph.addNode('app_question_node', appQuestionNode);
 graph.addNode('unknown_node', unknownNode);
 graph.addNode('human_node', humanNode);

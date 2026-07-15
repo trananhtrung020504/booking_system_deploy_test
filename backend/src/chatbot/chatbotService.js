@@ -1,6 +1,7 @@
 import { HumanMessage } from '@langchain/core/messages';
 import { Command } from '@langchain/langgraph';
 import { compiledChatGraph } from './graph/chatbotGraph.js';
+import { compactConversationState } from './utils/contextMemory.js';
 
 export const ChatbotService = {
   /**
@@ -25,8 +26,14 @@ export const ChatbotService = {
     try {
       // 1. Kiểm tra trạng thái hiện tại của Thread xem có bị tạm dừng (interrupt) không
       const currentState = await compiledChatGraph.getState(config);
+      const currentValues = currentState.values || {};
       const interruptedNodes = currentState.next || [];
       const isInterrupted = interruptedNodes.length > 0;
+      const compactedContext = await compactConversationState({
+        messages: currentValues.messages || [],
+        existingSummary: currentValues.conversationSummary || '',
+        existingRecentContext: currentValues.recentContext || ''
+      });
 
       let result;
 
@@ -37,7 +44,12 @@ export const ChatbotService = {
         // Resume graph bằng Command resume truyền dữ liệu người dùng bổ sung vào
         result = await compiledChatGraph.invoke(
           new Command({
-            resume: question
+            resume: question,
+            update: {
+              userId,
+              conversationSummary: compactedContext.conversationSummary,
+              recentContext: compactedContext.recentContext
+            }
           }),
           config
         );
@@ -50,7 +62,9 @@ export const ChatbotService = {
             messages: [new HumanMessage({ content: question })],
             userId,
             intent: '',
-            tool_call_count: 0
+            tool_call_count: 0,
+            conversationSummary: compactedContext.conversationSummary,
+            recentContext: compactedContext.recentContext
           },
           config
         );

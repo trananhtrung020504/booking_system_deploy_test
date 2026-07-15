@@ -8,6 +8,8 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import HomeExperienceGuide from '@/components/home/HomeExperienceGuide';
+import HomeShowcaseSections from '@/components/home/HomeShowcaseSections';
 import { useGetMoviesQuery } from '@/store/api/movieAPI';
 import { useGetShowQuery, useGetAvailableDatesQuery, useGetShowsByMovieQuery } from '@/store/api/showAPI';
 import { useAppSelector } from '@/store/hooks';
@@ -343,6 +345,10 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="container mx-auto px-6 md:px-10 py-10">
+        <HomeExperienceGuide />
+      </section>
+
       <section className="container mx-auto px-6 md:px-10 py-24 space-y-24">
         {(isNowShowingLoading || (nowShowingData?.movies && nowShowingData.movies.length > 0)) && (
           <div className="space-y-12">
@@ -485,6 +491,10 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+      </section>
+
+      <section className="container mx-auto px-6 md:px-10 pb-12">
+        <HomeShowcaseSections />
       </section>
 
       {showTimeModal && (

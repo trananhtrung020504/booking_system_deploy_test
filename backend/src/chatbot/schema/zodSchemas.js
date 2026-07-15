@@ -6,6 +6,8 @@ export const IntentResultSchema = z.object({
     'movies',
     'movie_detail',
     'movie_detail_missing_field',
+    'book_movie',
+    'book_movie_missing_field',
     'showtimes',
     'vouchers',
     'bookings',
@@ -79,4 +81,30 @@ export const BookingListResponseSchema = z.object({
   type: z.literal('bookings'),
   message: z.string().describe('Thông báo hoặc tóm tắt danh sách vé đặt của người dùng'),
   bookings: z.array(BookingItemSchema)
+});
+
+export const BookingFlowMovieSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  genre: z.array(z.string()),
+  duration: z.number(),
+  certification: z.string(),
+  poster: z.string().nullable()
+});
+
+export const BookingFlowPreviewShowSchema = z.object({
+  id: z.string(),
+  theaterName: z.string(),
+  screenName: z.string(),
+  startTime: z.string(),
+  format: z.string(),
+  availableSeats: z.number()
+});
+
+export const BookingFlowResponseSchema = z.object({
+  type: z.literal('booking_flow'),
+  message: z.string(),
+  movie: BookingFlowMovieSchema,
+  showtimes: z.array(BookingFlowPreviewShowSchema),
+  supportedPaymentMethods: z.array(z.string())
 });

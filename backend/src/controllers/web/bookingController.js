@@ -1,6 +1,6 @@
 import prisma from '../../config/database.js';
 import redis from '../../config/redis.js';
-import { emitShowUpdate } from '../../socket/socket.js';
+import { emitShowUpdate, emitBookingUpdate } from '../../socket/socket.js';
 
 export const applyVoucher = async (req, res) => {
     try {
@@ -126,6 +126,12 @@ export const createBooking = async (req, res) => {
         const io = req.app.get('io');
         if (io) {
             await emitShowUpdate(io, showId);
+            emitBookingUpdate(io, userId, {
+                bookingId: result.id,
+                bookingRef: result.bookingRef,
+                status: 'PENDING',
+                source: 'booking_created'
+            });
         }
 
         res.status(201).json({ success: true, booking: result });
@@ -151,13 +157,29 @@ export const confirmBooking = async (req, res) => {
             include: { show: { include: { movie: { include: { poster: true } }, theater: true, screen: true } }, seats: true }
         });
 
+        if (transactionCode) {
+            await prisma.transaction.updateMany({
+                where: { transactionCode, status: 'PENDING' },
+                data: {
+                    status: 'PAID',
+                    paidAt: new Date(),
+                    transactionNo: transactionCode
+                }
+            });
+        }
+
         for (const seat of booking.seats) await redis.del(`hold:${booking.showId}:${seat.id}`);
         await prisma.seatHold.deleteMany({ where: { showId: booking.showId, userId } });
 
         const io = req.app.get('io');
         if (io) {
-            const { emitShowUpdate } = await import('../../socket/socket.js');
             await emitShowUpdate(io, booking.showId);
+            emitBookingUpdate(io, userId, {
+                bookingId: updatedBooking.id,
+                bookingRef: updatedBooking.bookingRef,
+                status: 'CONFIRMED',
+                source: 'booking_confirmed'
+            });
         }
         res.json({ success: true, booking: updatedBooking });
     } catch (error) {
@@ -204,7 +226,7 @@ export const checkAndExpireBookings = async (userId, io) => {
 
                 // Update booking status to EXPIRED
                 await prisma.$transaction(async (tx) => {
-                    await tx.booking.update({
+                    const expiredBooking = await tx.booking.update({
                         where: { id: booking.id },
                         data: { status: 'EXPIRED' }
                     });
@@ -214,7 +236,17 @@ export const checkAndExpireBookings = async (userId, io) => {
                             data: { usedCount: { decrement: 1 } }
                         });
                     }
+                    return expiredBooking;
                 });
+
+                if (io) {
+                    emitBookingUpdate(io, userId, {
+                        bookingId: booking.id,
+                        bookingRef: booking.bookingRef,
+                        status: 'EXPIRED',
+                        source: 'booking_expired'
+                    });
+                }
             }
         }
 
@@ -283,11 +315,24 @@ export const getBookingDetail = async (req, res) => {
 
 export const cancelBooking = async (req, res) => {
     try {
+        const existingBooking = await prisma.booking.findFirst({
+            where: { id: req.params.id, userId: req.user.id },
+            select: { id: true, status: true }
+        });
+
+        if (!existingBooking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        if (existingBooking.status === 'CONFIRMED') {
+            return res.status(400).json({ message: "Đã thanh toán thành công nên không thể hủy vé." });
+        }
+
         const booking = await prisma.booking.findFirst({
-            where: { id: req.params.id, userId: req.user.id, status: { in: ['PENDING', 'CONFIRMED'] } },
+            where: { id: req.params.id, userId: req.user.id, status: 'PENDING' },
             include: { seats: true }
         });
-        if (!booking) return res.status(404).json({ message: "Cannot cancel" });
+        if (!booking) return res.status(400).json({ message: "Chỉ có thể hủy vé đang chờ thanh toán." });
 
         const updatedBooking = await prisma.booking.update({ where: { id: booking.id }, data: { status: 'CANCELLED' } });
         if (booking.voucherId) {
@@ -308,11 +353,17 @@ export const cancelBooking = async (req, res) => {
         
         await redis.del(`payment_link:${booking.id}:VNPAY`);
         await redis.del(`payment_link:${booking.id}:ZALOPAY`);
+        await redis.del(`payment_link:${booking.id}:SEPAY`);
 
         const io = req.app.get('io');
         if (io) {
-            const { emitShowUpdate } = await import('../../socket/socket.js');
             await emitShowUpdate(io, booking.showId);
+            emitBookingUpdate(io, req.user.id, {
+                bookingId: updatedBooking.id,
+                bookingRef: updatedBooking.bookingRef,
+                status: 'CANCELLED',
+                source: 'booking_cancelled'
+            });
         }
         res.json({ success: true, booking: updatedBooking });
     } catch (error) {
@@ -426,5 +477,3 @@ export const holdSeats = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-
-

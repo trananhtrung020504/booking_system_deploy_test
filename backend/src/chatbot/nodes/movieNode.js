@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { llm } from '../config/openai.js';
 import prisma from '../../config/database.js';
 import { TextResponseSchema, IntentResultSchema } from '../schema/zodSchemas.js';
+import { buildConversationContext } from '../utils/contextMemory.js';
 
 // ── SCHEMAS TRÍCH XUẤT THAM SỐ (TỐI ƯU HÓA TOKEN) ──────────────────────────
 const MovieParamsSchema = z.object({
@@ -25,11 +26,17 @@ const intentLLM = llm.withStructuredOutput(IntentResultSchema);
 export async function movieNode(state) {
   try {
     const userText = state.messages[state.messages.length - 1].content;
+    const conversationContext = buildConversationContext(state);
     console.log(`[Node: movie_node] Extracting search parameters for: "${userText}"`);
 
     // Bước 1: LLM chỉ trích xuất tham số tìm kiếm (Cực ít token)
     const params = await movieParamsLLM.invoke([
-      new SystemMessage({ content: "Bạn là trợ lý trích xuất bộ lọc phim. Hãy phân tích câu hỏi và điền các thuộc tính lọc phù hợp." }),
+      new SystemMessage({ content: `Bạn là trợ lý trích xuất bộ lọc phim. Hãy phân tích câu hỏi và điền các thuộc tính lọc phù hợp.
+
+Ngữ cảnh hội thoại:
+${conversationContext}
+
+Nếu người dùng dùng cách nói tham chiếu như "phim này", "phim đó", hãy dùng ngữ cảnh để suy ra phim hoặc nhu cầu gần nhất.` }),
       new HumanMessage({ content: userText })
     ]);
 
@@ -110,6 +117,7 @@ export async function movieNode(state) {
 export async function movieDetailNode(state) {
   try {
     const userText = state.messages[state.messages.length - 1].content;
+    const conversationContext = buildConversationContext(state);
     console.log(`[Node: movie_detail_node] Extracting movie title for detail lookup: "${userText}"`);
 
     // Lấy danh sách phim đang hoạt động động từ DB để làm bộ đối chiếu chính xác cho LLM
@@ -120,6 +128,9 @@ export async function movieDetailNode(state) {
     const movieTitlesStr = activeMovies.map(m => `"${m.title}"`).join(', ');
 
     const detailSystemPrompt = `Bạn là trợ lý rút trích chính xác tên bộ phim được nhắc tới trong câu hỏi của người dùng.
+
+NGỮ CẢNH HỘI THOẠI:
+${conversationContext}
     
 ⚠️ DANH SÁCH CÁC BỘ PHIM TRÊN HỆ THỐNG:
 [ ${movieTitlesStr} ]
@@ -226,6 +237,7 @@ Nhiệm vụ của bạn:
 // 3. Node thiếu tên phim → interrupt chờ người dùng nhập bổ sung
 export async function movieMissingNameNode(state) {
   try {
+    const conversationContext = buildConversationContext(state);
     const askResponse = {
       type: 'movie_detail_missing_field',
       message: 'Bạn muốn tìm hiểu thông tin hay lịch chiếu của bộ phim nào ạ? Hãy cho mình biết tên phim nhé! (Ví dụ: phim Mai, Mắt Biếc, Skyfall...)'
@@ -238,8 +250,12 @@ export async function movieMissingNameNode(state) {
     // Dùng LLM trích xuất tên phim từ câu trả lời mới
     const extractPrompt = `
     Bạn là trợ lý lọc thông tin. Hãy kiểm tra xem câu trả lời của người dùng có chứa tên phim nào không.
+    Ngữ cảnh hội thoại:
+    ${conversationContext}
+
     Trả về định dạng JSON của TextResponse. 
     - Nếu có chứa tên phim (ví dụ: "phim Mai", "tôi muốn xem Mai", "Mai nhé", "Skyfall"): trả về type="movie_detail_missing_field" và message là đúng tên phim đó (ví dụ: "Mai", "Skyfall").
+    - Nếu người dùng dùng cách nói tham chiếu như "phim này", "bộ đó", hãy suy ra theo ngữ cảnh hội thoại nếu ngữ cảnh đã có phim cụ thể.
     - Nếu người dùng chuyển chủ đề hoặc không đưa ra tên phim: trả về type="unknown" và message là câu trả lời của họ.
     `;
 
@@ -264,10 +280,11 @@ export async function movieMissingNameNode(state) {
     // Nếu vẫn không cung cấp tên phim, tiến hành phân loại lại intent dựa trên nội dung mới
     const INTENT_SYSTEM_SHORT = `
     Phân loại câu hỏi của người dùng vào 1 trong các ý định: 
-    'movies', 'movie_detail', 'movie_detail_missing_field', 'showtimes', 'vouchers', 'bookings', 'app_question', 'human_intervention', 'unknown'.
+    'movies', 'movie_detail', 'movie_detail_missing_field', 'book_movie', 'book_movie_missing_field', 'showtimes', 'vouchers', 'bookings', 'app_question', 'human_intervention', 'unknown'.
+    Nếu người dùng nói "phim này", "đặt phim này", "bộ đó", hãy suy ra theo ngữ cảnh hội thoại.
     `;
     const newIntent = await intentLLM.invoke([
-      new SystemMessage({ content: INTENT_SYSTEM_SHORT }),
+      new SystemMessage({ content: `${INTENT_SYSTEM_SHORT}\nNgữ cảnh hội thoại:\n${conversationContext}` }),
       new HumanMessage({ content: userInput })
     ]);
 
@@ -277,6 +294,8 @@ export async function movieMissingNameNode(state) {
       movies: 'movie_node',
       movie_detail: 'movie_detail_node',
       movie_detail_missing_field: 'movie_missing_name_node',
+      book_movie: 'booking_node',
+      book_movie_missing_field: 'booking_node',
       showtimes: 'showtime_node',
       vouchers: 'booking_node',
       bookings: 'booking_node',

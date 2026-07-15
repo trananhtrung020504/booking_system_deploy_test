@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { llm } from '../config/openai.js';
 import prisma from '../../config/database.js';
 import { TextResponseSchema } from '../schema/zodSchemas.js';
+import { buildConversationContext } from '../utils/contextMemory.js';
 
 // ── SCHEMAS TRÍCH XUẤT THAM SỐ (TỐI ƯU HÓA TOKEN) ──────────────────────────
 const ShowtimeParamsSchema = z.object({
@@ -42,6 +43,7 @@ Hãy lịch sự từ chối trả lời câu hỏi nằm ngoài phạm vi này 
 export async function showtimeNode(state) {
   try {
     const userText = state.messages[state.messages.length - 1].content;
+    const conversationContext = buildConversationContext(state);
     console.log(`[Node: showtime_node] Extracting showtime parameters for: "${userText}"`);
 
     // Cung cấp ngày giờ hiện tại của hệ thống để LLM tính toán chính xác "hôm nay", "ngày mai"
@@ -52,6 +54,9 @@ export async function showtimeNode(state) {
     const systemPrompt = `Bạn là trợ lý trích xuất tham số lọc lịch chiếu phim của rạp RoPhim.
 Ngày hôm nay (Hôm nay) của hệ thống là: ${localDateStr}.
 Nhiệm vụ của bạn là phân tích câu hỏi người dùng và điền chính xác các bộ lọc.
+
+NGỮ CẢNH HỘI THOẠI:
+${conversationContext}
 
 ⚠️ LƯU Ý ĐẶC BIỆT VỀ TIẾNG VIỆT (TRÁNH LẪN LỘN):
 1. Từ "mai" có thể là tên bộ phim "Mai" HOẶC là thời gian "ngày mai".

@@ -2,7 +2,7 @@ import { SePayPgClient } from 'sepay-pg-node';
 import CryptoJS from 'crypto-js';
 import prisma from '../../config/database.js';
 import redis from '../../config/redis.js';
-import { emitShowUpdate, broadcastGlobalNotification } from '../../socket/socket.js';
+import { emitShowUpdate, broadcastGlobalNotification, emitBookingUpdate } from '../../socket/socket.js';
 import { sendBookingConfirmationEmail } from '../../services/mail.service.js';
 
 const client = new SePayPgClient({
@@ -78,6 +78,63 @@ export const createSepayPayment = async (req, res) => {
     }
 };
 
+export const getSepayCheckoutBridge = async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        const cacheKey = `payment_link:${bookingId}:SEPAY`;
+        const cached = await redis.get(cacheKey);
+
+        if (!cached) {
+            return res.status(404).send(`
+                <html>
+                  <body style="font-family: Arial, sans-serif; background:#111; color:#fff; display:flex; align-items:center; justify-content:center; min-height:100vh;">
+                    <div style="max-width:420px; text-align:center;">
+                      <h2>Liên kết thanh toán không còn hiệu lực</h2>
+                      <p>Đơn đặt vé này có thể đã hết hạn hoặc đã được xử lý. Vui lòng quay lại website để tạo lại giao dịch mới.</p>
+                    </div>
+                  </body>
+                </html>
+            `);
+        }
+
+        const { checkoutURL, checkoutFormfields } = JSON.parse(cached);
+        const hiddenFields = Object.entries(checkoutFormfields || {})
+            .map(([key, value]) => `<input type="hidden" name="${key}" value="${String(value).replace(/"/g, '&quot;')}" />`)
+            .join('');
+
+        return res.send(`
+            <html>
+              <head>
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <title>Đang chuyển đến cổng thanh toán</title>
+              </head>
+              <body style="margin:0; font-family: Arial, sans-serif; background:#050507; color:#fff; display:flex; align-items:center; justify-content:center; min-height:100vh;">
+                <div style="max-width:420px; text-align:center; padding:24px;">
+                  <h2 style="margin-bottom:12px;">Đang chuyển đến cổng thanh toán</h2>
+                  <p style="color:rgba(255,255,255,0.7); line-height:1.6;">Nếu trình duyệt chưa tự chuyển, vui lòng nhấn nút bên dưới để tiếp tục thanh toán.</p>
+                  <form id="sepay-checkout-form" method="POST" action="${checkoutURL}">
+                    ${hiddenFields}
+                    <button type="submit" style="margin-top:20px; border:none; border-radius:999px; padding:14px 24px; background:#fff; color:#111; font-weight:700; cursor:pointer;">
+                      Tiếp tục thanh toán
+                    </button>
+                  </form>
+                </div>
+                <script>
+                  setTimeout(function() {
+                    var form = document.getElementById('sepay-checkout-form');
+                    if (form) form.submit();
+                  }, 300);
+                </script>
+              </body>
+            </html>
+        `);
+    } catch (error) {
+        console.error('[Controller Error] [mobile/paymentController.js][getSepayCheckoutBridge]:', error);
+        res.status(500).send('Không thể khởi tạo cầu nối thanh toán.');
+    }
+};
+
 export const sepayWebhook = async (req, res) => {
     try {
         console.log("SEPAY WEBHOOK NHAN DUOC DATA:", req.body);
@@ -114,6 +171,12 @@ export const sepayWebhook = async (req, res) => {
                 const io = req.app.get('io');
                 if (io && booking) {
                     await emitShowUpdate(io, booking.showId);
+                    emitBookingUpdate(io, booking.userId, {
+                        bookingId: booking.id,
+                        bookingRef: booking.bookingRef,
+                        status: 'CONFIRMED',
+                        source: 'sepay_webhook'
+                    });
                     broadcastGlobalNotification(io, `Chúc mừng ${booking.user.name || 'khách hàng'} vừa đặt thành công ${booking.seats.length} vé phim ${booking.show.movie.title}!`, 'success');
                 }
 

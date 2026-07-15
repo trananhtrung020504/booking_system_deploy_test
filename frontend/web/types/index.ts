@@ -156,6 +156,32 @@ export interface Booking {
   transaction?: Transaction | null;
 }
 
+export interface BookingFlowMovie {
+  id: string;
+  title: string;
+  genre: string[];
+  duration: number;
+  certification: string;
+  poster: string | null;
+}
+
+export interface BookingFlowShowtime {
+  id: string;
+  theaterName: string;
+  screenName: string;
+  startTime: string;
+  format: string;
+  availableSeats: number;
+}
+
+export interface BookingFlowResponse {
+  type: 'booking_flow';
+  message: string;
+  movie: BookingFlowMovie;
+  showtimes: BookingFlowShowtime[];
+  supportedPaymentMethods: string[];
+}
+
 export type TransactionStatus = 'PENDING' | 'PAID' | 'FAILED';
 
 export interface Transaction {

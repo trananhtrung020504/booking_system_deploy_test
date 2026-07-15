@@ -10,6 +10,14 @@ export const emitToUser = (io, userId, eventName, data) => {
     io.to(`user:${userId}`).emit(eventName, data);
 };
 
+export const emitBookingUpdate = (io, userId, payload) => {
+    if (!io || !userId) return;
+    emitToUser(io, userId, 'booking:updated', {
+        ...payload,
+        timestamp: Date.now()
+    });
+};
+
 export const broadcastGlobalNotification = (io, message, type = 'info') => {
     io.to('global').emit('global:notification', { message, type, timestamp: Date.now() });
 };

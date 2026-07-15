@@ -353,16 +353,6 @@ function BookingsContent() {
                                 <QrCode className="h-3.5 w-3.5" />
                                 Xem vé QR
                               </Button>
-                              {isFuture && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-[10px] text-destructive hover:text-destructive rounded-xl border-destructive/20 hover:bg-destructive/10 uppercase tracking-widest px-4"
-                                  onClick={() => setConfirmCancelId(booking.id)}
-                                >
-                                  Hủy vé
-                                </Button>
-                              )}
                             </>
                           )}
                         </>

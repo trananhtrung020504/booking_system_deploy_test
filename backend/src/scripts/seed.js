@@ -31,16 +31,26 @@ async function main() {
                 { email: 'khach2@gmail.com', name: 'Khách Test 2', phone: '0911000002', password: hashedPassword, role: 'USER' },
                 { email: 'khach3@gmail.com', name: 'Khách Test 3', phone: '0911000003', password: hashedPassword, role: 'USER' },
                 { email: 'khach4@gmail.com', name: 'Khách Test 4', phone: '0911000004', password: hashedPassword, role: 'USER' },
-                { email: 'khach5@gmail.com', name: 'Khách Test 5', phone: '0911000005', password: hashedPassword, role: 'USER' }
+                { email: 'khach5@gmail.com', name: 'Khách Test 5', phone: '0911000005', password: hashedPassword, role: 'USER' },
+                { email: 'khach6@gmail.com', name: 'Khách Test 6', phone: '0911000006', password: hashedPassword, role: 'USER' },
+                { email: 'khach7@gmail.com', name: 'Khách Test 7', phone: '0911000007', password: hashedPassword, role: 'USER' },
+                { email: 'khach8@gmail.com', name: 'Khách Test 8', phone: '0911000008', password: hashedPassword, role: 'USER' },
+                { email: 'khach9@gmail.com', name: 'Khách Test 9', phone: '0911000009', password: hashedPassword, role: 'USER' },
+                { email: 'khach10@gmail.com', name: 'Khách Test 10', phone: '0911000010', password: hashedPassword, role: 'USER' },
+                { email: 'khach11@gmail.com', name: 'Khách Test 11', phone: '0911000011', password: hashedPassword, role: 'USER' },
+                { email: 'khach12@gmail.com', name: 'Khách Test 12', phone: '0911000012', password: hashedPassword, role: 'USER' },
+                { email: 'khach13@gmail.com', name: 'Khách Test 13', phone: '0911000013', password: hashedPassword, role: 'USER' },
+                { email: 'khach14@gmail.com', name: 'Khách Test 14', phone: '0911000014', password: hashedPassword, role: 'USER' },
+                { email: 'khach15@gmail.com', name: 'Khách Test 15', phone: '0911000015', password: hashedPassword, role: 'USER' }
             ]
         });
 
         console.log(" Đang tạo Combos...");
         await prisma.combo.createMany({
             data: [
-                { name: 'Combo Solo', description: '1 Bắp lớn + 2 Nước ngọt lớn', price: 80000, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4VNqj94q4Z4ItOfpYtVUTuek1Tk2XqWRlQw&s' },
-                { name: 'Combo Couple', description: '2 Bắp lớn + 2 Nước ngọt lớn', price: 105000, image: 'https://lh3.googleusercontent.com/-Uuyu4iVAmfg/Wcscqcgnx2I/AAAAAAAAgMQ/oVv3piWljBMMLIduVs-2Few7AwJkHswuQCHMYCw/2914a66e-7e99-48f4-8172-183d03a0d624.jpg' },
-                { name: 'Combo Party', description: '3 Bắp lớn + 3 Nước ngọt lớn', price: 169000, image: 'https://iguov8nhvyobj.vcdn.cloud/media/wysiwyg/2022/012022/350x495_1.jpg' },
+                { name: 'Combo Solo', description: '1 Bắp lớn + 2 Nước ngọt lớn', price: 2000, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4VNqj94q4Z4ItOfpYtVUTuek1Tk2XqWRlQw&s' },
+                { name: 'Combo Couple', description: '2 Bắp lớn + 2 Nước ngọt lớn', price: 2000, image: 'https://lh3.googleusercontent.com/-Uuyu4iVAmfg/Wcscqcgnx2I/AAAAAAAAgMQ/oVv3piWljBMMLIduVs-2Few7AwJkHswuQCHMYCw/2914a66e-7e99-48f4-8172-183d03a0d624.jpg' },
+                { name: 'Combo Party', description: '3 Bắp lớn + 3 Nước ngọt lớn', price: 2000, image: 'https://iguov8nhvyobj.vcdn.cloud/media/wysiwyg/2022/012022/350x495_1.jpg' },
             ]
         });
 
@@ -208,13 +218,13 @@ async function main() {
             movies.push(movie);
         }
 
-        console.log("⏳ Đang tạo suất chiếu cho 200 ngày tới (hơn 6 tháng)...");
+        console.log("⏳ Đang tạo suất chiếu cho 400 ngày tới...");
         const now = new Date();
         const nowShowing = movies.filter(m => m.releaseDate < now);
 
         for (const m of nowShowing) {
-            // Tạo suất chiếu cho 200 ngày tới
-            for (let i = 0; i < 200; i++) {
+            // Tạo suất chiếu cho 400 ngày tới
+            for (let i = 0; i < 400; i++) {
                 const date = new Date();
                 date.setDate(now.getDate() + i);
 
@@ -235,7 +245,7 @@ async function main() {
                                 format: m.format[0],
                                 startTime,
                                 endTime,
-                                priceMap: { STANDARD: 95000, VIP: 125000, SWEETBOX: 250000 }
+                                priceMap: { STANDARD: 2000, VIP: 2000, SWEETBOX: 2000 }
                             }
                         });
                     }

@@ -170,7 +170,8 @@ router.post('/chat', chatbotLimiter, validateChatInput, async (req, res) => {
         metadata: {
           movies: response.answer?.movies || [],
           showtimes: response.answer?.showtimes || [],
-          bookings: response.answer?.bookings || []
+          bookings: response.answer?.bookings || [],
+          bookingFlow: response.answer?.type === 'booking_flow' ? response.answer : null
         }
       }
     });
@@ -228,6 +229,8 @@ router.get('/history/:threadIdLang', async (req, res) => {
       movies: msg.metadata?.movies || [],
       showtimes: msg.metadata?.showtimes || [],
       bookings: msg.metadata?.bookings || [],
+      bookingFlow: msg.metadata?.bookingFlow || null,
+      paymentQr: msg.metadata?.paymentQr || null,
       createdAt: msg.createdAt
     }));
 
@@ -247,7 +250,79 @@ router.get('/history/:threadIdLang', async (req, res) => {
 });
 
 // ============================================================
-// 4. DELETE /history/{threadIdLang} - Clear all chat messages
+// 4. POST /history/{threadIdLang}/payment-qr - Persist chatbot QR message
+// ============================================================
+router.post('/history/:threadIdLang/payment-qr', async (req, res) => {
+  try {
+    const { threadIdLang } = req.params;
+    const { message, paymentQr } = req.body;
+    const userId = await extractUserId(req);
+
+    if (!message || typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'message is required'
+      });
+    }
+
+    if (!paymentQr || typeof paymentQr !== 'object') {
+      return res.status(400).json({
+        success: false,
+        message: 'paymentQr is required'
+      });
+    }
+
+    const chatThread = await prisma.chatThread.findUnique({
+      where: { threadIdLang }
+    });
+
+    if (!chatThread) {
+      return res.status(404).json({
+        success: false,
+        message: 'Chat thread not found'
+      });
+    }
+
+    if (chatThread.userId && chatThread.userId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized access to this chat thread'
+      });
+    }
+
+    const savedMessage = await prisma.chatMessage.create({
+      data: {
+        threadId: chatThread.id,
+        sender: 'bot',
+        text: message,
+        metadata: {
+          paymentQr
+        }
+      }
+    });
+
+    return res.json({
+      success: true,
+      message: {
+        id: savedMessage.id,
+        sender: savedMessage.sender,
+        text: savedMessage.text,
+        paymentQr: savedMessage.metadata?.paymentQr || null,
+        createdAt: savedMessage.createdAt
+      }
+    });
+  } catch (error) {
+    console.error('[ChatbotRoute] Persist payment QR error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error saving payment QR message',
+      error: error.message
+    });
+  }
+});
+
+// ============================================================
+// 5. DELETE /history/{threadIdLang} - Clear all chat messages
 // ============================================================
 router.delete('/history/:threadIdLang', async (req, res) => {
   try {

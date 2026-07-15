@@ -57,7 +57,7 @@ interface ChatMessage {
   isInterrupted?: boolean;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/chatbot` : 'http://localhost:5000/api/v1/web/chatbot';
+const API_BASE_URL = 'http://localhost:5000/api/v1/web/chatbot';
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -92,10 +92,8 @@ export default function Chatbot() {
         });
 
         const threadData = await threadResponse.json();
-        console.log('[Chatbot] Thread response:', threadData);
         if (!threadData.success) {
-          console.error('[Chatbot] Thread creation failed:', threadData);
-          throw new Error(threadData.message || 'Failed to create thread');
+          throw new Error(threadData.message);
         }
 
         // Load chat history from backend

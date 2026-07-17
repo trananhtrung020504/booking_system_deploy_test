@@ -39,7 +39,8 @@ export const createSepayPayment = async (req, res) => {
         if (transaction) {
             transactionCode = transaction.transactionCode;
         } else {
-            transactionCode = CryptoJS.lib.WordArray.random(20).toString(CryptoJS.enc.Hex);
+            // Rút ngắn mã giao dịch để tránh bị ngân hàng cắt bớt nội dung khi chuyển khoản VietQR trực tiếp
+            transactionCode = "RP" + Math.random().toString(36).substring(2, 10).toUpperCase();
             transaction = await prisma.transaction.create({
                 data: {
                     userId,
@@ -144,14 +145,31 @@ export const sepayWebhook = async (req, res) => {
 
         // If standard SePay (not PG) hits this endpoint:
         const code = req.body.code || reference_number;
-        const transactionCode = order_invoice_number || req.body.content;
 
-        if (!transactionCode) return res.json({ success: false, message: 'Missing transaction code' });
+        let transactionCode = order_invoice_number;
+        let transaction = null;
 
-        const transaction = await prisma.transaction.findUnique({
-            where: { transactionCode: transactionCode },
-            include: { bookings: { include: { user: true, seats: true, show: { include: { movie: true, theater: true, screen: true } } } } }
-        });
+        if (transactionCode) {
+            transaction = await prisma.transaction.findUnique({
+                where: { transactionCode: transactionCode },
+                include: { bookings: { include: { user: true, seats: true, show: { include: { movie: true, theater: true, screen: true } } } } }
+            });
+        } else if (req.body.content) {
+            // Trường hợp quét VietQR trực tiếp, webhook của SePay sẽ không có order_invoice_number
+            // Mã giao dịch (40 ký tự) sẽ nằm bên trong nội dung chuyển khoản (req.body.content)
+            const content = req.body.content.toUpperCase();
+            const pendingTransactions = await prisma.transaction.findMany({
+                where: { status: 'PENDING', paymentMethod: 'SEPAY' },
+                include: { bookings: { include: { user: true, seats: true, show: { include: { movie: true, theater: true, screen: true } } } } }
+            });
+
+            transaction = pendingTransactions.find(t => content.includes(t.transactionCode.toUpperCase()));
+            if (transaction) {
+                transactionCode = transaction.transactionCode;
+            }
+        }
+
+        if (!transaction) return res.json({ success: false, message: 'Transaction not found or missing transaction code' });
 
         if (transaction && transaction.status === 'PENDING') {
             const booking = transaction.bookings[0];
@@ -180,8 +198,13 @@ export const sepayWebhook = async (req, res) => {
                     broadcastGlobalNotification(io, `Chúc mừng ${booking.user.name || 'khách hàng'} vừa đặt thành công ${booking.seats.length} vé phim ${booking.show.movie.title}!`, 'success');
                 }
 
-                if (booking?.user?.email) await sendBookingConfirmationEmail(booking.user.email, booking);
-
+                if (booking?.user?.email) {
+                    try {
+                        await sendBookingConfirmationEmail(booking.user.email, booking);
+                    } catch (emailError) {
+                        console.error('[MailService] Lỗi khi gửi email xác nhận (bỏ qua để không chết webhook):', emailError.message);
+                    }
+                }
                 await redis.del(`payment_link:${booking.id}:SEPAY`);
             }
         }

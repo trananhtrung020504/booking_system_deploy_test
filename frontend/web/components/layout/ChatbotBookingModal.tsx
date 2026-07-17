@@ -112,15 +112,15 @@ export default function ChatbotBookingModal({
   const visibleDates = showAllDates
     ? (availableDates || [])
     : (() => {
-        const dates = availableDates || [];
-        if (selectedDateIndex < INITIAL_VISIBLE_DATES) {
-          return dates.slice(0, INITIAL_VISIBLE_DATES);
-        }
+      const dates = availableDates || [];
+      if (selectedDateIndex < INITIAL_VISIBLE_DATES) {
+        return dates.slice(0, INITIAL_VISIBLE_DATES);
+      }
 
-        const selectedDateValue = dates[selectedDateIndex];
-        const previewDates = dates.slice(0, INITIAL_VISIBLE_DATES - 1);
-        return selectedDateValue ? [...previewDates, selectedDateValue] : previewDates;
-      })();
+      const selectedDateValue = dates[selectedDateIndex];
+      const previewDates = dates.slice(0, INITIAL_VISIBLE_DATES - 1);
+      return selectedDateValue ? [...previewDates, selectedDateValue] : previewDates;
+    })();
   const canExpandDates = (availableDates?.length || 0) > INITIAL_VISIBLE_DATES;
 
   const { data: showsData } = useGetShowsByMovieQuery(
@@ -278,10 +278,19 @@ export default function ChatbotBookingModal({
       }
 
       const checkoutBridgeUrl = `${API_ROOT}/payment/sepay/checkout/${bookingResponse.booking.id}`;
-      const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(checkoutBridgeUrl)}`;
+
+      // Lấy mã giao dịch từ backend để làm nội dung chuyển khoản
+      const transactionCode = paymentData.transactionCode || bookingResponse.booking.id;
+      // Lấy cấu hình bank từ biến môi trường
+      const bankId = process.env.NEXT_PUBLIC_SEPAY_BANK_ID || 'ACB';
+      const accountNo = process.env.NEXT_PUBLIC_SEPAY_ACCOUNT_NO || '7380071';
+      const accountName = process.env.NEXT_PUBLIC_SEPAY_ACCOUNT_NAME || 'TRAN ANH TRUNG';
+
+      // Tạo mã VietQR qua hệ thống chính chủ của SePay
+      const qrImageUrl = `https://qr.sepay.vn/img?bank=${bankId}&acc=${accountNo}&template=compact&amount=${bookingResponse.booking.total}&des=${encodeURIComponent(transactionCode)}&holder=${encodeURIComponent(accountName)}`;
 
       await onPaymentReady({
-        message: `M\u00ecnh \u0111\u00e3 t\u1ea1o \u0111\u01a1n \u0111\u1eb7t v\u00e9 cho phim ${movie?.title}. B\u1ea1n c\u00f3 th\u1ec3 qu\u00e9t QR ho\u1eb7c b\u1ea5m m\u1edf c\u1ed5ng thanh to\u00e1n \u0111\u1ec3 ho\u00e0n t\u1ea5t giao d\u1ecbch.`,
+        message: `Mình đã tạo đơn đặt vé cho phim ${movie?.title}. Bạn có thể quét mã VietQR để thanh toán hoặc bấm mở cổng thanh toán.\n\n⚠️ Lưu ý: Mã QR này sẽ biến mất nếu bạn tải lại trang (để đảm bảo an toàn giao dịch). Nếu lỡ tải lại trang, bạn vui lòng vào mục "Vé của tôi" để tiếp tục thanh toán nhé!`,
         qrImageUrl,
         checkoutBridgeUrl,
         bookingRef: bookingResponse.booking.bookingRef,

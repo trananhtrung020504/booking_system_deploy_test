@@ -67,8 +67,8 @@ export const emitShowUpdate = async (io, showId) => {
         getSelectingSeats(showId)
     ]);
     const viewerCount = io.sockets.adapter.rooms.get(`show:${showId}`)?.size || 0;
-    io.to(`show:${showId}`).emit('show:seats-update', { 
-        showId, held, booked, selecting, viewerCount, timestamp: Date.now() 
+    io.to(`show:${showId}`).emit('show:seats-update', {
+        showId, held, booked, selecting, viewerCount, timestamp: Date.now()
     });
 };
 
@@ -86,7 +86,7 @@ const initSocket = (io) => {
     io.on('connection', (socket) => {
         const cookies = parseCookies(socket.handshake.headers.cookie);
         const token = socket.handshake.auth.token || cookies.accessToken;
-        
+
         console.log(`🔌 New connection attempt: ${socket.id}`);
         console.log(`🍪 Cookies present: ${socket.handshake.headers.cookie ? 'Yes' : 'No'}`);
         console.log(`🎟️ Token found: ${token ? 'Yes' : 'No'}`);
@@ -121,7 +121,7 @@ const initSocket = (io) => {
         socket.on('show:leave', async (showId) => {
             socket.leave(`show:${showId}`);
             socket.currentShowId = null;
-            
+
             // Release holds and selecting state for this user and show when they leave the seat selection page
             try {
                 if (showId && userId) {
@@ -157,10 +157,10 @@ const initSocket = (io) => {
 
                 const expiresAt = Date.now() + SEAT_HOLD_TTL * 1000;
                 const holdValue = JSON.stringify({ userId, expiresAt });
-                
+
                 const bookedSeats = await getBookedSeats(showId);
                 const bookedSet = new Set(bookedSeats.map(b => b.seatId));
-                
+
                 for (const id of seatIds) {
                     if (bookedSet.has(id)) return callback?.({ success: false, message: 'Một hoặc nhiều ghế đã được đặt' });
                 }
@@ -170,7 +170,7 @@ const initSocket = (io) => {
                 for (const seatId of seatIds) {
                     const key = `hold:${showId}:${seatId}`;
                     const existing = await redis.get(key);
-                    
+
                     let canHold = false;
                     if (existing) {
                         try {
@@ -281,7 +281,7 @@ const initSocket = (io) => {
         socket.on('disconnect', async () => {
             const showId = socket.currentShowId;
             userSocketMap.delete(userId);
-            
+
             // Release all active holds and selecting state for this user when they disconnect
             try {
                 if (userId) {

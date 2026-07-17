@@ -7,6 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useGetMovieQuery } from '@/store/api/movieAPI';
 import { useGetShowsByMovieQuery, useGetAvailableDatesQuery, useGetShowQuery } from '@/store/api/showAPI';
 import { useAppSelector } from '@/store/hooks';
@@ -27,6 +33,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
   const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
   const [activeShowId, setActiveShowId] = useState<string | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showTrailerModal, setShowTrailerModal] = useState(false);
   const [modalStep, setModalStep] = useState<'times' | 'seats'>('times');
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [heldSeats, setHeldSeats] = useState<any[]>([]);
@@ -45,6 +52,34 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
 
   const selectedShowData = showsData?.theaters.flatMap(t => t.shows).find(s => s.id === activeShowId);
   const selectedTheater = showsData?.theaters.find(t => t.shows.some(s => s.id === activeShowId))?.theater;
+
+  const getYoutubeEmbedUrl = (url?: string | null) => {
+    if (!url) return '';
+
+    try {
+      const parsedUrl = new URL(url);
+      const host = parsedUrl.hostname.replace('www.', '');
+
+      if (host === 'youtu.be') {
+        const videoId = parsedUrl.pathname.split('/').filter(Boolean)[0];
+        return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : '';
+      }
+
+      if (host.includes('youtube.com')) {
+        const videoId = parsedUrl.searchParams.get('v');
+        if (videoId) return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+
+        const shortsMatch = parsedUrl.pathname.match(/\/shorts\/([^/]+)/);
+        if (shortsMatch?.[1]) return `https://www.youtube.com/embed/${shortsMatch[1]}?autoplay=1`;
+      }
+    } catch {
+      return '';
+    }
+
+    return url.includes('/embed/') ? `${url}${url.includes('?') ? '&' : '?'}autoplay=1` : '';
+  };
+
+  const trailerEmbedUrl = getYoutubeEmbedUrl(movie?.trailerUrl);
 
 
 
@@ -273,7 +308,10 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
       <div className="max-w-[1440px] mx-auto px-6 md:px-10 -mt-[45vh] md:-mt-[55vh] relative z-10">
         <div className="flex flex-col md:flex-row gap-10 md:gap-16 items-start">
           <div className="w-full md:w-[320px] shrink-0 group relative z-10">
-            <div className="relative rounded-[2.5rem] overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.6)] border border-white/10 group-hover:border-primary/50 transition-all duration-700">
+            <div
+              onClick={() => movie.trailerUrl && setShowTrailerModal(true)}
+              className={`relative rounded-[2.5rem] overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.6)] border border-white/10 transition-all duration-700 ${movie.trailerUrl ? 'cursor-pointer group-hover:border-primary/50' : ''}`}
+            >
               {movie.poster?.source ? <img src={movie.poster.source} alt={movie.title} className="w-full aspect-[2/3] object-cover group-hover:scale-105 transition-transform duration-1000" /> : <div className="w-full aspect-[2/3] bg-zinc-900 flex items-center justify-center"><Film className="h-16 w-16 text-white/10" /></div>}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
                 <div className="bg-primary p-4 rounded-full shadow-2xl shadow-primary/40 transform scale-75 group-hover:scale-100 transition-all duration-500"><Play className="h-8 w-8 fill-white text-white" /></div>
@@ -304,7 +342,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
             </div>
 
             <div className="flex flex-wrap gap-4 pt-2">
-              {movie.trailerUrl && <Button onClick={() => window.open(movie.trailerUrl || undefined, '_blank')} className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-14 px-8 rounded-xl font-black uppercase tracking-wider text-[10px] gap-2.5 transition-all shadow-xl"><Play className="h-4 w-4 fill-white" /> Xem Trailer</Button>}
+              {movie.trailerUrl && <Button onClick={() => setShowTrailerModal(true)} className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-14 px-8 rounded-xl font-black uppercase tracking-wider text-[10px] gap-2.5 transition-all shadow-xl"><Play className="h-4 w-4 fill-white" /> Xem Trailer</Button>}
               <Button onClick={handleOpenBooking} className="bg-primary hover:bg-primary/90 text-white h-14 px-8 rounded-xl font-black uppercase tracking-wider text-[10px] gap-2.5 shadow-2xl shadow-primary/30 active:scale-95">Đặt vé ngay <ChevronRight className="h-4 w-4" /></Button>
             </div>
 
@@ -316,6 +354,33 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
       </div>
+
+      <Dialog open={showTrailerModal} onOpenChange={setShowTrailerModal}>
+        <DialogContent className="sm:max-w-4xl bg-black/95 border border-white/10 backdrop-blur-2xl p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6">
+            <DialogTitle className="text-lg font-bold uppercase tracking-tight text-white">
+              Trailer: {movie.title}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="px-6 pb-6">
+            {trailerEmbedUrl ? (
+              <div className="relative aspect-video overflow-hidden rounded-3xl border border-white/10 bg-black">
+                <iframe
+                  src={trailerEmbedUrl}
+                  title={`${movie.title} trailer`}
+                  className="absolute inset-0 h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <div className="flex min-h-[240px] items-center justify-center rounded-3xl border border-dashed border-white/10 bg-white/[0.03] text-sm font-medium text-white/50">
+                Chưa có link trailer hợp lệ.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Showtimes Section */}
       <div id="showtimes-section" className="max-w-[1440px] mx-auto px-6 md:px-10 py-24 space-y-12 relative">

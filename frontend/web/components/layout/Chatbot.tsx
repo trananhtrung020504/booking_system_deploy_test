@@ -2,18 +2,23 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Bot, 
-  MessageSquare, 
-  X, 
-  Send, 
-  Sparkles, 
-  Star, 
-  Calendar, 
-  Ticket, 
-  ChevronRight, 
-  Loader2 
+import {
+  Bot,
+  MessageSquare,
+  X,
+  Send,
+  Sparkles,
+  Star,
+  Calendar,
+  Ticket,
+  ChevronRight,
+  Loader2
 } from 'lucide-react';
+import ChatbotBookingModal from './ChatbotBookingModal';
+import { getSocket, connectSocket } from '@/lib/socket';
+import { useAppDispatch } from '@/store/hooks';
+import { bookingAPI } from '@/store/api/bookingAPI';
+import { toast } from 'sonner';
 
 interface Movie {
   id: string;
@@ -51,10 +56,12 @@ interface ChatMessage {
   id: string;
   sender: 'user' | 'bot';
   text: string;
+  movie?: any;
   movies?: Movie[];
   showtimes?: Showtime[];
   bookings?: Booking[];
   isInterrupted?: boolean;
+  paymentData?: any;
 }
 
 const API_BASE_URL = 'http://localhost:5000/api/v1/web/chatbot';
@@ -66,6 +73,8 @@ export default function Chatbot() {
   const [loading, setLoading] = useState(false);
   const [threadIdLang, setThreadIdLang] = useState(''); // LangGraph thread_id
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [currentFlow, setCurrentFlow] = useState<any | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -109,9 +118,11 @@ export default function Chatbot() {
             id: msg.id,
             sender: msg.sender,
             text: msg.text,
+            movie: msg.movie,
             movies: msg.movies,
             showtimes: msg.showtimes,
-            bookings: msg.bookings
+            bookings: msg.bookings,
+            paymentData: msg.paymentData
           }));
           setMessages(loadedMessages);
         } else {
@@ -133,12 +144,50 @@ export default function Chatbot() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
+  const dispatch = useAppDispatch();
+
+  // Realtime Socket listener for payment success
+  useEffect(() => {
+    const socket = connectSocket();
+
+    const handleBookingUpdate = (data: any) => {
+      if (data.status === 'CONFIRMED' && data.bookingRef) {
+        toast.success(`Thanh toán thành công! Vé ${data.bookingRef} đã được xác nhận.`);
+
+        setMessages(prev => {
+          // Tránh spam nếu đã có tin nhắn này
+          const alreadyNotified = prev.some(m => m.text.includes(`Giao dịch cho mã vé ${data.bookingRef} đã thành công`));
+          if (alreadyNotified) return prev;
+
+          return [...prev, {
+            id: 'msg_' + Date.now() + '_success',
+            sender: 'bot',
+            text: `🎉 Tuyệt vời! Giao dịch cho mã vé **${data.bookingRef}** đã thành công. Bạn có thể kiểm tra vé ở mục "Vé của tôi". Cảm ơn bạn đã đặt vé!`,
+          }];
+        });
+
+        // Mở chat lên nếu đang đóng để user thấy
+        setIsOpen(true);
+
+        // Tự động làm mới dữ liệu của trang hiện tại bằng cách xóa cache Redux
+        router.refresh();
+        dispatch(bookingAPI.util.invalidateTags(['Booking']));
+      }
+    };
+
+    socket.on('booking:updated', handleBookingUpdate);
+
+    return () => {
+      socket.off('booking:updated', handleBookingUpdate);
+    };
+  }, [dispatch, router]);
+
   const loadDefaultGreeting = () => {
     setMessages([
       {
         id: 'welcome',
         sender: 'bot',
-        text: 'Chào bạn! Mình là Trợ Lý Ảo thông minh của rạp RoPhim. 🎬 Mình có thể giúp gì cho bạn hôm nay?\n\nBạn có thể hỏi mình các câu hỏi như:\n- Hôm nay rạp có những phim nào?\n- Lịch chiếu phim Mai ra sao?\n- Có chương trình khuyến mãi nào không?\n- Xem vé tôi đã đặt.'
+        text: 'Chào bạn! Mình là Trợ Lý Ảo thông minh của rạp RoPhim. 🎬 Mình có thể giúp gì cho bạn hôm nay?\n\nBạn có thể hỏi mình các câu hỏi như:\n- Hôm nay rạp có những phim nào?\n- Lịch chiếu phim Mai ra sao?\n- Có chương trình khuyến mãi nào không?\n- Xem vé tôi đã đặt\n- Tôi muốn đặt vé phim (Thay thế phim bạn muốn đặt vào)\n- Xem chi tiết phim bạn muốn (Tôi muốn xem chi tiết phim...).'
       }
     ]);
   };
@@ -180,6 +229,7 @@ export default function Chatbot() {
           id: botMsgId,
           sender: 'bot',
           text: botAnswer.message || 'Mình đã nhận được thông tin.',
+          movie: botAnswer.movie,
           movies: botAnswer.movies,
           showtimes: botAnswer.showtimes,
           bookings: botAnswer.bookings,
@@ -188,6 +238,12 @@ export default function Chatbot() {
 
         const finalMessages = [...updatedMessages, newBotMessage];
         setMessages(finalMessages);
+
+        // Tự động mở modal đặt vé khi có thông tin phim trả về
+        if (botAnswer.movie) {
+          setCurrentFlow({ movie: botAnswer.movie });
+          setBookingModalOpen(true);
+        }
         // ✅ Backend automatically persists messages via /chat endpoint
       } else {
         throw new Error(data.message || 'Lỗi xử lý phản hồi từ chatbot.');
@@ -327,7 +383,7 @@ export default function Chatbot() {
       `}</style>
 
       {/* 🟢 NÚT BẤM FLOATING CHATBOT (GÓC DƯỚI PHẢI) */}
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full bg-gradient-to-tr from-primary to-rose-500 flex items-center justify-center text-white shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 group shadow-primary/20"
       >
@@ -342,7 +398,7 @@ export default function Chatbot() {
       {/* 🟢 CỬA SỔ CHAT GRAPH GLASSMORPHISM */}
       {isOpen && (
         <div className="fixed bottom-24 right-6 z-[9999] w-[92vw] sm:w-[400px] h-[550px] max-h-[80vh] rounded-2xl border border-white/10 bg-black/85 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 animate-in slide-in-from-bottom-6">
-          
+
           {/* Header */}
           <div className="p-4 border-b border-white/10 bg-gradient-to-r from-primary/10 to-rose-500/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -359,8 +415,8 @@ export default function Chatbot() {
                 </span>
               </div>
             </div>
-            
-            <button 
+
+            <button
               onClick={handleClearHistory}
               title="Làm mới lịch sử chat"
               className="text-white/40 hover:text-white text-xs px-2.5 py-1 rounded-lg border border-white/5 hover:bg-white/5 transition-all"
@@ -380,7 +436,7 @@ export default function Chatbot() {
 
               if (typeof msg.text === 'string') {
                 const trimmed = msg.text.trim();
-                
+
                 // Trường hợp tin nhắn là JSON thuần
                 if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
                   try {
@@ -389,9 +445,9 @@ export default function Chatbot() {
                     if (parsed.movies) msgMovies = parsed.movies;
                     if (parsed.showtimes) msgShowtimes = parsed.showtimes;
                     if (parsed.bookings) msgBookings = parsed.bookings;
-                  } catch (e) {}
+                  } catch (e) { }
                 }
-                
+
                 // Trường hợp tin nhắn là JSON bọc trong nhãn markdown ```json
                 if (trimmed.includes('```json')) {
                   try {
@@ -404,22 +460,21 @@ export default function Chatbot() {
                     if (parsed.movies) msgMovies = parsed.movies;
                     if (parsed.showtimes) msgShowtimes = parsed.showtimes;
                     if (parsed.bookings) msgBookings = parsed.bookings;
-                  } catch (e) {}
+                  } catch (e) { }
                 }
               }
 
               return (
-                <div 
-                  key={msg.id} 
+                <div
+                  key={msg.id}
                   className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
                 >
                   {/* Bong bóng tin nhắn */}
-                  <div 
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-line shadow-md ${
-                      msg.sender === 'user' 
-                        ? 'bg-gradient-to-tr from-primary to-rose-500 text-white rounded-tr-none' 
-                        : 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none'
-                    }`}
+                  <div
+                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-line shadow-md ${msg.sender === 'user'
+                      ? 'bg-gradient-to-tr from-primary to-rose-500 text-white rounded-tr-none'
+                      : 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none'
+                      }`}
                   >
                     {formatMessageText(displayContent)}
                   </div>
@@ -428,14 +483,14 @@ export default function Chatbot() {
                   {msgMovies && msgMovies.length > 0 && (
                     <div className="w-full mt-3 overflow-x-auto flex gap-3 pb-2 no-scrollbar">
                       {msgMovies.map((movie) => (
-                        <div 
-                          key={movie.id} 
+                        <div
+                          key={movie.id}
                           className="flex-shrink-0 w-36 rounded-xl bg-white/5 border border-white/10 p-2 text-center flex flex-col justify-between hover:bg-white/10 transition-all duration-300"
                         >
                           {movie.poster ? (
-                            <img 
-                              src={movie.poster} 
-                              alt={movie.title} 
+                            <img
+                              src={movie.poster}
+                              alt={movie.title}
                               className="w-full h-32 object-cover rounded-lg shadow-md"
                             />
                           ) : (
@@ -446,7 +501,7 @@ export default function Chatbot() {
                             <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
                             <span className="text-[10px] text-white/60">{movie.rating || 'N/A'}</span>
                           </div>
-                          <button 
+                          <button
                             onClick={() => {
                               setIsOpen(false);
                               router.push(`/movies`);
@@ -467,10 +522,10 @@ export default function Chatbot() {
                         const startTimeDate = new Date(show.startTime);
                         const timeStr = startTimeDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
                         const dateStr = startTimeDate.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
-                        
+
                         return (
-                          <div 
-                            key={show.id} 
+                          <div
+                            key={show.id}
                             className="w-full bg-white/5 border border-white/10 rounded-xl p-3 flex items-center justify-between hover:bg-white/10 transition-all duration-300"
                           >
                             <div className="space-y-0.5">
@@ -478,7 +533,7 @@ export default function Chatbot() {
                               <p className="text-[10px] text-white/50">{show.theaterName} • {show.screenName}</p>
                               <p className="text-[10px] text-primary font-medium">{show.price}</p>
                             </div>
-                            <button 
+                            <button
                               onClick={() => {
                                 setIsOpen(false);
                                 router.push(`/booking/${show.id}`);
@@ -494,16 +549,48 @@ export default function Chatbot() {
                     </div>
                   )}
 
-                  {/* 🎟️ 3. RENDER VÉ ĐÃ ĐẶT (BOOKINGS) */}
+                  {/* 🎟️ 3. RENDER MỞ BẢNG ĐẶT VÉ (MODAL) */}
+                  {msg.movie && msg.showtimes && msg.showtimes.length > 0 && (
+                    <div className="w-full mt-3">
+                      <button
+                        onClick={() => {
+                          setCurrentFlow({ movie: msg.movie });
+                          setBookingModalOpen(true);
+                        }}
+                        className="w-full py-2.5 rounded-xl bg-gradient-to-tr from-primary to-rose-500 text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                      >
+                        <Ticket className="w-4 h-4" />
+                        Mở Bảng Đặt Vé
+                      </button>
+                    </div>
+                  )}
+
+                  {/* 💳 4. RENDER PAYMENT DATA (NẾU CÓ) */}
+                  {msg.paymentData && (
+                    <div className="w-full mt-3 bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col items-center shadow-lg">
+                      <img src={msg.paymentData.qrImageUrl} alt="Payment QR" className="w-40 h-40 rounded-xl mb-3 shadow-md border border-white/10" />
+                      <p className="text-white font-bold text-sm text-center uppercase tracking-wider">{msg.paymentData.movieTitle}</p>
+                      <p className="text-white/60 text-[10px] mt-1 font-mono uppercase tracking-widest">Mã vé: {msg.paymentData.bookingRef}</p>
+                      <p className="text-primary font-bold mt-1 text-lg">{msg.paymentData.amount.toLocaleString('vi-VN')}đ</p>
+                      <button
+                        onClick={() => window.open(msg.paymentData.checkoutBridgeUrl, '_blank')}
+                        className="mt-3 w-full py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold text-[10px] uppercase tracking-widest transition-all"
+                      >
+                        Mở Cổng Thanh Toán
+                      </button>
+                    </div>
+                  )}
+
+                  {/* 🎟️ 5. RENDER VÉ ĐÃ ĐẶT (BOOKINGS) */}
                   {msgBookings && msgBookings.length > 0 && (
                     <div className="w-full mt-3 space-y-3">
                       {msgBookings.map((booking) => {
                         const bookingDate = new Date(booking.startTime);
                         const isConfirmed = booking.status === 'CONFIRMED';
-                        
+
                         return (
-                          <div 
-                            key={booking.id} 
+                          <div
+                            key={booking.id}
                             className="w-full bg-white/5 border border-white/10 rounded-xl overflow-hidden shadow-lg"
                           >
                             {/* Top part */}
@@ -513,11 +600,10 @@ export default function Chatbot() {
                                 <h4 className="text-white text-xs font-bold line-clamp-1 mt-0.5">{booking.movieTitle}</h4>
                                 <p className="text-[9px] text-white/50 mt-0.5">{booking.theaterName}</p>
                               </div>
-                              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                                isConfirmed 
-                                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
-                                  : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                              }`}>
+                              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${isConfirmed
+                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                                }`}>
                                 {booking.status}
                               </span>
                             </div>
@@ -555,31 +641,31 @@ export default function Chatbot() {
                 </div>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
 
           {/* Quick Suggestions Pills */}
           <div className="flex gap-2 py-2 overflow-x-auto px-4 border-t border-white/5 bg-black/20 no-scrollbar flex-shrink-0">
-            <button 
+            <button
               onClick={() => handleSendMessage('🎬 Phim đang chiếu')}
               className="flex-shrink-0 text-[10px] text-white/70 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-3 py-1 hover:text-white transition-all font-medium"
             >
               🎬 Phim đang chiếu
             </button>
-            <button 
+            <button
               onClick={() => handleSendMessage('📅 Hôm nay có lịch chiếu nào không?')}
               className="flex-shrink-0 text-[10px] text-white/70 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-3 py-1 hover:text-white transition-all font-medium"
             >
               📅 Lịch chiếu hôm nay
             </button>
-            <button 
+            <button
               onClick={() => handleSendMessage('🎟️ Xem vé tôi đã đặt')}
               className="flex-shrink-0 text-[10px] text-white/70 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-3 py-1 hover:text-white transition-all font-medium"
             >
               🎟️ Vé của tôi
             </button>
-            <button 
+            <button
               onClick={() => handleSendMessage('🎁 Có khuyến mãi gì không?')}
               className="flex-shrink-0 text-[10px] text-white/70 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-3 py-1 hover:text-white transition-all font-medium"
             >
@@ -588,28 +674,28 @@ export default function Chatbot() {
           </div>
 
           {/* Ô nhập thông tin chát */}
-          <form 
+          <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSendMessage(inputText);
             }}
             className="p-3 border-t border-white/10 bg-black/40 flex items-center gap-2 flex-shrink-0"
           >
-            <input 
+            <input
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder={
-                loading 
-                  ? 'Trợ lý đang phản hồi...' 
-                  : messages[messages.length - 1]?.isInterrupted 
-                    ? 'Nhập thông tin bổ sung...' 
+                loading
+                  ? 'Trợ lý đang phản hồi...'
+                  : messages[messages.length - 1]?.isInterrupted
+                    ? 'Nhập thông tin bổ sung...'
                     : 'Hỏi lịch chiếu, vé đặt, khuyến mãi...'
               }
               disabled={loading}
               className="flex-1 bg-white/5 border border-white/10 text-white rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-primary/50 placeholder:text-white/30 transition-colors"
             />
-            <button 
+            <button
               type="submit"
               disabled={loading || !inputText.trim()}
               className="bg-gradient-to-tr from-primary to-rose-500 hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:scale-100 rounded-xl p-2.5 text-white shadow-md shadow-primary/20 transition-all flex items-center justify-center flex-shrink-0"
@@ -624,6 +710,25 @@ export default function Chatbot() {
 
         </div>
       )}
+
+      <ChatbotBookingModal
+        open={bookingModalOpen}
+        flow={currentFlow}
+        onClose={() => setBookingModalOpen(false)}
+        onPaymentReady={(payload) => {
+          const botMsgId = 'msg_' + Date.now() + '_bot';
+          const newBotMessage: ChatMessage = {
+            id: botMsgId,
+            sender: 'bot',
+            text: payload.message,
+            paymentData: payload
+          };
+          setMessages(prev => [...prev, newBotMessage]);
+          setBookingModalOpen(false);
+          // Show chat window if it was closed
+          setIsOpen(true);
+        }}
+      />
     </>
   );
 }

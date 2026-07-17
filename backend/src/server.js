@@ -64,7 +64,7 @@ const io = new Server(server, {
 });
 
 initSocket(io);
-app.io = io;
+app.set('io', io);
 initRoutes(app, io);
 
 app.use((err, req, res, next) => {

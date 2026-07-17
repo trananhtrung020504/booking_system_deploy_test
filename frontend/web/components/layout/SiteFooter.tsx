@@ -88,7 +88,7 @@ export default function SiteFooter() {
               Bạn có thể giữ footer này như nơi cắm newsletter, app download, campaign hoặc social proof sau khi backend hoàn thiện hơn.
             </p>
             <Button asChild className="mt-6 h-12 rounded-full bg-white text-black hover:bg-cinema-gold">
-              <Link href="/promotions" className="text-[10px] font-bold uppercase tracking-[0.3em]">
+              <Link href="/promotions" className="text-[11px] font-semibold flex flex-row ">
                 Xem khu khuyến mãi
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

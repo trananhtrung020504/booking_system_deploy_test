@@ -5,10 +5,8 @@ import { uploadLogo } from '../../middleware/handle_multer.js';
 
 const router = express.Router();
 
-// All admin routes require admin role verification
 router.use(verifyAdminRole);
 
-// Theater management
 router.post('/', uploadLogo.single('logo'), adminTheaterController.createTheater);
 router.get('/', adminTheaterController.getAllTheaters);
 router.get('/cities', adminTheaterController.getCities);

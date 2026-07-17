@@ -12,7 +12,6 @@ router.use('/auth', authRoutes);
 router.use('/movies', movieRoutes);
 router.use('/shows', showRoutes);
 
-// Protected routes
 router.use('/bookings', verifyToken, bookingRoutes);
 router.use('/payment', paymentRoutes);
 

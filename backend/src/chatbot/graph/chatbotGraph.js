@@ -6,7 +6,6 @@ import { movieNode, movieDetailNode, movieMissingNameNode } from '../nodes/movie
 import { bookingNode } from '../nodes/bookingNode.js';
 import { showtimeNode, appQuestionNode, unknownNode, humanNode } from '../nodes/systemNode.js';
 
-// Định nghĩa State Graph Annotation (kế thừa lịch sử tin nhắn MessagesAnnotation)
 export const GraphStateAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
   userId: Annotation({
@@ -31,10 +30,8 @@ export const GraphStateAnnotation = Annotation.Root({
   })
 });
 
-// Khởi tạo đồ thị LangGraph
 const graph = new StateGraph(GraphStateAnnotation);
 
-// Đăng ký các Nodes với tùy chọn "ends" chỉ rõ các điểm đến Command.goto tiềm năng để phục vụ việc xác thực biên dịch
 graph.addNode('intent_node', intentRouterNode, {
   ends: [
     'movie_node',
@@ -76,19 +73,15 @@ graph.addNode('app_question_node', appQuestionNode);
 graph.addNode('unknown_node', unknownNode);
 graph.addNode('human_node', humanNode);
 
-// Đăng ký các Edges khởi đầu
 graph.addEdge(START, 'intent_node');
 
-// Sử dụng bộ lưu checkpointer PostgresSaver để lưu giữ trạng thái các phiên hội thoại (thread_id) vĩnh viễn trong PostgreSQL
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL
 });
 const checkpointer = new PostgresSaver(pool);
 
-// Tự động thiết lập cấu trúc bảng checkpointer trong database
 await checkpointer.setup();
 
-// Biên dịch Graph
 export const compiledChatGraph = graph.compile({
   checkpointer
 });

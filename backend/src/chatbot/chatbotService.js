@@ -4,14 +4,6 @@ import { compiledChatGraph } from './graph/chatbotGraph.js';
 import { compactConversationState } from './utils/contextMemory.js';
 
 export const ChatbotService = {
-  /**
-   * Xử lý tin nhắn từ người dùng, điều khiển luồng đi của LangGraph.
-   * @param {Object} params
-   * @param {string} params.question - Câu hỏi của người dùng
-   * @param {string} params.threadId - Định danh phiên hội thoại (Thread ID)
-   * @param {string} [params.userId] - ID người dùng đã đăng nhập (nếu có)
-   * @returns {Promise<Object>} Phản hồi chuẩn hóa cho Frontend
-   */
   async handleChatInput({ question, threadId, userId = '' }) {
     if (!question || question.trim() === '') {
       return { success: false, message: 'Câu hỏi không được để trống.' };
@@ -24,7 +16,6 @@ export const ChatbotService = {
     console.log(`[ChatbotService] Processing: threadId="${threadId}", userId="${userId}", question="${question}"`);
 
     try {
-      // 1. Kiểm tra trạng thái hiện tại của Thread xem có bị tạm dừng (interrupt) không
       const currentState = await compiledChatGraph.getState(config);
       const currentValues = currentState.values || {};
       const interruptedNodes = currentState.next || [];
@@ -37,11 +28,9 @@ export const ChatbotService = {
 
       let result;
 
-      // 2. Chạy hoặc Resume Graph
       if (isInterrupted) {
         console.log(`[ChatbotService] Resuming graph from interrupted node: "${interruptedNodes[0]}"`);
         
-        // Resume graph bằng Command resume truyền dữ liệu người dùng bổ sung vào
         result = await compiledChatGraph.invoke(
           new Command({
             resume: question,
@@ -56,7 +45,6 @@ export const ChatbotService = {
       } else {
         console.log('[ChatbotService] Invoking fresh graph run');
         
-        // Chạy graph mới từ đầu
         result = await compiledChatGraph.invoke(
           {
             messages: [new HumanMessage({ content: question })],
@@ -70,7 +58,6 @@ export const ChatbotService = {
         );
       }
 
-      // 3. Kiểm tra xem Graph sau khi chạy có sinh ra một interrupt mới không
       const newState = await compiledChatGraph.getState(config);
       const newInterruptedNodes = newState.next || [];
       const isNewInterrupted = newInterruptedNodes.length > 0;
@@ -78,7 +65,6 @@ export const ChatbotService = {
       if (isNewInterrupted) {
         console.log(`[ChatbotService] Graph has been interrupted at node: "${newInterruptedNodes[0]}"`);
 
-        // Lấy giá trị truyền vào trong hàm interrupt()
         let interruptValue = null;
         if (newState.tasks && newState.tasks.length > 0) {
           for (const t of newState.tasks) {
@@ -112,7 +98,6 @@ export const ChatbotService = {
         };
       }
 
-      // 4. Graph đã chạy xong bình thường -> lấy tin nhắn AIMessage cuối cùng
       const messages = result.messages || newState.values.messages || [];
       if (messages.length === 0) {
         throw new Error('Graph execution returned no messages.');
@@ -125,7 +110,6 @@ export const ChatbotService = {
       try {
         parsedAnswer = JSON.parse(rawContent);
       } catch (e) {
-        // Trường hợp khẩn cấp nếu AI trả về chuỗi text thuần túy
         parsedAnswer = {
           type: result.intent || 'unknown',
           message: rawContent

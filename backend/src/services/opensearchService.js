@@ -157,7 +157,6 @@ export async function resetIndices() {
             console.log(`OpenSearch Đã xóa index "${USERS_INDEX}"`);
         }
 
-        // Tạo lại indexes
         await createIndices();
         console.log('OpenSearch Đã reset và tạo lại indexes');
     } catch (error) {

@@ -2,10 +2,6 @@ import prisma from '../../config/database.js';
 import { uploadToR2, deleteFromR2 } from '../../config/cloudflareR2.js';
 import { format } from 'date-fns';
 
-/**
- * Admin: Create Movie
- * Can upload poster via form data
- */
 export const createMovie = async (req, res) => {
     try {
         const {
@@ -21,14 +17,12 @@ export const createMovie = async (req, res) => {
             isActive
         } = req.body;
 
-        // Validate required fields
         if (!title || !description || !duration || !releaseDate) {
             return res.status(400).json({
                 message: "title, description, duration, and releaseDate are required"
             });
         }
 
-        // CHECK: Unique title
         const existingMovie = await prisma.movie.findFirst({
             where: { title: { equals: title, mode: 'insensitive' } }
         });
@@ -39,7 +33,6 @@ export const createMovie = async (req, res) => {
             });
         }
 
-        // Parse array fields helper
         const parseArray = (field) => {
             if (Array.isArray(field)) return field;
             if (typeof field === 'string') {
@@ -73,7 +66,6 @@ export const createMovie = async (req, res) => {
             include: { poster: true }
         });
 
-        // Upload poster if file provided
         if (req.file) {
             try {
                 const posterKey = `movies/posters/${movie.id}-${Date.now()}`;
@@ -93,7 +85,6 @@ export const createMovie = async (req, res) => {
             } catch (err) {
         console.error(`[Controller Error] [web/adminMovieController.js]:`, err);
                 console.error("Error uploading poster:", err);
-                // Continue without poster rather than fail
             }
         }
 
@@ -107,9 +98,6 @@ export const createMovie = async (req, res) => {
     }
 };
 
-/**
- * Admin: Get single movie by ID
- */
 export const getMovieById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -129,9 +117,6 @@ export const getMovieById = async (req, res) => {
     }
 };
 
-/**
- * Admin: Get all movies (including inactive)
- */
 export const getAllMovies = async (req, res) => {
     try {
         const { page = 1, limit = 20, isActive, search } = req.query;
@@ -179,19 +164,14 @@ export const getAllMovies = async (req, res) => {
     }
 };
 
-/**
- * Admin: Update Movie
- */
 export const updateMovie = async (req, res) => {
     try {
         const { id } = req.params;
         const updates = req.body;
 
-        // Prevent direct role/id changes
         delete updates.id;
         delete updates.role;
 
-        // Parse array fields helper
         const parseArray = (field) => {
             if (Array.isArray(field)) return field;
             if (typeof field === 'string') {
@@ -215,7 +195,6 @@ export const updateMovie = async (req, res) => {
         if (updates.releaseDate) {
             const newReleaseDate = new Date(updates.releaseDate);
             
-            // CHECK: Are there any existing shows before this new release date?
             const earliestShow = await prisma.show.findFirst({
                 where: { movieId: id },
                 orderBy: { startTime: 'asc' }
@@ -233,7 +212,6 @@ export const updateMovie = async (req, res) => {
             updates.isActive = String(updates.isActive) === 'true';
         }
 
-        // CHECK: Unique title (excluding current movie)
         if (updates.title) {
             const existingTitle = await prisma.movie.findFirst({
                 where: { 
@@ -255,14 +233,12 @@ export const updateMovie = async (req, res) => {
             include: { poster: true }
         });
 
-        // Upload new poster if provided
         if (req.file) {
             try {
                 const oldPoster = await prisma.moviePoster.findUnique({
                     where: { movieId: id }
                 });
 
-                // Delete old poster
                 if (oldPoster) {
                     await deleteFromR2(oldPoster.publicId);
                     await prisma.moviePoster.delete({
@@ -270,7 +246,6 @@ export const updateMovie = async (req, res) => {
                     });
                 }
 
-                // Upload new poster
                 const posterKey = `movies/posters/${movie.id}-${Date.now()}`;
                 const result = await uploadToR2(posterKey, req.file.buffer, req.file.mimetype);
 
@@ -301,9 +276,6 @@ export const updateMovie = async (req, res) => {
     }
 };
 
-/**
- * Admin: Soft delete Movie (set isActive to false)
- */
 export const deleteMovie = async (req, res) => {
     try {
         const { id } = req.params;
@@ -323,14 +295,10 @@ export const deleteMovie = async (req, res) => {
     }
 };
 
-/**
- * Admin: Permanently delete Movie
- */
 export const hardDeleteMovie = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Delete poster
         const poster = await prisma.moviePoster.findUnique({
             where: { movieId: id }
         });
@@ -342,7 +310,6 @@ export const hardDeleteMovie = async (req, res) => {
             });
         }
 
-        // Delete movie (related shows, bookings cascade)
         const movie = await prisma.movie.delete({
             where: { id }
         });
@@ -357,9 +324,6 @@ export const hardDeleteMovie = async (req, res) => {
     }
 };
 
-/**
- * Admin: Get movie details with analytics
- */
 export const getMovieAnalytics = async (req, res) => {
     try {
         const { id } = req.params;
@@ -383,7 +347,6 @@ export const getMovieAnalytics = async (req, res) => {
             return res.status(404).json({ message: "Movie not found" });
         }
 
-        // Calculate analytics
         const totalShows = movie.shows.length;
         const totalBookings = movie.shows.reduce((acc, show) => acc + show.bookings.length, 0);
         const totalRevenue = movie.shows.reduce((acc, show) => {

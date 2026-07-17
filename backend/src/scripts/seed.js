@@ -223,7 +223,6 @@ async function main() {
         const nowShowing = movies.filter(m => m.releaseDate < now);
 
         for (const m of nowShowing) {
-            // Tạo suất chiếu cho 400 ngày tới
             for (let i = 0; i < 400; i++) {
                 const date = new Date();
                 date.setDate(now.getDate() + i);
@@ -234,7 +233,6 @@ async function main() {
                     const startTime = new Date(date);
                     startTime.setHours(hours, minutes, 0, 0);
 
-                    // Chỉ tạo nếu suất chiếu ở tương lai
                     if (startTime > now) {
                         const endTime = new Date(startTime.getTime() + m.duration * 60000);
                         await prisma.show.create({

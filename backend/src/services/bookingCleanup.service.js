@@ -29,7 +29,6 @@ export const initBookingCleanupWorker = (io) => {
                     console.log(`📢 [Booking Cleanup] Emitting seat update for show ${booking.showId} (cancelled booking ${booking.id})`);
                     await emitShowUpdate(io, booking.showId);
                     
-                    // Also notify the user directly via personal room
                     io.to(`user:${booking.userId}`).emit('global:notification', {
                         message: `Đơn hàng ${booking.bookingRef} đã hết hạn thanh toán. Ghế được giải phóng.`,
                         type: 'warning',

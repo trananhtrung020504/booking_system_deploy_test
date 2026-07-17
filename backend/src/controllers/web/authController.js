@@ -8,10 +8,6 @@ import { ENV_VARS } from '../../config/env_vars.js';
 const getCookieOptions = (maxAge = null) => {
     const isProd = ENV_VARS.NODE_ENV === 'production';
     const cookieDomain = ENV_VARS.COOKIE_DOMAIN;
-    // Cấu hình cookie tối ưu cho cả production (custom domain & default domain) và development (localhost):
-    // - Nếu có custom domain chung (cookieDomain): dùng 'Lax' để bảo mật và tránh bị trình duyệt chặn ở tab ẩn danh.
-    // - Nếu ở Production nhưng khác domain (Vercel & Render mặc định): dùng 'None' và 'secure' để truyền cookie chéo trang.
-    // - Nếu ở local development (localhost): dùng 'Lax' để chạy bình thường.
     return {
         ...(maxAge && { maxAge }),
         httpOnly: true,
@@ -58,7 +54,6 @@ export const signup = async (req, res) => {
             return res.status(400).json({ message: "Mã xác thực OTP là bắt buộc để đăng ký tài khoản" });
         }
 
-        // Verify OTP signature
         const [hashedOTP, expires] = hash.split('.');
         if (Date.now() > Number(expires)) {
             return res.status(400).json({ message: "Mã OTP đã hết hạn, vui lòng gửi lại mã mới" });
@@ -95,7 +90,6 @@ export const sendOtp = async (req, res) => {
         if (!email) {
             return res.status(400).json({ message: "Email is required" });
         }
-        // Check if email already registered
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
             return res.status(400).json({ message: "Email đã được đăng ký trên hệ thống, vui lòng đăng nhập" });

@@ -8,7 +8,6 @@ export const getAllVouchers = async (req, res) => {
             }
         });
 
-        // Auto-seed some vouchers if database is empty so there's always real data
         if (vouchers.length === 0) {
             console.log('Seeding initial vouchers into database...');
             const seedVouchers = [

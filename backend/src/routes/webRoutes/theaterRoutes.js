@@ -3,7 +3,6 @@ import * as adminTheaterController from '../../controllers/web/adminTheaterContr
 
 const router = express.Router();
 
-// Expose public endpoints to list theaters and cities
 router.get('/', adminTheaterController.getAllTheaters);
 router.get('/cities', adminTheaterController.getCities);
 

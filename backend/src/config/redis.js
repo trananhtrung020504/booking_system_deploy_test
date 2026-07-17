@@ -19,8 +19,6 @@ if (ENV_VARS.REDIS_URL) {
         retryStrategy: (times) => Math.min(times * 50, 2000)
     };
 
-    // Nếu host thuộc Upstash (chứa upstash.io) hoặc cổng TLS tiêu chuẩn của Redis (6379, 6380 nhưng trên cloud cần TLS)
-    // Hoặc nếu bạn muốn kích hoạt TLS thủ công trên môi trường production
     if (ENV_VARS.REDIS_HOST && (ENV_VARS.REDIS_HOST.includes('upstash.io') || ENV_VARS.REDIS_HOST.includes('redislabs.com'))) {
         redisOptions.tls = {};
     }

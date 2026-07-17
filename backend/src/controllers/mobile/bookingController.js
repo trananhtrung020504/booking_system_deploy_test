@@ -7,7 +7,6 @@ export const createBooking = async (req, res) => {
 
     try {
         const result = await prisma.$transaction(async (tx) => {
-            // 1. Check if seats are already booked
             const existingBookings = await tx.booking.findMany({
                 where: {
                     showId,
@@ -20,7 +19,6 @@ export const createBooking = async (req, res) => {
                 throw new Error("One or more seats are already booked");
             }
 
-            // 2. Create Booking
             const bookingRef = `BKS-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
             const booking = await tx.booking.create({
                 data: {

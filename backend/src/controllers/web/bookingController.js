@@ -48,7 +48,6 @@ export const createBooking = async (req, res) => {
             }
         }
 
-        // Auto-secure Redis hold lock for 10 minutes to protect these seats during payment
         const expiresAt = Date.now() + 600 * 1000;
         const holdValue = JSON.stringify({ userId, expiresAt });
         for (const seatId of seatIds) {
@@ -214,17 +213,14 @@ export const checkAndExpireBookings = async (userId, io) => {
                 expiredBookingIds.push(booking.id);
                 showsToUpdate.add(booking.showId);
 
-                // Release seats held in Redis
                 for (const seat of booking.seats) {
                     await redis.del(`hold:${booking.showId}:${seat.id}`);
                 }
                 
-                // Release seatHold in DB
                 await prisma.seatHold.deleteMany({
                     where: { showId: booking.showId, userId }
                 });
 
-                // Update booking status to EXPIRED
                 await prisma.$transaction(async (tx) => {
                     const expiredBooking = await tx.booking.update({
                         where: { id: booking.id },
@@ -339,7 +335,6 @@ export const cancelBooking = async (req, res) => {
             await prisma.voucher.update({ where: { id: booking.voucherId }, data: { usedCount: { decrement: 1 } } });
         }
 
-        // Clean up pending transactions
         if (booking.paymentId) {
             await prisma.transaction.updateMany({
                 where: { transactionCode: booking.paymentId, status: 'PENDING' },
@@ -347,7 +342,6 @@ export const cancelBooking = async (req, res) => {
             });
         }
 
-        // Clean up Redis holds and payment links
         for (const seat of booking.seats) await redis.del(`hold:${booking.showId}:${seat.id}`);
         await prisma.seatHold.deleteMany({ where: { showId: booking.showId, userId: req.user.id } });
         
@@ -384,7 +378,6 @@ export const holdSeats = async (req, res) => {
         const expiresAt = Date.now() + 600 * 1000; // 10 minutes (matching payment page 600s)
         const holdValue = JSON.stringify({ userId, expiresAt });
 
-        // 1. Check if seats are already booked
         const bookings = await prisma.booking.findMany({
             where: {
                 showId,
@@ -397,7 +390,6 @@ export const holdSeats = async (req, res) => {
             return res.status(400).json({ message: "Một hoặc nhiều ghế đã được đặt hoặc đang chờ thanh toán." });
         }
 
-        // 2. Try holding in Redis (allowing same-user renewal)
         const holdResults = [];
         for (const seatId of seatIds) {
             const key = `hold:${showId}:${seatId}`;
@@ -427,7 +419,6 @@ export const holdSeats = async (req, res) => {
 
         const failed = holdResults.filter(r => !r.success);
         if (failed.length > 0) {
-            // Revert any successful Redis holds (only if they weren't already held by us to avoid deleting our own valid holds)
             for (const r of holdResults) {
                 if (r.success) {
                     const existing = await redis.get(`hold:${showId}:${r.seatId}`);
@@ -446,7 +437,6 @@ export const holdSeats = async (req, res) => {
             return res.status(400).json({ message: "Một hoặc nhiều ghế đang có người giữ." });
         }
 
-        // 3. Update database SeatHold
         try {
             await prisma.seatHold.deleteMany({ where: { showId, userId } });
             await prisma.seatHold.create({
@@ -458,14 +448,11 @@ export const holdSeats = async (req, res) => {
                 }
             });
         } catch (dbError) {
-            // Ignore unique constraint violation (P2002) from concurrent requests 
-            // since it means the hold has already been successfully created.
             if (dbError.code !== 'P2002') {
                 throw dbError;
             }
         }
 
-        // 4. Emit show seats update via Socket
         const io = req.app.get('io');
         if (io) {
             await emitShowUpdate(io, showId);

@@ -122,7 +122,6 @@ const initSocket = (io) => {
             socket.leave(`show:${showId}`);
             socket.currentShowId = null;
 
-            // Release holds and selecting state for this user and show when they leave the seat selection page
             try {
                 if (showId && userId) {
                     await redis.del(`selecting:${showId}:${userId}`);
@@ -165,7 +164,6 @@ const initSocket = (io) => {
                     if (bookedSet.has(id)) return callback?.({ success: false, message: 'Một hoặc nhiều ghế đã được đặt' });
                 }
 
-                // Try holding in Redis (allowing same-user renewal)
                 const holdResults = [];
                 for (const seatId of seatIds) {
                     const key = `hold:${showId}:${seatId}`;
@@ -213,7 +211,6 @@ const initSocket = (io) => {
                     return callback?.({ success: false, message: "Một hoặc nhiều ghế đã có người giữ" });
                 }
 
-                // Update database SeatHold
                 try {
                     await prisma.seatHold.deleteMany({
                         where: { showId, userId }
@@ -229,8 +226,6 @@ const initSocket = (io) => {
                         }
                     });
                 } catch (dbError) {
-                    // Ignore unique constraint violation (P2002) from concurrent requests 
-                    // since it means the hold has already been successfully created.
                     if (dbError.code !== 'P2002') {
                         throw dbError;
                     }
@@ -282,10 +277,8 @@ const initSocket = (io) => {
             const showId = socket.currentShowId;
             userSocketMap.delete(userId);
 
-            // Release all active holds and selecting state for this user when they disconnect
             try {
                 if (userId) {
-                    // Clean selecting seats
                     try {
                         const pattern = `selecting:*:${userId}`;
                         const keys = await redis.keys(pattern);

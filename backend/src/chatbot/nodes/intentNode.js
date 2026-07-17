@@ -53,7 +53,6 @@ export async function intentRouterNode(state) {
     console.log(`[Node: intent_router] Analyzing message: "${lastMessage.substring(0, 60)}"`);
     const conversationContext = buildConversationContext(state);
 
-    // Lấy danh sách phim đang hoạt động động từ DB để làm bộ đối chiếu chính xác cho LLM
     const activeMovies = await prisma.movie.findMany({
       where: { isActive: true },
       select: { title: true }

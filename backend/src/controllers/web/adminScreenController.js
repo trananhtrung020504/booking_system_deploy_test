@@ -1,10 +1,6 @@
 import { createScreenWithSeats, getScreenDetails } from '../../services/screen.service.js';
 import prisma from '../../config/database.js';
 
-/**
- * Admin: Create Screen for a Theater
- * (This will automatically generate seats)
- */
 export const createScreen = async (req, res) => {
     try {
         const { name, theaterId, rows, cols } = req.body;
@@ -15,7 +11,6 @@ export const createScreen = async (req, res) => {
             });
         }
 
-        // Kiểm tra rạp có tồn tại không
         const theater = await prisma.theater.findUnique({
             where: { id: theaterId }
         });
@@ -41,9 +36,6 @@ export const createScreen = async (req, res) => {
     }
 };
 
-/**
- * Admin: Get all screens for a theater
- */
 export const getTheaterScreens = async (req, res) => {
     try {
         const { theaterId } = req.params;
@@ -64,9 +56,6 @@ export const getTheaterScreens = async (req, res) => {
     }
 };
 
-/**
- * Admin: Get screen detail with seat map
- */
 export const getScreenById = async (req, res) => {
     try {
         const { id } = req.params;

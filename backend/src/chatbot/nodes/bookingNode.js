@@ -276,7 +276,6 @@ export async function bookingNode(state) {
       });
     }
 
-    // ── Xử lý INTENT: BOOKINGS (Tra cứu vé đặt của người dùng) ────────────────
     if (intent === 'bookings') {
       if (!userId || userId.trim() === '') {
         const response = {
@@ -291,7 +290,6 @@ export async function bookingNode(state) {
         });
       }
 
-      // Lấy danh sách bookings từ Database
       const bookings = await prisma.booking.findMany({
         where: {
           userId: userId
@@ -353,7 +351,6 @@ export async function bookingNode(state) {
       });
     }
 
-    // ── Xử lý INTENT: VOUCHERS (Tìm khuyến mãi & mã giảm giá) ─────────────────
     if (intent === 'vouchers') {
       const activeVouchers = await prisma.voucher.findMany({
         where: {
@@ -401,7 +398,6 @@ export async function bookingNode(state) {
       });
     }
 
-    // Trình trạng dự phòng nếu không khớp intent nào trong node này
     const fallbackResponse = {
       type: 'unknown',
       message: 'Xin lỗi, mình chưa tìm thấy thông tin bạn yêu cầu.'

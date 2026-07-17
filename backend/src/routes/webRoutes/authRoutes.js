@@ -11,7 +11,6 @@ router.post('/send-otp', authLimiter, authController.sendOtp);
 router.post('/refresh-token', authController.refreshToken);
 router.get('/refresh-token', authController.refreshToken);
 
-// Protected
 router.get('/me', verifyToken, authController.getMe);
 router.post('/logout', verifyToken, authController.logout);
 

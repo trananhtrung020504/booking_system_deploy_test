@@ -29,7 +29,6 @@ async function main() {
       startTime: s.startTime.toISOString()
     })));
 
-    // Try a search for "Mai"
     const searchResult = await prisma.show.findMany({
       where: {
         startTime: { gt: now },

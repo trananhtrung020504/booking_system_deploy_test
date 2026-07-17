@@ -35,7 +35,6 @@ export const createCombo = async (req, res) => {
 
         let imageUrl = null;
         
-        // Handle file upload to R2
         if (req.file) {
             const key = `combos/${Date.now()}-${Math.round(Math.random() * 1E9)}`;
             const result = await uploadToR2(key, req.file.buffer, req.file.mimetype);
@@ -76,9 +75,7 @@ export const updateCombo = async (req, res) => {
 
         let imageUrl = existingCombo.image;
 
-        // Handle image replacement
         if (req.file) {
-            // Delete old R2 image if it exists
             const oldKey = getR2KeyFromUrl(existingCombo.image);
             if (oldKey) {
                 try {
@@ -136,7 +133,6 @@ export const deleteCombo = async (req, res) => {
             return res.status(404).json({ message: "Combo not found" });
         }
 
-        // Delete old R2 image if it exists
         const oldKey = getR2KeyFromUrl(existingCombo.image);
         if (oldKey) {
             try {

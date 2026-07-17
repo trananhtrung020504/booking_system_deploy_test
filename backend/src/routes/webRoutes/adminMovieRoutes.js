@@ -5,10 +5,8 @@ import { uploadPoster } from '../../middleware/handle_multer.js';
 
 const router = express.Router();
 
-// All admin routes require admin role verification
 router.use(verifyAdminRole);
 
-// Movie management
 router.post('/', uploadPoster.single('poster'), adminMovieController.createMovie);
 router.get('/', adminMovieController.getAllMovies);
 router.get('/:id', adminMovieController.getMovieById);

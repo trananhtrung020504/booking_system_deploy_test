@@ -6,7 +6,6 @@ import prisma from '../../config/database.js';
 import { TextResponseSchema, IntentResultSchema } from '../schema/zodSchemas.js';
 import { buildConversationContext } from '../utils/contextMemory.js';
 
-// ── SCHEMAS TRÍCH XUẤT THAM SỐ (TỐI ƯU HÓA TOKEN) ──────────────────────────
 const MovieParamsSchema = z.object({
   keyword: z.string().describe('Từ khóa tên phim người dùng nhắc tới. Trả về chuỗi rỗng "" nếu không nhắc tới.'),
   genre: z.string().describe('Thể loại phim (Hành động, Tình cảm, Hoạt hình, Kinh dị...). Trả về chuỗi rỗng "" nếu không nhắc tới.'),
@@ -22,14 +21,12 @@ const detailParamLLM = llm.withStructuredOutput(MovieDetailParamSchema);
 const structuredTextLLM = llm.withStructuredOutput(TextResponseSchema);
 const intentLLM = llm.withStructuredOutput(IntentResultSchema);
 
-// 1. Node truy vấn danh sách phim (Code-Formatted)
 export async function movieNode(state) {
   try {
     const userText = state.messages[state.messages.length - 1].content;
     const conversationContext = buildConversationContext(state);
     console.log(`[Node: movie_node] Extracting search parameters for: "${userText}"`);
 
-    // Bước 1: LLM chỉ trích xuất tham số tìm kiếm (Cực ít token)
     const params = await movieParamsLLM.invoke([
       new SystemMessage({ content: `Bạn là trợ lý trích xuất bộ lọc phim. Hãy phân tích câu hỏi và điền các thuộc tính lọc phù hợp.
 
@@ -42,7 +39,6 @@ Nếu người dùng dùng cách nói tham chiếu như "phim này", "phim đó"
 
     console.log(`[Node: movie_node] Extracted Params:`, params);
 
-    // Bước 2: Tự code truy vấn Database qua Prisma (Chính xác 100%, 0 hao token)
     const where = { isActive: true };
     
     if (params.keyword && params.keyword.trim() !== '') {
@@ -82,7 +78,6 @@ Nếu người dùng dùng cách nói tham chiếu như "phim này", "phim đó"
       }
     });
 
-    // Bước 3: Tự code format JSON đầu ra (100% chuẩn, không bị nhét block markdown)
     const response = {
       type: 'movies',
       message: movies.length > 0 
@@ -113,14 +108,12 @@ Nếu người dùng dùng cách nói tham chiếu như "phim này", "phim đó"
   }
 }
 
-// 2. Node truy vấn chi tiết phim và suất chiếu (Code-Formatted)
 export async function movieDetailNode(state) {
   try {
     const userText = state.messages[state.messages.length - 1].content;
     const conversationContext = buildConversationContext(state);
     console.log(`[Node: movie_detail_node] Extracting movie title for detail lookup: "${userText}"`);
 
-    // Lấy danh sách phim đang hoạt động động từ DB để làm bộ đối chiếu chính xác cho LLM
     const activeMovies = await prisma.movie.findMany({
       where: { isActive: true },
       select: { title: true }
@@ -138,7 +131,6 @@ Nhiệm vụ của bạn:
 - Hãy tìm xem người dùng nhắc tới tên phim nào (hoặc viết gần giống/không dấu) khớp với một phim trong danh sách trên.
 - Trả về chính xác tên đầy đủ của bộ phim đó từ danh sách trên (ví dụ: nếu họ ghi "nhà bà nữ" -> trả về "Nhà Bà Nữ").`;
 
-    // Bước 1: LLM trích xuất tên phim
     const params = await detailParamLLM.invoke([
       new SystemMessage({ content: detailSystemPrompt }),
       new HumanMessage({ content: userText })
@@ -146,7 +138,6 @@ Nhiệm vụ của bạn:
 
     console.log(`[Node: movie_detail_node] Looked up title: "${params.movieTitle}"`);
 
-    // Bước 2: Tự code tìm kiếm tương đối trong Database
     const movie = await prisma.movie.findFirst({
       where: {
         title: {
@@ -189,7 +180,6 @@ Nhiệm vụ của bạn:
       });
     }
 
-    // Bước 3: Định dạng các suất chiếu sắp diễn ra
     const showtimes = movie.shows.map(s => {
       let priceRange = '95.000đ';
       if (s.priceMap && typeof s.priceMap === 'object') {
@@ -214,7 +204,6 @@ Nhiệm vụ của bạn:
       };
     });
 
-    // Trả về type "showtimes" kèm mảng showtimes để frontend vẽ luôn Time Chips đặt vé cực xịn!
     const response = {
       type: 'showtimes',
       message: `🎬 **Thông tin phim ${movie.title}**:\n- *Thể loại:* ${movie.genre.join(', ')}\n- *Thời lượng:* ${movie.duration} phút\n- *Độ tuổi:* ${movie.certification}\n\nDưới đây là danh sách các suất chiếu sắp diễn ra. Bạn có thể bấm chọn suất chiếu để tiến hành đặt vé ngay nhé:`,
@@ -234,7 +223,6 @@ Nhiệm vụ của bạn:
   }
 }
 
-// 3. Node thiếu tên phim → interrupt chờ người dùng nhập bổ sung
 export async function movieMissingNameNode(state) {
   try {
     const conversationContext = buildConversationContext(state);
@@ -243,11 +231,9 @@ export async function movieMissingNameNode(state) {
       message: 'Bạn muốn tìm hiểu thông tin hay lịch chiếu của bộ phim nào ạ? Hãy cho mình biết tên phim nhé! (Ví dụ: phim Mai, Mắt Biếc, Skyfall...)'
     };
 
-    // Gọi interrupt() để tạm dừng graph và gửi yêu cầu cho client
     const userInput = interrupt(JSON.stringify(askResponse));
     console.log(`[Node: movie_missing_name] Graph resumed with input: "${userInput}"`);
 
-    // Dùng LLM trích xuất tên phim từ câu trả lời mới
     const extractPrompt = `
     Bạn là trợ lý lọc thông tin. Hãy kiểm tra xem câu trả lời của người dùng có chứa tên phim nào không.
     Ngữ cảnh hội thoại:
@@ -266,7 +252,6 @@ export async function movieMissingNameNode(state) {
 
     if (extractResult.type === 'movie_detail_missing_field' && extractResult.message.trim().length > 0) {
       console.log(`[Node: movie_missing_name] Extracted Movie Name: "${extractResult.message}"`);
-      // Đi thẳng tới movie_detail_node với câu hỏi chứa tên phim rõ ràng
       return new Command({
         goto: 'movie_detail_node',
         update: {
@@ -277,7 +262,6 @@ export async function movieMissingNameNode(state) {
       });
     }
 
-    // Nếu vẫn không cung cấp tên phim, tiến hành phân loại lại intent dựa trên nội dung mới
     const INTENT_SYSTEM_SHORT = `
     Phân loại câu hỏi của người dùng vào 1 trong các ý định: 
     'movies', 'movie_detail', 'movie_detail_missing_field', 'book_movie', 'book_movie_missing_field', 'showtimes', 'vouchers', 'bookings', 'app_question', 'human_intervention', 'unknown'.

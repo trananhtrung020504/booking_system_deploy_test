@@ -2,10 +2,6 @@ import jwt from 'jsonwebtoken';
 import { ENV_VARS } from '../../config/env_vars.js';
 import prisma from '../../config/database.js';
 
-/**
- * Middleware to verify admin role
- * Must be used after verifyToken middleware
- */
 export const verifyAdminRole = async (req, res, next) => {
     try {
         if (!req.user) {

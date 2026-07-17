@@ -9,7 +9,6 @@ const router = express.Router();
 router.get('/', movieController.getMovies);
 router.get('/:id', movieController.getMovie);
 
-// Admin only (assuming verifyToken for now)
 router.post(
     '/',
     verifyToken,

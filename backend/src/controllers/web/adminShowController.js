@@ -1,8 +1,5 @@
 import prisma from '../../config/database.js';
 
-/**
- * Admin: Create Show
- */
 export const createShow = async (req, res) => {
     try {
         const {
@@ -22,7 +19,6 @@ export const createShow = async (req, res) => {
             });
         }
 
-        // Verify movie, theater and screen exist
         const [movie, theater, screen] = await Promise.all([
             prisma.movie.findUnique({ where: { id: movieId } }),
             prisma.theater.findUnique({ where: { id: theaterId } }),
@@ -41,22 +37,18 @@ export const createShow = async (req, res) => {
             });
         }
 
-        // VALIDATION: Start time must be after release date
         const start = new Date(startTime);
         const releaseDate = new Date(movie.releaseDate);
         
-        // Reset hours for release date comparison if needed, or just compare absolute time
         if (start < releaseDate) {
             return res.status(400).json({
                 message: `Suất chiếu không thể diễn ra trước ngày phát hành của phim (${movie.releaseDate.toLocaleDateString('vi-VN')})`
             });
         }
 
-        // AUTO-CALCULATE: End time based on movie duration
         const durationMinutes = movie.duration || 120;
         const end = new Date(start.getTime() + durationMinutes * 60000);
 
-        // Default price map if not provided
         let parsedPriceMap = priceMap;
         if (typeof priceMap === 'string') {
             parsedPriceMap = JSON.parse(priceMap);
@@ -98,9 +90,6 @@ export const createShow = async (req, res) => {
     }
 };
 
-/**
- * Admin: Get all shows
- */
 export const getAllShows = async (req, res) => {
     try {
         const { page = 1, limit = 20, movieId, theaterId, status, dateFrom, dateTo } = req.query;
@@ -165,9 +154,6 @@ export const getAllShows = async (req, res) => {
     }
 };
 
-/**
- * Admin: Get single show by ID
- */
 export const getShowById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -190,9 +176,6 @@ export const getShowById = async (req, res) => {
     }
 };
 
-/**
- * Admin: Update Show
- */
 export const updateShow = async (req, res) => {
     try {
         const { id } = req.params;
@@ -222,9 +205,6 @@ export const updateShow = async (req, res) => {
     }
 };
 
-/**
- * Admin: Delete Show (soft delete)
- */
 export const deleteShow = async (req, res) => {
     try {
         const { id } = req.params;
@@ -244,9 +224,6 @@ export const deleteShow = async (req, res) => {
     }
 };
 
-/**
- * Admin: Hard delete show
- */
 export const hardDeleteShow = async (req, res) => {
     try {
         const { id } = req.params;
@@ -265,9 +242,6 @@ export const hardDeleteShow = async (req, res) => {
     }
 };
 
-/**
- * Admin: Get show details with seat analytics
- */
 export const getShowAnalytics = async (req, res) => {
     try {
         const { id } = req.params;
@@ -288,7 +262,6 @@ export const getShowAnalytics = async (req, res) => {
             return res.status(404).json({ message: "Show not found" });
         }
 
-        // Fetch all seats in this screen
         const allSeats = await prisma.seat.findMany({
             where: { screenId: show.screenId }
         });
@@ -297,8 +270,6 @@ export const getShowAnalytics = async (req, res) => {
         const activeSeats = allSeats.filter(s => s.isActive).length;
         const unavailableSeats = totalSeats - activeSeats;
 
-        // Get seat IDs from bookings and holds
-        // Note: seats is now a relation, so we need to count them
         const bookedSeatsCount = show.bookings.reduce((acc, b) => acc + b.seats.length, 0);
         const heldSeatsCount = show.seatHolds.reduce((acc, h) => acc + h.seats.length, 0);
         
@@ -333,9 +304,6 @@ export const getShowAnalytics = async (req, res) => {
     }
 };
 
-/**
- * Admin: Get available seats status for a show
- */
 export const getShowSeatsStatus = async (req, res) => {
     try {
         const { id } = req.params;
@@ -355,13 +323,11 @@ export const getShowSeatsStatus = async (req, res) => {
             return res.status(404).json({ message: "Show not found" });
         }
 
-        // Fetch all seats for this screen
         const screenSeats = await prisma.seat.findMany({
             where: { screenId: show.screenId },
             orderBy: [{ row: 'asc' }, { column: 'asc' }]
         });
 
-        // Map status
         const bookedSeatIds = new Set(show.bookings.flatMap(b => b.seats.map(s => s.id)));
         const heldSeatIds = new Set(show.seatHolds.flatMap(h => h.seats.map(s => s.id)));
 

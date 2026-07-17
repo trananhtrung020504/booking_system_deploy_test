@@ -4,10 +4,8 @@ import { verifyAdminRole } from '../../middleware/web/adminAuth.js';
 
 const router = express.Router();
 
-// All admin routes require admin role verification
 router.use(verifyAdminRole);
 
-// Show management
 router.post('/', adminShowController.createShow);
 router.get('/', adminShowController.getAllShows);
 router.get('/:id', adminShowController.getShowById);

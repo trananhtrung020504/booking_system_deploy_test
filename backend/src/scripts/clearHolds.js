@@ -5,7 +5,6 @@ async function clearHolds() {
     try {
         console.log("🧹 Clearing all SeatHolds in Redis and Database...");
         
-        // Find all Redis keys matching hold:*
         const keys = await redis.keys('hold:*');
         if (keys.length > 0) {
             for (const key of keys) {
@@ -16,7 +15,6 @@ async function clearHolds() {
             console.log("ℹ️ No hold keys found in Redis.");
         }
 
-        // Clear all seat hold records in PostgreSQL database
         const deletedHolds = await prisma.seatHold.deleteMany();
         console.log(`✅ Deleted ${deletedHolds.count} seat hold records from Database.`);
 

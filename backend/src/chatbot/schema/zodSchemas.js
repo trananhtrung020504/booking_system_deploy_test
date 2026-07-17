@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// 1. Phân loại ý định (Intent Classifier)
 export const IntentResultSchema = z.object({
   intent: z.enum([
     'movies',
@@ -17,7 +16,6 @@ export const IntentResultSchema = z.object({
   ]).describe('Phân loại chính xác ý định của người dùng')
 });
 
-// 2. Phản hồi dạng văn bản thông dụng (FAQ, Missing SKU/Name, Unknown, Human)
 export const TextResponseSchema = z.object({
   type: z.enum([
     'movie_detail_missing_field',
@@ -29,7 +27,6 @@ export const TextResponseSchema = z.object({
   message: z.string().describe('Nội dung phản hồi chi tiết, lịch sự, thân thiện bằng tiếng Việt')
 });
 
-// 3. Phản hồi danh sách phim (Movies List)
 export const MovieItemSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -48,7 +45,6 @@ export const MovieListResponseSchema = z.object({
   movies: z.array(MovieItemSchema)
 });
 
-// 4. Phản hồi danh sách lịch chiếu (Showtimes List)
 export const ShowtimeItemSchema = z.object({
   id: z.string(),
   movieTitle: z.string(),
@@ -65,7 +61,6 @@ export const ShowtimeResponseSchema = z.object({
   showtimes: z.array(ShowtimeItemSchema)
 });
 
-// 5. Phản hồi danh sách vé đặt (Bookings List)
 export const BookingItemSchema = z.object({
   id: z.string(),
   bookingRef: z.string(),

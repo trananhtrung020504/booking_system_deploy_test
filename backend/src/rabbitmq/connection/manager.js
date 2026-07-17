@@ -5,7 +5,6 @@ let connectionPromise = null;
 
 export async function getRabbitConnection() {
     if (!connectionPromise) {
-        // Tránh tạo nhiều kết nối khi có nhiều request cùng lúc
         connectionPromise = amqplib.connect(rabbitmqConfig.url, rabbitmqConfig.socketOptions);
     }
 

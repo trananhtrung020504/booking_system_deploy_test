@@ -6,7 +6,6 @@ import prisma from '../../config/database.js';
 import { TextResponseSchema } from '../schema/zodSchemas.js';
 import { buildConversationContext } from '../utils/contextMemory.js';
 
-// ── SCHEMAS TRÍCH XUẤT THAM SỐ (TỐI ƯU HÓA TOKEN) ──────────────────────────
 const ShowtimeParamsSchema = z.object({
   movieTitle: z.string().describe('Tên phim cần tìm lịch chiếu. Trả về chuỗi rỗng "" nếu không nhắc tới.'),
   theaterName: z.string().describe('Tên rạp cần tìm lịch chiếu (ví dụ: Hùng Vương). Trả về chuỗi rỗng "" nếu không nhắc tới.'),
@@ -39,16 +38,13 @@ Hãy lịch sự từ chối trả lời câu hỏi nằm ngoài phạm vi này 
 Đầu ra phải khớp hoàn toàn với cấu trúc Zod Schema TextResponse (type luôn là 'unknown').
 `;
 
-// 1. Node lịch chiếu phim (Code-Formatted & Direct DB Lookup)
 export async function showtimeNode(state) {
   try {
     const userText = state.messages[state.messages.length - 1].content;
     const conversationContext = buildConversationContext(state);
     console.log(`[Node: showtime_node] Extracting showtime parameters for: "${userText}"`);
 
-    // Cung cấp ngày giờ hiện tại của hệ thống để LLM tính toán chính xác "hôm nay", "ngày mai"
     const now = new Date();
-    // Định dạng ngày Việt Nam (múi giờ GMT+7)
     const localDateStr = new Date(now.getTime() + 7 * 60 * 60 * 1000).toISOString().split('T')[0];
 
     const systemPrompt = `Bạn là trợ lý trích xuất tham số lọc lịch chiếu phim của rạp RoPhim.
@@ -64,7 +60,6 @@ ${conversationContext}
    - Nếu câu hỏi có cụm từ "lịch chiếu ngày mai", "mai rạp có phim gì", "suất chiếu ngày mai" -> Đây là thời gian (ngày mai) -> Hãy tính toán ngày mai là ngày nào dựa trên ngày hôm nay (${localDateStr}) và điền vào trường "date" dạng YYYY-MM-DD.
 2. Nếu người dùng không hỏi về ngày cụ thể, hãy trả về trường date là chuỗi rỗng "".`;
 
-    // Bước 1: LLM chỉ trích xuất tham số lọc lịch chiếu
     const params = await showtimeParamsLLM.invoke([
       new SystemMessage({ content: systemPrompt }),
       new HumanMessage({ content: userText })
@@ -72,7 +67,6 @@ ${conversationContext}
 
     console.log(`[Node: showtime_node] Extracted Params:`, params);
 
-    // Bước 2: Tự code truy vấn DB qua Prisma (0 hao phí token)
     const where = {
       startTime: {
         gt: new Date()
@@ -124,7 +118,6 @@ ${conversationContext}
       }
     });
 
-    // Bước 3: Định dạng các suất chiếu
     const showtimes = shows.map(s => {
       let priceRange = '95.000đ';
       if (s.priceMap && typeof s.priceMap === 'object') {
@@ -170,7 +163,6 @@ ${conversationContext}
   }
 }
 
-// 2. Node trả lời các câu hỏi FAQ hệ thống (Sử dụng LLM tạo văn bản tự nhiên)
 export async function appQuestionNode(state) {
   try {
     const userText = state.messages[state.messages.length - 1].content;
@@ -192,7 +184,6 @@ export async function appQuestionNode(state) {
   }
 }
 
-// 3. Node xử lý câu hỏi ngoài phạm vi
 export async function unknownNode(state) {
   try {
     const userText = state.messages[state.messages.length - 1].content;
@@ -214,7 +205,6 @@ export async function unknownNode(state) {
   }
 }
 
-// 4. Node yêu cầu gặp nhân viên hỗ trợ trực tiếp (Human in the loop)
 export async function humanNode(state) {
   try {
     const response = {

@@ -56,7 +56,6 @@ export const handleMulterError = (err, req, res, next) => {
 
 export const uploadMiddleware = upload.memory;
 
-// Image only multer instances for admin
 const imageFilter = (req, file, cb) => {
     if (IMAGE_MIMES.includes(file.mimetype)) {
         cb(null, true);

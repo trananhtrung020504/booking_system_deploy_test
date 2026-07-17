@@ -7,11 +7,9 @@ import prisma from '../../config/database.js';
 
 const router = express.Router();
 
-// Helper: Extract and validate userId from JWT token
 const extractUserId = async (req) => {
   let userId = '';
 
-  // 1. Try extracting from Cookies (Web)
   if (req.cookies && req.cookies.accessToken) {
     try {
       const decoded = jwt.verify(req.cookies.accessToken, ENV_VARS.JWT_ACCESS_SECRET);
@@ -21,7 +19,6 @@ const extractUserId = async (req) => {
     }
   }
 
-  // 2. Try extracting from Authorization Header (Mobile/Flutter)
   if (!userId && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
     try {
       const token = req.headers.authorization.split(' ')[1];
@@ -34,7 +31,6 @@ const extractUserId = async (req) => {
 
   if (userId) {
     try {
-      // Validate that the user exists in database to avoid foreign key violations
       const user = await prisma.user.findUnique({
         where: { id: userId },
         select: { id: true }
@@ -50,9 +46,6 @@ const extractUserId = async (req) => {
   return null; // null = guest user
 };
 
-// ============================================================
-// 1. POST /thread/create - Create or get existing thread
-// ============================================================
 router.post('/thread/create', async (req, res) => {
   try {
     const userId = await extractUserId(req);
@@ -65,12 +58,10 @@ router.post('/thread/create', async (req, res) => {
       });
     }
 
-    // Check if thread already exists
     let chatThread = await prisma.chatThread.findUnique({
       where: { threadIdLang: threadIdLang }
     });
 
-    // Create new thread if doesn't exist
     if (!chatThread) {
       chatThread = await prisma.chatThread.create({
         data: {
@@ -95,9 +86,6 @@ router.post('/thread/create', async (req, res) => {
   }
 });
 
-// ============================================================
-// 2. POST /chat - Send message (existing endpoint, now with DB persistence)
-// ============================================================
 router.post('/chat', chatbotLimiter, validateChatInput, async (req, res) => {
   try {
     const { question, thread_id, threadId } = req.body;
@@ -117,7 +105,6 @@ router.post('/chat', chatbotLimiter, validateChatInput, async (req, res) => {
       });
     }
 
-    // Support both thread_id (old) and threadId (new)
     const langThreadId = thread_id || threadId;
     if (!langThreadId || langThreadId.trim() === '') {
       return res.status(400).json({
@@ -126,7 +113,6 @@ router.post('/chat', chatbotLimiter, validateChatInput, async (req, res) => {
       });
     }
 
-    // Get or create chat thread
     let chatThread = await prisma.chatThread.findUnique({
       where: { threadIdLang: langThreadId }
     });
@@ -140,7 +126,6 @@ router.post('/chat', chatbotLimiter, validateChatInput, async (req, res) => {
       });
     }
 
-    // Save user message to database
     await prisma.chatMessage.create({
       data: {
         threadId: chatThread.id,
@@ -150,7 +135,6 @@ router.post('/chat', chatbotLimiter, validateChatInput, async (req, res) => {
       }
     });
 
-    // Process chat through LangGraph
     const response = await ChatbotService.handleChatInput({
       question,
       threadId: langThreadId,
@@ -161,7 +145,6 @@ router.post('/chat', chatbotLimiter, validateChatInput, async (req, res) => {
       return res.status(500).json(response);
     }
 
-    // Save bot response to database
     await prisma.chatMessage.create({
       data: {
         threadId: chatThread.id,
@@ -188,15 +171,11 @@ router.post('/chat', chatbotLimiter, validateChatInput, async (req, res) => {
   }
 });
 
-// ============================================================
-// 3. GET /history/{threadIdLang} - Load all chat messages
-// ============================================================
 router.get('/history/:threadIdLang', async (req, res) => {
   try {
     const { threadIdLang } = req.params;
     const userId = await extractUserId(req);
 
-    // Find chat thread by LangGraph thread ID
     const chatThread = await prisma.chatThread.findUnique({
       where: { threadIdLang: threadIdLang },
       include: {
@@ -213,7 +192,6 @@ router.get('/history/:threadIdLang', async (req, res) => {
       });
     }
 
-    // Security: Only user who created the thread can view it (or guests can view their own)
     if (chatThread.userId && chatThread.userId !== userId) {
       return res.status(403).json({
         success: false,
@@ -221,7 +199,6 @@ router.get('/history/:threadIdLang', async (req, res) => {
       });
     }
 
-    // Format messages for frontend
     const messages = chatThread.messages.map(msg => ({
       id: msg.id,
       sender: msg.sender,
@@ -249,9 +226,6 @@ router.get('/history/:threadIdLang', async (req, res) => {
   }
 });
 
-// ============================================================
-// 4. POST /history/{threadIdLang}/payment-qr - Persist chatbot QR message
-// ============================================================
 router.post('/history/:threadIdLang/payment-qr', async (req, res) => {
   try {
     const { threadIdLang } = req.params;
@@ -321,15 +295,11 @@ router.post('/history/:threadIdLang/payment-qr', async (req, res) => {
   }
 });
 
-// ============================================================
-// 5. DELETE /history/{threadIdLang} - Clear all chat messages
-// ============================================================
 router.delete('/history/:threadIdLang', async (req, res) => {
   try {
     const { threadIdLang } = req.params;
     const userId = await extractUserId(req);
 
-    // Find chat thread
     const chatThread = await prisma.chatThread.findUnique({
       where: { threadIdLang: threadIdLang }
     });
@@ -341,7 +311,6 @@ router.delete('/history/:threadIdLang', async (req, res) => {
       });
     }
 
-    // Security: Only user who created the thread can delete it
     if (chatThread.userId && chatThread.userId !== userId) {
       return res.status(403).json({
         success: false,
@@ -349,15 +318,10 @@ router.delete('/history/:threadIdLang', async (req, res) => {
       });
     }
 
-    // Delete all messages in this thread
     await prisma.chatMessage.deleteMany({
       where: { threadId: chatThread.id }
     });
 
-    // Delete the thread itself (optional - you can keep empty threads)
-    // await prisma.chatThread.delete({
-    //   where: { id: chatThread.id }
-    // });
 
     return res.json({
       success: true,

@@ -1,8 +1,5 @@
 import prisma from '../../config/database.js';
 
-/**
- * Admin: Get all bookings
- */
 export const getAllBookings = async (req, res) => {
     try {
         const { page = 1, limit = 20, status, userId, showId, dateFrom, dateTo, search } = req.query;
@@ -75,9 +72,6 @@ export const getAllBookings = async (req, res) => {
     }
 };
 
-/**
- * Admin: Get booking details
- */
 export const getBookingDetail = async (req, res) => {
     try {
         const { id } = req.params;
@@ -107,9 +101,6 @@ export const getBookingDetail = async (req, res) => {
     }
 };
 
-/**
- * Admin: Cancel booking
- */
 export const cancelBooking = async (req, res) => {
     try {
         const { id } = req.params;
@@ -144,8 +135,6 @@ export const cancelBooking = async (req, res) => {
             }
         });
 
-        // TODO: Send cancellation email to user
-        // TODO: Process refund if payment was made
 
         res.json({
             message: "Booking cancelled successfully",
@@ -158,9 +147,6 @@ export const cancelBooking = async (req, res) => {
     }
 };
 
-/**
- * Admin: Dashboard - Get overall statistics
- */
 export const getDashboardStats = async (req, res) => {
     try {
         const { dateFrom, dateTo } = req.query;
@@ -178,23 +164,18 @@ export const getDashboardStats = async (req, res) => {
             }
         }
 
-        // Total users
         const totalUsers = await prisma.user.count();
 
-        // Total active shows
         const totalActiveShows = await prisma.show.count({
             where: { isActive: true, startTime: { gte: new Date() } }
         });
 
-        // Total active movies
         const totalActiveMovies = await prisma.movie.count({
             where: { isActive: true }
         });
 
-        // Total theaters
         const totalTheaters = await prisma.theater.count();
 
-        // Bookings stats
         const bookingStats = await prisma.booking.groupBy({
             by: ['status'],
             _count: true,
@@ -206,7 +187,6 @@ export const getDashboardStats = async (req, res) => {
         const pendingBookings = bookingStats.find(s => s.status === 'PENDING')?._count || 0;
         const cancelledBookings = bookingStats.find(s => s.status === 'CANCELLED')?._count || 0;
 
-        // Revenue stats
         const transactionStats = await prisma.transaction.aggregate({
             _sum: { amount: true },
             _count: true,
@@ -219,7 +199,6 @@ export const getDashboardStats = async (req, res) => {
         const totalRevenue = transactionStats._sum?.amount || 0;
         const totalTransactions = transactionStats._count || 0;
 
-        // Top movies by bookings
         const topMovies = await prisma.movie.findMany({
             take: 5,
             select: {
@@ -253,7 +232,6 @@ export const getDashboardStats = async (req, res) => {
             }, 0)
         }));
 
-        // Top theaters by bookings
         const topTheaters = await prisma.theater.findMany({
             take: 5,
             select: {
@@ -313,9 +291,6 @@ export const getDashboardStats = async (req, res) => {
     }
 };
 
-/**
- * Admin: Get bookings report/analytics
- */
 export const getBookingsReport = async (req, res) => {
     try {
         const { groupBy = 'date', dateFrom, dateTo } = req.query;
@@ -343,7 +318,6 @@ export const getBookingsReport = async (req, res) => {
                 where: dateFilter.createdAt ? { createdAt: dateFilter.createdAt } : {}
             });
 
-            // Manual grouping by date
             const byDate = {};
             const allBookings = await prisma.booking.findMany({
                 where: dateFilter.createdAt ? { createdAt: dateFilter.createdAt } : {},
@@ -414,9 +388,6 @@ export const getBookingsReport = async (req, res) => {
     }
 };
 
-/**
- * Admin: Get revenue by date range
- */
 export const getRevenueReport = async (req, res) => {
     try {
         const { dateFrom, dateTo } = req.query;

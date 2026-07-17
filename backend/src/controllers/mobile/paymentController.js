@@ -16,7 +16,6 @@ export const createSepayPayment = async (req, res) => {
         const { amount, bookingId } = req.body;
         const userId = req.user.id;
 
-        // 1. Validate booking exists and is not expired
         const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
         if (!booking) return res.status(404).json({ message: "Booking not found" });
         if (booking.status !== 'PENDING') return res.status(400).json({ message: "Booking is not pending payment" });
@@ -26,7 +25,6 @@ export const createSepayPayment = async (req, res) => {
         const remainingSeconds = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
         if (remainingSeconds <= 0) return res.status(400).json({ message: "Booking has expired" });
 
-        // 2. Create or reuse transaction
         let transaction = await prisma.transaction.findFirst({
             where: {
                 bookings: { some: { id: bookingId } },
@@ -39,7 +37,6 @@ export const createSepayPayment = async (req, res) => {
         if (transaction) {
             transactionCode = transaction.transactionCode;
         } else {
-            // Rút ngắn mã giao dịch để tránh bị ngân hàng cắt bớt nội dung khi chuyển khoản VietQR trực tiếp
             transactionCode = "RP" + Math.random().toString(36).substring(2, 10).toUpperCase();
             transaction = await prisma.transaction.create({
                 data: {
@@ -54,7 +51,6 @@ export const createSepayPayment = async (req, res) => {
             });
         }
 
-        // 3. Initialize SePay PG Checkout
         const checkoutURL = client.checkout.initCheckoutUrl();
         const frontendUrl = req.headers.origin || process.env.FRONTEND_URL || 'http://localhost:3000';
         const checkoutFormfields = client.checkout.initOneTimePaymentFields({
@@ -68,7 +64,6 @@ export const createSepayPayment = async (req, res) => {
             cancel_url: `${frontendUrl}/bookings?status=failed`,
         });
 
-        // Save generated payment details to cache (expires when booking expires)
         const cacheKey = `payment_link:${bookingId}:SEPAY`;
         await redis.setex(cacheKey, remainingSeconds, JSON.stringify({ checkoutURL, checkoutFormfields }));
 
@@ -140,10 +135,8 @@ export const sepayWebhook = async (req, res) => {
     try {
         console.log("SEPAY WEBHOOK NHAN DUOC DATA:", req.body);
 
-        // SePay IPN parameters might differ, but generally it contains order_invoice_number and payment_status
         const { order_invoice_number, payment_status, reference_number } = req.body;
 
-        // If standard SePay (not PG) hits this endpoint:
         const code = req.body.code || reference_number;
 
         let transactionCode = order_invoice_number;
@@ -155,8 +148,6 @@ export const sepayWebhook = async (req, res) => {
                 include: { bookings: { include: { user: true, seats: true, show: { include: { movie: true, theater: true, screen: true } } } } }
             });
         } else if (req.body.content) {
-            // Trường hợp quét VietQR trực tiếp, webhook của SePay sẽ không có order_invoice_number
-            // Mã giao dịch (40 ký tự) sẽ nằm bên trong nội dung chuyển khoản (req.body.content)
             const content = req.body.content.toUpperCase();
             const pendingTransactions = await prisma.transaction.findMany({
                 where: { status: 'PENDING', paymentMethod: 'SEPAY' },
@@ -175,7 +166,6 @@ export const sepayWebhook = async (req, res) => {
             const booking = transaction.bookings[0];
 
             if (booking && booking.status === 'PENDING') {
-                // Confirm booking
                 await prisma.booking.update({
                     where: { id: booking.id },
                     data: { status: 'CONFIRMED', paymentId: transactionCode }
@@ -209,7 +199,6 @@ export const sepayWebhook = async (req, res) => {
             }
         }
 
-        // Always return success to acknowledge receipt
         res.json({ success: true, message: 'Webhook processed' });
     } catch (error) {
         console.error(`[Controller Error] [mobile/paymentController.js]:`, error);

@@ -2,7 +2,6 @@ import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import prisma from '../../config/database.js';
 
-// 1. Tool tìm kiếm danh sách phim
 export const queryMoviesTool = tool(
   async ({ keyword, genre, status, limit = 6 }) => {
     try {
@@ -77,13 +76,11 @@ export const queryMoviesTool = tool(
   }
 );
 
-// 2. Tool lấy chi tiết phim và lịch chiếu đi kèm
 export const getMovieDetailTool = tool(
   async ({ movieTitle }) => {
     try {
       console.log(`[Tool: get_movie_detail] title='${movieTitle}'`);
       
-      // Tìm phim bằng từ khóa tương đối
       const movie = await prisma.movie.findFirst({
         where: {
           title: {
@@ -151,7 +148,6 @@ export const getMovieDetailTool = tool(
   }
 );
 
-// 3. Tool tra cứu lịch chiếu (Showtimes) theo phim, rạp hoặc ngày
 export const queryShowtimesTool = tool(
   async ({ movieTitle, theaterName, date }) => {
     try {

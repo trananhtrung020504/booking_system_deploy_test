@@ -7,8 +7,6 @@ import { verifyToken } from '../../middleware/web/auth.js';
 
 const router = express.Router();
 
-// All admin routes require authentication first, then admin role verification
-// The verifyAdminRole middleware is applied in each sub-router
 router.use(verifyToken);
 
 router.use('/movies', adminMovieRoutes);

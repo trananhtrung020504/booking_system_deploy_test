@@ -3,7 +3,6 @@ import prisma from '../config/database.js';
 async function updatePrices() {
   console.log("Đang cập nhật giá vé và combo xuống 1.000 VNĐ...");
   try {
-    // 1. Update Shows
     const shows = await prisma.show.findMany();
     for (const show of shows) {
       await prisma.show.update({
@@ -18,7 +17,6 @@ async function updatePrices() {
       });
     }
 
-    // 2. Update Combos
     await prisma.combo.updateMany({
       data: {
         price: 1000

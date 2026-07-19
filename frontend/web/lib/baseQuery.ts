@@ -23,7 +23,6 @@ export const baseQueryWithRefresh: BaseQueryFn<
     ((result.error.data as { message?: string })?.message?.includes('Token hết hạn') || 
      (result.error.data as { message?: string })?.message?.includes('Mã xác thực không hợp lệ'))
   ) {
-    // Try to refresh the token
     const refreshResult = await baseQuery(
       { url: '/auth/refresh-token', method: 'POST' },
       api,
@@ -31,10 +30,8 @@ export const baseQueryWithRefresh: BaseQueryFn<
     );
 
     if (refreshResult.data) {
-      // Retry the original request
       result = await baseQuery(args, api, extraOptions);
     } else {
-      // Refresh failed - Clear auth state
       const { clearUser } = await import('@/store/slice/authSlice');
       api.dispatch(clearUser());
       

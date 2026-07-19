@@ -1,50 +1,33 @@
 import nodemailer from 'nodemailer';
 import { ENV_VARS } from '../config/env_vars.js';
 
-
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: ENV_VARS.EMAIL_USER,
+        pass: ENV_VARS.EMAIL_PASS,
+    },
+});
 
 export const sendMail = async (options) => {
     try {
-        if (!ENV_VARS.BREVO_API_KEY) {
-            console.log(`[MailService] Thiếu BREVO_API_KEY, giả lập gửi email tới ${options.email}`);
-            return { messageId: 'simulated-message-id-' + Date.now() };
+        if (!ENV_VARS.EMAIL_USER || !ENV_VARS.EMAIL_PASS) {
+            throw new Error('Missing EMAIL_USER or EMAIL_PASS');
         }
 
-        const payload = {
-            sender: {
-                name: "RoPhim Booking",
-                email: ENV_VARS.EMAIL_USER // Email đã đăng ký và verify trên Brevo
-            },
-            to: [
-                { email: options.email }
-            ],
+        const message = {
+            from: `"RoPhim Booking" <${ENV_VARS.EMAIL_USER}>`,
+            to: options.email,
             subject: options.subject,
-            htmlContent: options.html
+            html: options.html,
         };
 
-        console.log(`[MailService] Đang gửi email qua Brevo API tới: ${options.email}`);
-        
-        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-            method: 'POST',
-            headers: {
-                'accept': 'application/json',
-                'api-key': ENV_VARS.BREVO_API_KEY,
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error(`[MailService] Lỗi từ Brevo:`, errorData);
-            throw new Error(`Brevo API Error: ${errorData.message}`);
-        }
-
-        const data = await response.json();
-        console.log(`[MailService] Email đã được gửi thành công qua Brevo: ${data.messageId}`);
-        return data;
+        console.log(`[MailService] Đang gửi email qua Nodemailer tới: ${options.email}`);
+        const info = await transporter.sendMail(message);
+        console.log(`[MailService] Email đã được gửi thành công qua Nodemailer: ${info.messageId}`);
+        return info;
     } catch (error) {
-        console.error(`[MailService] LỖI CỤ THỂ KHI GỬI EMAIL:`, error);
+        console.error('[MailService] Lỗi khi gửi email:', error);
         throw error;
     }
 };
@@ -53,10 +36,10 @@ export const sendOTPtoEmail = async (email, otp) => {
     const html = `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; padding: 30px; border-radius: 12px; background-color: #ffffff;">
             <div style="text-align: center; margin-bottom: 25px;">
-                <h1 style="color: #e11d48; margin: 0; font-size: 28px;">BookingSystem</h1>
+                <h1 style="color: #e11d48; margin: 0; font-size: 28px;">RoPhim Booking</h1>
             </div>
             <h2 style="color: #1f2937; text-align: center; margin-bottom: 20px;">Xác thực tài khoản</h2>
-            <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">Chào bạn, mã OTP để đăng nhập vào hệ thống của bạn là:</p>
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">Chào bạn, mã OTP để xác thực tài khoản của bạn là:</p>
             <div style="text-align: center; margin: 30px 0;">
                 <span style="font-size: 36px; font-weight: bold; color: #e11d48; letter-spacing: 5px; padding: 10px 20px; border: 2px dashed #e11d48; border-radius: 8px;">${otp}</span>
             </div>
@@ -65,7 +48,7 @@ export const sendOTPtoEmail = async (email, otp) => {
             <p style="font-size: 12px; color: #9ca3af; text-align: center;">Đây là email tự động, vui lòng không phản hồi.</p>
         </div>
     `;
-    return await sendMail({ email, subject: 'Mã xác thực OTP - BookingSystem', html });
+    return await sendMail({ email, subject: 'Mã xác thực OTP - RoPhim Booking', html });
 };
 
 export const sendBookingConfirmationEmail = async (email, booking) => {
@@ -76,7 +59,7 @@ export const sendBookingConfirmationEmail = async (email, booking) => {
                 <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Xác nhận đặt vé thành công!</h1>
             </div>
             <div style="padding: 30px;">
-                <p style="font-size: 16px; color: #1f2937;">Chào bạn, cảm ơn bạn đã lựa chọn BookingSystem. Dưới đây là thông tin chi tiết về vé của bạn:</p>
+                <p style="font-size: 16px; color: #1f2937;">Chào bạn, cảm ơn bạn đã lựa chọn RoPhim Booking. Dưới đây là thông tin chi tiết về vé của bạn:</p>
                 <div style="background-color: #f9fafb; border-radius: 8px; padding: 20px; margin: 25px 0;">
                     <h3 style="margin-top: 0; color: #e11d48; font-size: 20px;">${booking.show.movie.title}</h3>
                     <p style="margin: 8px 0; color: #4b5563;"><b>Mã đặt vé:</b> <span style="color: #1f2937;">${booking.bookingRef}</span></p>
@@ -84,11 +67,11 @@ export const sendBookingConfirmationEmail = async (email, booking) => {
                     <p style="margin: 8px 0; color: #4b5563;"><b>Phòng:</b> ${booking.show.screen.name}</p>
                     <p style="margin: 8px 0; color: #4b5563;"><b>Thời gian:</b> ${new Date(booking.show.startTime).toLocaleString('vi-VN')}</p>
                     <p style="margin: 8px 0; color: #4b5563;"><b>Ghế:</b> <span style="color: #e11d48; font-weight: bold;">${seatNames}</span></p>
-                    <p style="margin: 15px 0 0 0; font-size: 18px; color: #1f2937;"><b>Tổng cộng:</b> <span style="color: #10b981;">${booking.total.toLocaleString()}đ</span></p>
+                    <p style="margin: 15px 0 0 0; font-size: 18px; color: #1f2937;"><b>Tổng cộng:</b> <span style="color: #10b981;">${booking.total.toLocaleString('vi-VN')}đ</span></p>
                 </div>
                 <p style="font-size: 14px; color: #6b7280; font-style: italic;">Vui lòng đưa mã đặt vé này cho nhân viên tại quầy để nhận vé cứng.</p>
                 <hr style="border: 0; border-top: 1px solid #f3f4f6; margin: 30px 0;">
-                <p style="font-size: 12px; color: #9ca3af; text-align: center;">BookingSystem - Chúc bạn xem phim vui vẻ!</p>
+                <p style="font-size: 12px; color: #9ca3af; text-align: center;">RoPhim Booking - Chúc bạn xem phim vui vẻ!</p>
             </div>
         </div>
     `;
@@ -103,25 +86,22 @@ export const sendBookingExpiredRefundEmail = async (email, booking, amount, tran
                 <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Thông báo giao dịch quá hạn giữ ghế</h1>
             </div>
             <div style="padding: 30px;">
-                <p style="font-size: 16px; color: #1f2937;">Chào bạn, hệ thống ghi nhận bạn đã thanh toán thành công số tiền <b>${amount.toLocaleString()}đ</b> cho mã đặt vé <b>${booking.bookingRef}</b>.</p>
-                <p style="font-size: 16px; color: #ef4444; font-weight: bold;">Tuy nhiên, giao dịch này được hoàn tất sau khi thời gian giữ ghế (10 phút) đã hết hạn. Hệ thống đã giải phóng ghế của bạn để đảm bảo công bằng cho người dùng khác.</p>
-                
+                <p style="font-size: 16px; color: #1f2937;">Chào bạn, hệ thống ghi nhận bạn đã thanh toán thành công số tiền <b>${amount.toLocaleString('vi-VN')}đ</b> cho mã đặt vé <b>${booking.bookingRef}</b>.</p>
+                <p style="font-size: 16px; color: #ef4444; font-weight: bold;">Tuy nhiên, giao dịch này được hoàn tất sau khi thời gian giữ ghế 10 phút đã hết hạn. Hệ thống đã giải phóng ghế của bạn để đảm bảo công bằng cho người dùng khác.</p>
                 <div style="background-color: #f9fafb; border-radius: 8px; padding: 20px; margin: 25px 0;">
                     <h3 style="margin-top: 0; color: #f59e0b; font-size: 18px;">Thông tin đơn hàng quá hạn</h3>
                     <p style="margin: 8px 0; color: #4b5563;"><b>Mã đặt vé:</b> ${booking.bookingRef}</p>
                     <p style="margin: 8px 0; color: #4b5563;"><b>Phim:</b> ${booking.show.movie.title}</p>
                     <p style="margin: 8px 0; color: #4b5563;"><b>Ghế giữ trước đó:</b> ${seatNames}</p>
-                    <p style="margin: 8px 0; color: #4b5563;"><b>Số tiền đã thanh toán:</b> <span style="color: #10b981; font-weight: bold;">${amount.toLocaleString()}đ</span></p>
+                    <p style="margin: 8px 0; color: #4b5563;"><b>Số tiền đã thanh toán:</b> <span style="color: #10b981; font-weight: bold;">${amount.toLocaleString('vi-VN')}đ</span></p>
                     <p style="margin: 8px 0; color: #4b5563;"><b>Mã giao dịch cổng thanh toán:</b> ${transactionNo}</p>
                 </div>
-                
-                <p style="font-size: 15px; color: #1f2937; line-height: 1.6;"><b>Hướng giải quyết:</b> Bộ phận Chăm sóc khách hàng (CSKH) của chúng tôi đã nhận được thông tin đối soát này và đang tiến hành xử lý hoàn tiền hoặc đổi suất chiếu tương đương cho bạn. Chúng tôi sẽ liên hệ với bạn trong vòng 24h làm việc qua email hoặc số điện thoại đăng ký.</p>
+                <p style="font-size: 15px; color: #1f2937; line-height: 1.6;"><b>Hướng giải quyết:</b> Bộ phận Chăm sóc khách hàng của chúng tôi đã nhận được thông tin đối soát này và đang tiến hành xử lý hoàn tiền hoặc đổi suất chiếu tương đương cho bạn. Chúng tôi sẽ liên hệ với bạn trong vòng 24h làm việc qua email hoặc số điện thoại đăng ký.</p>
                 <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">Nếu bạn có thắc mắc gấp, vui lòng liên hệ hotline của chúng tôi để được giải quyết nhanh nhất.</p>
                 <hr style="border: 0; border-top: 1px solid #f3f4f6; margin: 30px 0;">
-                <p style="font-size: 12px; color: #9ca3af; text-align: center;">BookingSystem - Rất xin lỗi vì sự bất tiện này!</p>
+                <p style="font-size: 12px; color: #9ca3af; text-align: center;">RoPhim Booking - Rất xin lỗi vì sự bất tiện này!</p>
             </div>
         </div>
     `;
     return await sendMail({ email, subject: `[Cần đối soát hoàn tiền] Giao dịch quá hạn vé: ${booking.bookingRef}`, html });
 };
-

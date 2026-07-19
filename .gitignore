@@ -5,6 +5,7 @@ dist/
 build/
 
 # Ignore unnecessary root files and documentation
+explain/
 current_chatbot.txt
 custom_domain_guide.md
 ADMIN_IMPLEMENTATION.md

@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Gift, Sparkles, Ticket, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const promoSlides = [
   {
@@ -80,11 +81,12 @@ export default function FloatingPromoWidget() {
             </div>
           </div>
           <p className="mt-4 text-sm leading-6 text-white/50">{promo.description}</p>
-          <Button asChild className="mt-5 h-11 w-full rounded-full bg-white text-black hover:bg-cinema-gold">
-            <Link href={promo.href} className="text-[10px] font-bold uppercase tracking-[0.28em]">
-              {promo.action}
-            </Link>
-          </Button>
+          <Link
+            href={promo.href}
+            className={cn(buttonVariants({ variant: 'default' }), 'mt-5 h-11 w-full rounded-full bg-white text-[10px] font-bold uppercase tracking-[0.28em] text-black hover:bg-cinema-gold')}
+          >
+            {promo.action}
+          </Link>
         </div>
       </div>
     </div>

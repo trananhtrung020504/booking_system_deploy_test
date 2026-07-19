@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { Film, MapPin, Phone, Mail, Ticket, Gift, CalendarDays, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const exploreLinks = [
   { label: 'Phim đang chiếu', href: '/movies?status=now-showing' },
@@ -87,12 +88,13 @@ export default function SiteFooter() {
             <p className="mt-3 text-sm leading-6 text-white/45">
               Bạn có thể giữ footer này như nơi cắm newsletter, app download, campaign hoặc social proof sau khi backend hoàn thiện hơn.
             </p>
-            <Button asChild className="mt-6 h-12 rounded-full bg-white text-black hover:bg-cinema-gold">
-              <Link href="/promotions" className="text-[11px] font-semibold flex flex-row ">
-                Xem khu khuyến mãi
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            <Link
+              href="/promotions"
+              className={cn(buttonVariants({ variant: 'default' }), 'mt-6 h-12 rounded-full bg-white text-[11px] font-semibold text-black hover:bg-cinema-gold')}
+            >
+              Xem khu khuyến mãi
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </div>
         </div>
 

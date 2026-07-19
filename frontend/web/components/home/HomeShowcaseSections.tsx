@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Sparkles, Ticket, Popcorn, CalendarDays, Flame, ArrowRight, Clock3, Gift, Trophy, ShieldCheck } from 'lucide-react';
 
 const quickStats = [
@@ -59,7 +60,7 @@ const eventCards = [
     label: 'Fan screening',
     title: 'Không gian check-in và quà tặng nhỏ',
     meta: '20:00 • Cuối tuần',
-    description: 'Rất hợp để tạo chất “sự kiện” và tăng cảm giác sinh động cho website local demo.',
+    description: 'Rất hợp để tạo chất "sự kiện" và tăng cảm giác sinh động cho website local demo.',
   },
 ];
 
@@ -127,9 +128,12 @@ export default function HomeShowcaseSections() {
               Những khối UI nên có để site nhìn đầy đặn hơn
             </h2>
           </div>
-          <Button asChild variant="outline" className="rounded-full border-white/10 bg-white/5 px-6 text-[10px] font-bold uppercase tracking-[0.28em] text-white hover:bg-white/10">
-            <Link href="/promotions">Mở trang khuyến mãi</Link>
-          </Button>
+          <Link
+            href="/promotions"
+            className={cn(buttonVariants({ variant: 'outline' }), 'rounded-full border-white/10 bg-white/5 px-6 text-[10px] font-bold uppercase tracking-[0.28em] text-white hover:bg-white/10')}
+          >
+            Mở trang khuyến mãi
+          </Link>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
@@ -150,12 +154,13 @@ export default function HomeShowcaseSections() {
                   <h3 className="text-2xl font-bold uppercase tracking-tight text-white">{title}</h3>
                   <p className="text-sm leading-6 text-white/50">{description}</p>
                 </div>
-                <Button asChild className="h-12 rounded-full bg-white text-black hover:bg-cinema-gold">
-                  <Link href={href} className="text-[11px] font-bold uppercase tracking-[0.28em]">
-                    {cta}
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </Button>
+                <Link
+                  href={href}
+                  className={cn(buttonVariants({ variant: 'default' }), 'h-12 rounded-full bg-white text-[11px] font-bold uppercase tracking-[0.28em] text-black hover:bg-cinema-gold')}
+                >
+                  {cta}
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
               </div>
             </div>
           ))}
@@ -169,7 +174,7 @@ export default function HomeShowcaseSections() {
             <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-sky-400">Sự kiện & chiến dịch</span>
           </div>
           <h2 className="text-3xl font-bold uppercase tracking-tight text-white md:text-4xl">
-            Các card nội dung khiến dự án bớt cảm giác “bài tập local”
+            Các card nội dung khiến dự án bớt cảm giác "bài tập local"
           </h2>
         </div>
 
@@ -209,7 +214,7 @@ export default function HomeShowcaseSections() {
                 'Membership card trong hồ sơ người dùng',
                 'Countdown campaign ở trang promotions',
                 'Banner mini cho lịch chiếu và rạp',
-                'Social proof như “đang có 48 người xem”',
+                'Social proof như "đang có 48 người xem"',
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3 rounded-2xl border border-white/8 bg-white/4 p-4">
                   <Ticket className="mt-0.5 h-4 w-4 shrink-0 text-primary" />

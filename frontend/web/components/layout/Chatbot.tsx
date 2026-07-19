@@ -66,12 +66,15 @@ interface ChatMessage {
 
 const API_ROOT = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1/web').replace(/\/$/, '');
 const API_BASE_URL = `${API_ROOT}/chatbot`;
+const SLOW_RESPONSE_DELAY_MS = 5000;
+const SLOW_RESPONSE_NOTICE = 'Chatbot demo có thể mất vài giây để phản hồi do server đang chạy trên gói triển khai tiết kiệm. Cảm ơn bạn đã chờ.';
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showSlowResponseNotice, setShowSlowResponseNotice] = useState(false);
   const [threadIdLang, setThreadIdLang] = useState(''); // LangGraph thread_id
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
@@ -143,7 +146,20 @@ export default function Chatbot() {
   // Auto-scroll to latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, loading]);
+  }, [messages, loading, showSlowResponseNotice]);
+
+  useEffect(() => {
+    if (!loading) {
+      setShowSlowResponseNotice(false);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setShowSlowResponseNotice(true);
+    }, SLOW_RESPONSE_DELAY_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [loading]);
 
   const dispatch = useAppDispatch();
 
@@ -640,6 +656,11 @@ export default function Chatbot() {
                   <span className="w-2 h-2 rounded-full bg-rose-400 animate-bounce" style={{ animationDelay: '150ms' }}></span>
                   <span className="w-2 h-2 rounded-full bg-white/40 animate-bounce" style={{ animationDelay: '300ms' }}></span>
                 </div>
+                {showSlowResponseNotice && (
+                  <div className="mt-2 max-w-[85%] rounded-2xl border border-cinema-gold/20 bg-cinema-gold/10 px-4 py-2.5 text-xs leading-5 text-cinema-gold/90 shadow-md" aria-live="polite">
+                    {SLOW_RESPONSE_NOTICE}
+                  </div>
+                )}
               </div>
             )}
 

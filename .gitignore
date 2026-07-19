@@ -3,3 +3,21 @@ node_modules/
 .DS_Store
 dist/
 build/
+
+# Ignore unnecessary root files and documentation
+current_chatbot.txt
+custom_domain_guide.md
+ADMIN_IMPLEMENTATION.md
+PROGRESS_NOTES.md
+TEST_REALTIME_SOCKET.md
+explain_incognito_cookie_error.md
+hientai.md
+guide_deploy_render.txt
+guide_deploy_vercel.txt
+
+# Temporary scripts and agent files
+fix.js
+fix_646.js
+fix_encoding.js
+tempCodeRunnerFile.dart
+.agents/

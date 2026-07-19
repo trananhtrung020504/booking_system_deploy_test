@@ -21,3 +21,7 @@ fix_646.js
 fix_encoding.js
 tempCodeRunnerFile.dart
 .agents/
+
+# backend files
+backend/prisma/seed.js
+backend/note

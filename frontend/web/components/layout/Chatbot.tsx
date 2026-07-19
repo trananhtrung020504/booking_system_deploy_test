@@ -64,7 +64,8 @@ interface ChatMessage {
   paymentData?: any;
 }
 
-const API_BASE_URL = 'http://localhost:5000/api/v1/web/chatbot';
+const API_ROOT = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1/web').replace(/\/$/, '');
+const API_BASE_URL = `${API_ROOT}/chatbot`;
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);

@@ -66,7 +66,7 @@ interface ChatMessage {
 
 const API_ROOT = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1/web').replace(/\/$/, '');
 const API_BASE_URL = `${API_ROOT}/chatbot`;
-const SLOW_RESPONSE_DELAY_MS = 5000;
+const SLOW_RESPONSE_DELAY_MS = 3000;
 const SLOW_RESPONSE_NOTICE = 'Chatbot demo có thể mất vài giây để phản hồi do server đang chạy trên gói triển khai tiết kiệm. Cảm ơn bạn đã chờ.';
 
 export default function Chatbot() {

@@ -258,27 +258,46 @@ function PaymentContent() {
     return () => clearInterval(timer);
   }, [booking, router, cancelBooking]);
 
-  // Real-time Polling for Payment Success Check
   useEffect(() => {
     let interval: any;
+
     if (showQrModal && bookingId) {
+      const socket = getSocket();
+
+      const handleBookingConfirmed = (data: any) => {
+        if ((!data?.bookingId || data?.bookingId === bookingId) && data?.status === 'CONFIRMED') {
+          if (interval) clearInterval(interval);
+          setShowQrModal(false);
+          toast.success("Thanh toán thành công! Vé của bạn đã được xác nhận.");
+          router.push(`/bookings?status=success&bookingId=${bookingId}`);
+        }
+      };
+
+      if (socket) {
+        if (!socket.connected) socket.connect();
+        socket.on('booking:updated', handleBookingConfirmed);
+      }
+
       interval = setInterval(async () => {
         try {
           const res = await refetchBooking();
           if (res.data?.status === 'CONFIRMED') {
+            if (socket) socket.off('booking:updated', handleBookingConfirmed);
             clearInterval(interval);
             setShowQrModal(false);
             toast.success("Thanh toán thành công! Vé của bạn đã được xác nhận.");
             router.push(`/bookings?status=success&bookingId=${bookingId}`);
           }
         } catch (e) {
-          console.error("Payment status polling error:", e);
+          console.error("Payment status check error:", e);
         }
-      }, 3000);
+      }, 10000);
+
+      return () => {
+        if (socket) socket.off('booking:updated', handleBookingConfirmed);
+        if (interval) clearInterval(interval);
+      };
     }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
   }, [showQrModal, bookingId, refetchBooking, router]);
 
   // Handle already CONFIRMED booking immediately
@@ -506,10 +525,10 @@ function PaymentContent() {
                 onClick={handlePayment}
                 disabled={isProcessingPayment || seatsConflict.length > 0 || isRedirecting || isConfirmingCancel}
                 className={`w-full h-16 rounded-[2rem] font-bold uppercase tracking-widest text-xs gap-4 transition-all ${seatsConflict.length > 0
+                  ? 'bg-gray-600 text-white/60 cursor-not-allowed opacity-50'
+                  : isRedirecting || isConfirmingCancel
                     ? 'bg-gray-600 text-white/60 cursor-not-allowed opacity-50'
-                    : isRedirecting || isConfirmingCancel
-                      ? 'bg-gray-600 text-white/60 cursor-not-allowed opacity-50'
-                      : 'bg-primary text-white shadow-[0_15px_40px_rgba(239,68,68,0.3)] hover:shadow-[0_20px_50px_rgba(239,68,68,0.5)] hover:scale-[1.02] active:scale-[0.98]'
+                    : 'bg-primary text-white shadow-[0_15px_40px_rgba(239,68,68,0.3)] hover:shadow-[0_20px_50px_rgba(239,68,68,0.5)] hover:scale-[1.02] active:scale-[0.98]'
                   }`}
               >
                 {isProcessingPayment ? (

@@ -87,9 +87,9 @@ const initSocket = (io) => {
         const cookies = parseCookies(socket.handshake.headers.cookie);
         const token = socket.handshake.auth.token || cookies.accessToken;
 
-        console.log(`🔌 New connection attempt: ${socket.id}`);
-        console.log(`🍪 Cookies present: ${socket.handshake.headers.cookie ? 'Yes' : 'No'}`);
-        console.log(`🎟️ Token found: ${token ? 'Yes' : 'No'}`);
+        console.log(` New connection attempt: ${socket.id}`);
+        console.log(` Cookies present: ${socket.handshake.headers.cookie ? 'Yes' : 'No'}`);
+        console.log(` Token found: ${token ? 'Yes' : 'No'}`);
 
         let userId = null;
         if (token) {
@@ -100,16 +100,16 @@ const initSocket = (io) => {
                 socket.join(`user:${userId}`);
                 socket.join('global');
                 userSocketMap.set(userId, socket.id);
-                console.log(`✅ Socket verified: User ${userId} connected on ${socket.id}`);
+                console.log(` Socket verified: User ${userId} connected on ${socket.id}`);
             } catch (error) {
-                console.log(`⚠️ Token verification failed for socket ${socket.id}: ${error.message}. Connecting as guest.`);
+                console.log(` Token verification failed for socket ${socket.id}: ${error.message}. Connecting as guest.`);
                 userId = `guest-${socket.id}`;
                 socket.userId = userId;
             }
         } else {
             userId = `guest-${socket.id}`;
             socket.userId = userId;
-            console.log(`ℹ️ Socket connected as guest: ${socket.id}`);
+            console.log(` Socket connected as guest: ${socket.id}`);
         }
 
         socket.on('show:join', async (showId) => {

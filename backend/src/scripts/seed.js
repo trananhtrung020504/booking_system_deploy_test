@@ -45,6 +45,24 @@ async function main() {
             ]
         });
 
+        console.log("Dang cap nhat trang thai tai khoan...");
+        await prisma.user.update({
+            where: { email: 'khach14@gmail.com' },
+            data: { isActive: false }
+        });
+        await prisma.user.deleteMany({
+            where: { email: 'khach15@gmail.com' }
+        });
+
+        console.log("Dang tao Voucher...");
+        await prisma.voucher.createMany({
+            data: [
+                { code: 'GIAM20', type: 'PERCENT', value: 20, minOrder: 0, maxDiscount: 50000, expiresAt: new Date('2026-12-31T23:59:59Z'), isActive: true, usageLimit: 100 },
+                { code: 'VVIP50K', type: 'FIXED', value: 50000, minOrder: 200000, expiresAt: new Date('2026-12-31T23:59:59Z'), isActive: true, usageLimit: 80 },
+                { code: 'HAPPYTUE', type: 'FIXED', value: 30000, minOrder: 100000, expiresAt: new Date('2026-12-31T23:59:59Z'), isActive: true, usageLimit: 120 }
+            ]
+        });
+
         console.log(" Đang tạo Combos...");
         await prisma.combo.createMany({
             data: [

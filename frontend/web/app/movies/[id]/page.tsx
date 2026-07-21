@@ -28,8 +28,6 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
 
   const { data: movie, isLoading } = useGetMovieQuery(id);
   const { data: dates } = useGetAvailableDatesQuery(id);
-  
-  // States for Booking Flow
   const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
   const [activeShowId, setActiveShowId] = useState<string | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -151,28 +149,39 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
   };
 
   const isSeatSelectingByOthers = (seatId: string) => {
+    const socket = getSocket();
+    const currentGuestId = socket?.id ? `guest-${socket.id}` : '';
     return Object.entries(selectingSeatsMap).some(([uid, sIds]) => 
-      String(uid) !== String(user?.id || '') && sIds.includes(seatId)
+      String(uid) !== String(user?.id || '') && String(uid) !== currentGuestId && sIds.includes(seatId)
     );
   };
 
+  const handleCloseModal = () => {
+    if (activeShowId) {
+      const socket = getSocket();
+      if (socket?.connected) {
+        socket.emit('seats:selecting', { showId: activeShowId, seatIds: [] });
+        socket.emit('show:leave', activeShowId);
+      }
+    }
+    setShowBookingModal(false);
+    setSelectedSeats([]);
+    setActiveShowId(null);
+    setModalStep('times');
+  };
 
-  // Auto-select first available date
+
   useEffect(() => {
     if (dates && dates.length > 0 && !selectedDate) {
       setSelectedDate(dates[0]);
     }
   }, [dates, selectedDate]);
 
-  // Handle clicking a showtime on the main page
   const handlePageShowClick = (showId: string) => {
     setActiveShowId(prev => prev === showId ? null : showId);
   };
 
-  // Open modal from Hero section
   const handleOpenBooking = () => {
-    // If a show is already selected on the page, we can potentially skip to seats
-    // but the user wants the original logic (open at 'times' step)
     setModalStep('times');
     setShowBookingModal(true);
   };
@@ -200,7 +209,6 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
 
     setSelectedSeats(newSeats);
 
-    // Emit selecting so others see blinking
     if (socket?.connected) {
       socket.emit('seats:selecting', { showId: activeShowId, seatIds: newSeats });
     }
@@ -228,13 +236,11 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
       return;
     }
 
-    // Map IDs to labels (e.g. A1, B2)
     const seatLabels = selectedSeats.map(id => {
       const s = activeShow?.screen?.seats?.find(st => st.id === id);
       return s ? `${s.row}${s.column}` : id;
     });
 
-    // Clear selecting states before redirecting
     const socket = getSocket();
     if (socket?.connected) {
       socket.emit('seats:selecting', { showId: activeShowId, seatIds: [] });
@@ -243,7 +249,6 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
     router.push(`/payment?showId=${activeShowId}&seats=${seatLabels.join(',')}`);
   };
 
-  // Real-time alert when locally selected seats get held/booked by someone else
   useEffect(() => {
     if (!activeShow) return;
     const newlyHeldByOthers = selectedSeats.filter(id => 
@@ -463,7 +468,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
       {/* --- BOOKING MODAL (Sliding Version) --- */}
       {showBookingModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
-           <div onClick={() => { setShowBookingModal(false); setSelectedSeats([]); }} className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
+           <div onClick={handleCloseModal} className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
            <div className="relative w-full max-w-5xl bg-[#0a0a0f] border border-white/10 rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-300">
               <div className="grid grid-cols-1 md:grid-cols-12">
                  {/* Left: Summary */}
@@ -488,7 +493,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                        </div>
                        <div className="flex items-center gap-4">
                           {modalStep === 'seats' && <Button onClick={() => setModalStep('times')} variant="outline" className="w-10 h-10 rounded-full bg-white/5 border-white/10 flex items-center justify-center p-0"><ChevronLeft className="w-5 h-5" /></Button>}
-                          <button onClick={() => { setShowBookingModal(false); setSelectedSeats([]); }} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition-all group"><X className="w-5 h-5 text-white/40 group-hover:text-white" /></button>
+                          <button onClick={handleCloseModal} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition-all group"><X className="w-5 h-5 text-white/40 group-hover:text-white" /></button>
                        </div>
                     </div>
 

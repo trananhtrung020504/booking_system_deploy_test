@@ -13,6 +13,8 @@
     "db:seed": "node src/scripts/seed.js",
     "db:fresh": "npx prisma migrate reset --force && node src/scripts/seed.js && node src/scripts/resetOS.js",
     "db:studio": "npx prisma studio",
+    "users:unlock": "node src/scripts/unlockUsers.js",
+    "users:patch-active": "node src/scripts/patchUserIsActive.js",
     "es:reset": "node src/scripts/resetOS.js"
   },
   "dependencies": {

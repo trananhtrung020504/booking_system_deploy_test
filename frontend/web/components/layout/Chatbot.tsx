@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Bot,
@@ -67,7 +67,7 @@ interface ChatMessage {
 const API_ROOT = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1/web').replace(/\/$/, '');
 const API_BASE_URL = `${API_ROOT}/chatbot`;
 const SLOW_RESPONSE_DELAY_MS = 3000;
-const SLOW_RESPONSE_NOTICE = 'Chatbot demo có thể mất vài giây để phản hồi do server đang chạy trên gói triển khai tiết kiệm. Cảm ơn bạn đã chờ.';
+const SLOW_RESPONSE_NOTICE = 'Hệ thống đang xử lý yêu cầu của bạn, vui lòng đợi trong giây lát.';
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -80,6 +80,7 @@ export default function Chatbot() {
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [currentFlow, setCurrentFlow] = useState<any | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const paymentPollsRef = useRef<Record<string, number>>({});
   const router = useRouter();
 
   // 1. Initialize thread and load chat history from backend
@@ -163,12 +164,88 @@ export default function Chatbot() {
 
   const dispatch = useAppDispatch();
 
+  const appendPaymentSuccessMessage = useCallback((data: { bookingId?: string; bookingRef: string; source?: 'socket' | 'polling' }) => {
+    console.info(`[Chatbot] Payment confirmed by ${data.source || 'unknown'}`, {
+      bookingId: data.bookingId,
+      bookingRef: data.bookingRef
+    });
+    toast.success(`Thanh toán thành công! Vé ${data.bookingRef} đã được xác nhận.`);
+
+    setMessages(prev => {
+      const alreadyNotified = prev.some(m => m.text.includes(`Giao dịch cho mã vé ${data.bookingRef} đã thành công`));
+      if (alreadyNotified) return prev;
+
+      return [...prev, {
+        id: 'msg_' + Date.now() + '_success',
+        sender: 'bot',
+        text: `🎉 Tuyệt vời! Giao dịch cho mã vé **${data.bookingRef}** đã thành công. Bạn có thể kiểm tra vé ở mục "Vé của tôi". Cảm ơn bạn đã đặt vé!`,
+      }];
+    });
+
+    if (data.bookingId && paymentPollsRef.current[data.bookingId]) {
+      window.clearInterval(paymentPollsRef.current[data.bookingId]);
+      delete paymentPollsRef.current[data.bookingId];
+    }
+
+    setIsOpen(true);
+    router.refresh();
+    dispatch(bookingAPI.util.invalidateTags(['Booking']));
+  }, [dispatch, router]);
+
+  const startPaymentStatusPolling = useCallback((bookingId?: string, bookingRef?: string) => {
+    if (!bookingId || paymentPollsRef.current[bookingId]) return;
+
+    let attempts = 0;
+    paymentPollsRef.current[bookingId] = window.setInterval(async () => {
+      attempts += 1;
+      try {
+        const response = await fetch(`${API_ROOT}/bookings/${bookingId}`, {
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          const booking = await response.json();
+          if (booking.status === 'CONFIRMED') {
+            appendPaymentSuccessMessage({
+              bookingId,
+              bookingRef: booking.bookingRef || bookingRef || bookingId,
+              source: 'polling'
+            });
+            return;
+          }
+
+          if (['CANCELLED', 'EXPIRED'].includes(booking.status)) {
+            window.clearInterval(paymentPollsRef.current[bookingId]);
+            delete paymentPollsRef.current[bookingId];
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('[Chatbot] Payment status polling error:', error);
+      }
+
+      if (attempts >= 120) {
+        window.clearInterval(paymentPollsRef.current[bookingId]);
+        delete paymentPollsRef.current[bookingId];
+      }
+    }, 3000);
+  }, [appendPaymentSuccessMessage]);
+
+  useEffect(() => {
+    return () => {
+      Object.values(paymentPollsRef.current).forEach((timerId) => window.clearInterval(timerId));
+      paymentPollsRef.current = {};
+    };
+  }, []);
+
   // Realtime Socket listener for payment success
   useEffect(() => {
     const socket = connectSocket();
 
     const handleBookingUpdate = (data: any) => {
       if (data.status === 'CONFIRMED' && data.bookingRef) {
+        appendPaymentSuccessMessage({ ...data, source: 'socket' });
+        return;
         toast.success(`Thanh toán thành công! Vé ${data.bookingRef} đã được xác nhận.`);
 
         setMessages(prev => {
@@ -197,7 +274,7 @@ export default function Chatbot() {
     return () => {
       socket.off('booking:updated', handleBookingUpdate);
     };
-  }, [dispatch, router]);
+  }, [appendPaymentSuccessMessage]);
 
   const loadDefaultGreeting = () => {
     setMessages([
@@ -590,7 +667,7 @@ export default function Chatbot() {
                       <p className="text-white/60 text-[10px] mt-1 font-mono uppercase tracking-widest">Mã vé: {msg.paymentData.bookingRef}</p>
                       <p className="text-primary font-bold mt-1 text-lg">{msg.paymentData.amount.toLocaleString('vi-VN')}đ</p>
                       <button
-                        onClick={() => window.open(msg.paymentData.checkoutBridgeUrl, '_blank')}
+                        onClick={() => window.open(msg.paymentData.qrImageUrl, '_blank')}
                         className="mt-3 w-full py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold text-[10px] uppercase tracking-widest transition-all"
                       >
                         Mở Cổng Thanh Toán
@@ -746,6 +823,7 @@ export default function Chatbot() {
             paymentData: payload
           };
           setMessages(prev => [...prev, newBotMessage]);
+          startPaymentStatusPolling(payload.bookingId, payload.bookingRef);
           setBookingModalOpen(false);
           // Show chat window if it was closed
           setIsOpen(true);

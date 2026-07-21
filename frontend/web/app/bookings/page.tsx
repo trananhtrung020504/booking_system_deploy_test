@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
-import { useGetUserBookingsQuery, useCancelBookingMutation, useConfirmBookingMutation } from '@/store/api/bookingAPI';
+import { useGetUserBookingsQuery, useCancelBookingMutation } from '@/store/api/bookingAPI';
 import { useAppSelector } from '@/store/hooks';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -64,10 +64,8 @@ function BookingsContent() {
     status: activeTab === 'ALL' ? undefined : activeTab
   });
   const [cancelBooking, { isLoading: isCancelling }] = useCancelBookingMutation();
-  const [confirmBooking] = useConfirmBookingMutation();
 
   const bookingIdParam = searchParams.get('bookingId');
-  const txParam = searchParams.get('tx');
 
   const handleTabChange = (tab: 'ALL' | 'CONFIRMED' | 'PENDING' | 'CANCELLED') => {
     setActiveTab(tab);
@@ -86,22 +84,44 @@ function BookingsContent() {
         duration: 8000
       });
       router.replace('/bookings');
-    } else if (statusParam === 'success' && bookingIdParam && txParam) {
-      // Mock webhook handling for local development since SePay can't reach localhost
-      const confirmLocal = async () => {
-        try {
-          await confirmBooking({ bookingId: bookingIdParam, transactionCode: txParam }).unwrap();
-          toast.success("Thanh toán thành công! Vé của bạn đã được xác nhận.");
-          refetch();
-        } catch (error) {
-          // Might already be confirmed or failed
-          refetch();
-        }
-        router.replace('/bookings');
+    } else if (statusParam === 'success' && bookingIdParam) {
+      // After payment redirect, poll the booking status.
+      // The SePay webhook handles the actual CONFIRMED transition server-side.
+      // We only need to refetch to reflect the latest status in the UI.
+      const pollStatus = async () => {
+        toast.info('Đang kiểm tra trạng thái thanh toán...', { duration: 3000 });
+
+        // Poll a few times to give webhook time to process
+        let attempts = 0;
+        const maxAttempts = 6;
+        const pollInterval = 2000; // 2 seconds
+
+        const poll = async () => {
+          attempts++;
+          const result = await refetch();
+          const booking = result.data?.bookings?.find((b: any) => b.id === bookingIdParam);
+
+          if (booking?.status === 'CONFIRMED') {
+            toast.success('Thanh toán thành công! Vé của bạn đã được xác nhận.');
+            router.replace('/bookings');
+            return;
+          }
+
+          if (attempts < maxAttempts) {
+            setTimeout(poll, pollInterval);
+          } else {
+            // Webhook may arrive later via Socket.IO — the Chatbot listener handles that
+            toast.info('Hệ thống đang xử lý thanh toán. Vé sẽ tự động cập nhật khi hoàn tất.', { duration: 5000 });
+            router.replace('/bookings');
+          }
+        };
+
+        await poll();
       };
-      confirmLocal();
+
+      pollStatus();
     }
-  }, [statusParam, bookingIdParam, txParam, confirmBooking, refetch, router]);
+  }, [statusParam, bookingIdParam, refetch, router]);
 
   const handleCancel = async (bookingId: string) => {
     try {

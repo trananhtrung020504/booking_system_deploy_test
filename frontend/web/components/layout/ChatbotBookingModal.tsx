@@ -21,6 +21,7 @@ interface ChatbotBookingModalProps {
     message: string;
     qrImageUrl: string;
     checkoutBridgeUrl: string;
+    bookingId: string;
     bookingRef: string;
     amount: number;
     movieTitle: string;
@@ -193,7 +194,13 @@ export default function ChatbotBookingModal({
 
       const nextMap: Record<string, string[]> = {};
       (payload.selecting || []).forEach((item: any) => {
-        nextMap[item.userId] = item.seatIds;
+        const itemUserId = String(item.userId);
+        const currentUserId = String(user?.id || '');
+        const currentGuestId = socket.id ? `guest-${socket.id}` : '';
+
+        if (itemUserId !== currentUserId && itemUserId !== currentGuestId) {
+          nextMap[item.userId] = item.seatIds;
+        }
       });
       setSelectingSeatsMap(nextMap);
     };
@@ -211,13 +218,16 @@ export default function ChatbotBookingModal({
       socket.emit('show:leave', selectedShowId);
       socket.emit('seats:selecting', { showId: selectedShowId, seatIds: [] });
     };
-  }, [open, selectedShowId]);
+  }, [open, selectedShowId, user?.id]);
 
   const isSeatBooked = (seatId: string) => bookedSeats.some((seat) => seat.seatId === seatId);
   const isSeatHeldByOthers = (seatId: string) =>
     heldSeats.some((seat) => seat.seatId === seatId && String(seat.userId) !== String(user?.id || ''));
-  const isSeatSelectingByOthers = (seatId: string) =>
-    Object.entries(selectingSeatsMap).some(([uid, seats]) => String(uid) !== String(user?.id || '') && seats.includes(seatId));
+  const isSeatSelectingByOthers = (seatId: string) => {
+    const socket = getSocket();
+    const currentGuestId = socket?.id ? `guest-${socket.id}` : '';
+    return Object.entries(selectingSeatsMap).some(([uid, seats]) => String(uid) !== String(user?.id || '') && String(uid) !== currentGuestId && seats.includes(seatId));
+  };
 
   const handleSeatClick = (seatId: string) => {
     if (isSeatBooked(seatId)) {
@@ -279,20 +289,18 @@ export default function ChatbotBookingModal({
 
       const checkoutBridgeUrl = `${API_ROOT}/payment/sepay/checkout/${bookingResponse.booking.id}`;
 
-      // Lấy mã giao dịch từ backend để làm nội dung chuyển khoản
       const transactionCode = paymentData.transactionCode || bookingResponse.booking.id;
-      // Lấy cấu hình bank từ biến môi trường
       const bankId = process.env.NEXT_PUBLIC_SEPAY_BANK_ID || 'ACB';
       const accountNo = process.env.NEXT_PUBLIC_SEPAY_ACCOUNT_NO || '7380071';
       const accountName = process.env.NEXT_PUBLIC_SEPAY_ACCOUNT_NAME || 'TRAN ANH TRUNG';
 
-      // Tạo mã VietQR qua hệ thống chính chủ của SePay
-      const qrImageUrl = `https://qr.sepay.vn/img?bank=${bankId}&acc=${accountNo}&template=compact&amount=${bookingResponse.booking.total}&des=${encodeURIComponent(transactionCode)}&holder=${encodeURIComponent(accountName)}`;
+      const qrImageUrl = paymentData.qrImageUrl || `https://qr.sepay.vn/img?bank=${bankId}&acc=${accountNo}&template=compact&amount=${bookingResponse.booking.total}&des=${encodeURIComponent(transactionCode)}&holder=${encodeURIComponent(accountName)}`;
 
       await onPaymentReady({
         message: `Mình đã tạo đơn đặt vé cho phim ${movie?.title}. Bạn có thể quét mã VietQR để thanh toán hoặc bấm mở cổng thanh toán.\n\n⚠️ Lưu ý: Mã QR này sẽ biến mất nếu bạn tải lại trang (để đảm bảo an toàn giao dịch). Nếu lỡ tải lại trang, bạn vui lòng vào mục "Vé của tôi" để tiếp tục thanh toán nhé!`,
         qrImageUrl,
         checkoutBridgeUrl,
+        bookingId: bookingResponse.booking.id,
         bookingRef: bookingResponse.booking.bookingRef,
         amount: bookingResponse.booking.total,
         movieTitle: movie?.title || TEXT.selectedShowFallback

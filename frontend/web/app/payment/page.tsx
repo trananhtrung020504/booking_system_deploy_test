@@ -194,7 +194,7 @@ function PaymentContent() {
           const res = await createBooking({
             showId,
             seatIds,
-            paymentMethod: 'VNPAY'
+            paymentMethod: 'SEPAY'
           }).unwrap();
 
           if (res.success && res.booking?.id) {
@@ -269,7 +269,7 @@ function PaymentContent() {
             clearInterval(interval);
             setShowQrModal(false);
             toast.success("Thanh toán thành công! Vé của bạn đã được xác nhận.");
-            router.push('/bookings?status=success');
+            router.push(`/bookings?status=success&bookingId=${bookingId}`);
           }
         } catch (e) {
           console.error("Payment status polling error:", e);
@@ -285,7 +285,7 @@ function PaymentContent() {
   useEffect(() => {
     if (booking && booking.status === 'CONFIRMED') {
       toast.success('Đơn hàng này đã được thanh toán thành công!');
-      router.replace('/bookings?status=success');
+      router.replace(`/bookings?status=success&bookingId=${booking.id}`);
     }
   }, [booking, router]);
 
@@ -359,21 +359,17 @@ function PaymentContent() {
       const paymentData = await paymentRes.json();
 
       if (paymentData.success) {
-        toast.info("Đang chuyển hướng sang cổng thanh toán an toàn...");
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = paymentData.checkoutURL;
+        const transactionCode = paymentData.transactionCode || booking.id;
+        const bankId = process.env.NEXT_PUBLIC_SEPAY_BANK_ID || 'ACB';
+        const accountNo = process.env.NEXT_PUBLIC_SEPAY_ACCOUNT_NO || '7380071';
+        const accountName = process.env.NEXT_PUBLIC_SEPAY_ACCOUNT_NAME || 'TRAN ANH TRUNG';
+        const qrUrl = paymentData.qrImageUrl || `https://qr.sepay.vn/img?bank=${bankId}&acc=${accountNo}&template=compact&amount=${booking.total}&des=${encodeURIComponent(transactionCode)}&holder=${encodeURIComponent(accountName)}`;
 
-        Object.keys(paymentData.checkoutFormfields).forEach(key => {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = key;
-          input.value = paymentData.checkoutFormfields[key];
-          form.appendChild(input);
-        });
-
-        document.body.appendChild(form);
-        form.submit();
+        setPaymentQrUrl(qrUrl);
+        setPaymentUrl(`${apiUrl}/payment/sepay/checkout/${booking.id}`);
+        setShowQrModal(true);
+        setIsProcessingPayment(false);
+        toast.info("Vui lòng quét mã QR và giữ nguyên trang này để hệ thống cập nhật trạng thái.");
       } else {
         toast.error(paymentData.message || 'Lỗi khởi tạo cổng thanh toán');
         setIsProcessingPayment(false);

@@ -18,6 +18,7 @@ model User {
   phone        String?
   password     String?
   role         Roles         @default(USER)
+  isActive     Boolean       @default(true)
   refreshToken String?
   avatar       UserAvatar?
   createdAt    DateTime      @default(now())
@@ -28,6 +29,7 @@ model User {
   chatThreads  ChatThread[]
   chatMessages ChatMessage[]
 
+  @@index([isActive])
   @@map("users")
 }
 

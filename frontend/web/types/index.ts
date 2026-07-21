@@ -4,6 +4,7 @@ export interface User {
   name: string | null;
   phone: string | null;
   role: 'ADMIN' | 'USER';
+  isActive: boolean;
   avatar: UserAvatar | null;
   createdAt: string;
   updatedAt: string;
@@ -244,11 +245,6 @@ export interface CreateBookingParams {
   combos?: { comboId: string; quantity: number }[];
 }
 
-export interface ConfirmBookingParams {
-  bookingId: string;
-  transactionCode?: string;
-}
-
 export interface CreateMovieParams {
   title: string;
   description: string;
@@ -333,21 +329,37 @@ export interface CancelBookingParams {
 }
 
 export interface BookingsReport {
-  totalBookings: number;
-  confirmedBookings: number;
-  pendingBookings: number;
-  cancelledBookings: number;
-  byDate?: { date: string; count: number }[];
-  byStatus?: { status: string; count: number }[];
-  byMovie?: { movieId: string; title: string; count: number }[];
+  groupBy: 'date' | 'status' | 'movie';
+  dateRange: string | Record<string, string>;
+  data: {
+    date?: string;
+    status?: string;
+    movieId?: string;
+    movieTitle?: string;
+    count: number;
+    revenue: number;
+    confirmed?: number;
+    pending?: number;
+  }[];
 }
 
 export interface RevenueReport {
-  totalRevenue: number;
-  ticketRevenue: number;
-  comboRevenue: number;
-  byDate?: { date: string; amount: number }[];
-  byTheater?: { theaterId: string; name: string; amount: number }[];
+  dateRange: string | Record<string, string>;
+  summary: {
+    totalRevenue: number;
+    transactionCount: number;
+    byPaymentMethod: Record<string, { count: number; amount: number }>;
+    byType: Record<string, { count: number; amount: number }>;
+    byDate: { date: string; amount: number; count: number }[];
+  };
+  transactions: {
+    transactionCode: string;
+    amount: number;
+    paymentMethod: string;
+    type: string;
+    createdAt: string;
+    user: { email: string; name: string | null };
+  }[];
 }
 
 export interface GetAdminMoviesParams {
@@ -483,6 +495,11 @@ export interface DashboardStats {
       total: number;
       totalRevenue: number;
     };
+  };
+  trends?: {
+    users: number | null;
+    revenue: number | null;
+    bookings: number | null;
   };
   topMovies: {
     id: string;

@@ -7,7 +7,7 @@ export const applyVoucher = async (req, res) => {
         const { code, amount } = req.body;
         if (!code || !amount) return res.status(400).json({ message: "Code and amount are required" });
 
-        const voucher = await prisma.voucher.findUnique({ where: { code, isActive: true } });
+        const voucher = await prisma.voucher.findFirst({ where: { code, isActive: true } });
         if (!voucher) return res.status(404).json({ message: "Voucher không tồn tại hoặc đã hết hạn" });
 
         if (voucher.expiresAt < new Date()) return res.status(400).json({ message: "Voucher đã hết hạn" });
@@ -30,12 +30,28 @@ export const applyVoucher = async (req, res) => {
 };
 
 export const createBooking = async (req, res) => {
-    const { showId, seatIds, paymentMethod, voucherCode, combos } = req.body;
+    const { showId, seatIds, voucherCode, combos } = req.body;
+    const paymentMethod = 'SEPAY';
     const userId = req.user.id;
+    const createdHoldKeys = [];
 
     try {
-        if (!showId || !seatIds || !Array.isArray(seatIds) || seatIds.length === 0 || !paymentMethod) {
+        if (!showId || !seatIds || !Array.isArray(seatIds) || seatIds.length === 0) {
             return res.status(400).json({ message: "Invalid input data" });
+        }
+
+        const show = await prisma.show.findUnique({ where: { id: showId }, include: { screen: true } });
+        if (!show || !show.isActive) return res.status(404).json({ message: "Show not found" });
+
+        const seats = await prisma.seat.findMany({
+            where: {
+                id: { in: seatIds },
+                screenId: show.screenId,
+                isActive: true
+            }
+        });
+        if (seats.length !== seatIds.length) {
+            return res.status(400).json({ message: "Một hoặc nhiều ghế không hợp lệ cho suất chiếu này." });
         }
 
         for (const seatId of seatIds) {
@@ -48,18 +64,11 @@ export const createBooking = async (req, res) => {
             }
         }
 
-        const expiresAt = Date.now() + 600 * 1000;
-        const holdValue = JSON.stringify({ userId, expiresAt });
-        for (const seatId of seatIds) {
-            await redis.set(`hold:${showId}:${seatId}`, holdValue, 'EX', 600);
-        }
-
-        const show = await prisma.show.findUnique({ where: { id: showId }, include: { screen: true } });
-        if (!show) return res.status(404).json({ message: "Show not found" });
-
-        const seats = await prisma.seat.findMany({ where: { id: { in: seatIds } } });
         let ticketAmount = 0;
         seats.forEach(seat => ticketAmount += (show.priceMap[seat.type] || show.priceMap['STANDARD'] || 0));
+        if (!Number.isFinite(ticketAmount) || ticketAmount <= 0) {
+            return res.status(400).json({ message: "Giá vé không hợp lệ." });
+        }
 
         let comboAmount = 0;
         let comboList = [];
@@ -67,7 +76,7 @@ export const createBooking = async (req, res) => {
             for (const c of combos) {
                 if (c.quantity <= 0) continue;
                 const comboData = await prisma.combo.findUnique({ where: { id: c.comboId } });
-                if (comboData) {
+                if (comboData && comboData.isActive) {
                     comboAmount += comboData.price * c.quantity;
                     comboList.push({ comboId: c.comboId, quantity: c.quantity });
                 }
@@ -79,7 +88,7 @@ export const createBooking = async (req, res) => {
         let voucherId = null;
 
         if (voucherCode) {
-            const voucher = await prisma.voucher.findUnique({ where: { code: voucherCode, isActive: true } });
+            const voucher = await prisma.voucher.findFirst({ where: { code: voucherCode, isActive: true } });
             if (voucher) {
                 if (voucher.expiresAt < new Date()) return res.status(400).json({ message: "Voucher đã hết hạn" });
                 if (totalBeforeVoucher < voucher.minOrder) return res.status(400).json({ message: "Đơn hàng không đủ điều kiện áp dụng voucher" });
@@ -95,6 +104,13 @@ export const createBooking = async (req, res) => {
         }
 
         const finalTotal = Math.max(0, totalBeforeVoucher - discountAmount);
+        const expiresAt = Date.now() + 600 * 1000;
+        const holdValue = JSON.stringify({ userId, expiresAt });
+        for (const seatId of seatIds) {
+            const key = `hold:${showId}:${seatId}`;
+            await redis.set(key, holdValue, 'EX', 600);
+            createdHoldKeys.push(key);
+        }
 
         const result = await prisma.$transaction(async (tx) => {
             const booked = await tx.booking.findMany({
@@ -135,52 +151,39 @@ export const createBooking = async (req, res) => {
 
         res.status(201).json({ success: true, booking: result });
     } catch (error) {
+        for (const key of createdHoldKeys) {
+            try {
+                const value = await redis.get(key);
+                if (value) {
+                    const parsed = JSON.parse(value);
+                    if (String(parsed.userId) === String(userId)) {
+                        await redis.del(key);
+                    }
+                }
+            } catch (_) {
+                await redis.del(key);
+            }
+        }
         console.error(`[Controller Error] [web/bookingController.js]:`, error);
         res.status(400).json({ message: error.message });
     }
 };
 
 export const confirmBooking = async (req, res) => {
-    const { bookingId, transactionCode } = req.body;
+    const { bookingId } = req.body;
     const userId = req.user.id;
     try {
         const booking = await prisma.booking.findFirst({
-            where: { id: bookingId, userId, status: 'PENDING' },
-            include: { seats: true }
+            where: { id: bookingId, userId },
+            include: {
+                show: { include: { movie: { include: { poster: true } }, theater: true, screen: true } },
+                seats: true,
+                transaction: true
+            }
         });
         if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-        const updatedBooking = await prisma.booking.update({
-            where: { id: bookingId },
-            data: { status: 'CONFIRMED', paymentId: transactionCode || null },
-            include: { show: { include: { movie: { include: { poster: true } }, theater: true, screen: true } }, seats: true }
-        });
-
-        if (transactionCode) {
-            await prisma.transaction.updateMany({
-                where: { transactionCode, status: 'PENDING' },
-                data: {
-                    status: 'PAID',
-                    paidAt: new Date(),
-                    transactionNo: transactionCode
-                }
-            });
-        }
-
-        for (const seat of booking.seats) await redis.del(`hold:${booking.showId}:${seat.id}`);
-        await prisma.seatHold.deleteMany({ where: { showId: booking.showId, userId } });
-
-        const io = req.app.get('io');
-        if (io) {
-            await emitShowUpdate(io, booking.showId);
-            emitBookingUpdate(io, userId, {
-                bookingId: updatedBooking.id,
-                bookingRef: updatedBooking.bookingRef,
-                status: 'CONFIRMED',
-                source: 'booking_confirmed'
-            });
-        }
-        res.json({ success: true, booking: updatedBooking });
+        res.json({ success: true, booking });
     } catch (error) {
         console.error(`[Controller Error] [web/bookingController.js]:`, error);
         res.status(500).json({ message: error.message });
@@ -375,7 +378,23 @@ export const holdSeats = async (req, res) => {
             return res.status(400).json({ message: "Invalid input data" });
         }
 
-        const expiresAt = Date.now() + 600 * 1000; // 10 minutes (matching payment page 600s)
+        const show = await prisma.show.findUnique({ where: { id: showId } });
+        if (!show || !show.isActive) {
+            return res.status(404).json({ message: "Show not found" });
+        }
+
+        const validSeats = await prisma.seat.count({
+            where: {
+                id: { in: seatIds },
+                screenId: show.screenId,
+                isActive: true
+            }
+        });
+        if (validSeats !== seatIds.length) {
+            return res.status(400).json({ message: "Một hoặc nhiều ghế không hợp lệ cho suất chiếu này." });
+        }
+
+        const expiresAt = Date.now() + 600 * 1000; // 10 minutes
         const holdValue = JSON.stringify({ userId, expiresAt });
 
         const bookings = await prisma.booking.findMany({

@@ -27,6 +27,9 @@ export const login = async (req, res) => {
         if (!user) {
             return res.status(400).json({ message: "Email not found. Please signup first." });
         }
+        if (!user.isActive) {
+            return res.status(403).json({ message: "Account is locked" });
+        }
         const isPasswordValid = await bcrypt.compare(password, user.password || '');
         if (!isPasswordValid) {
             return res.status(401).json({ message: "Invalid password" });
@@ -143,6 +146,11 @@ export const refreshToken = async (req, res) => {
             return res.status(401).json({ message: "Refresh token mismatch" });
         }
 
+        if (!user.isActive) {
+            await TokenUtils.deleteRefreshToken(user.id);
+            return res.status(403).json({ message: "Account is locked" });
+        }
+
         const { accessToken, refreshToken } = TokenUtils.generateTokens({ id: user.id, email: user.email });
         await TokenUtils.storeRefreshToken(user.id, refreshToken);
 
@@ -165,6 +173,10 @@ export const getMe = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
+        }
+
+        if (!user.isActive) {
+            return res.status(403).json({ message: "Account is locked" });
         }
 
         const { password, refreshToken, ...safeUser } = user;

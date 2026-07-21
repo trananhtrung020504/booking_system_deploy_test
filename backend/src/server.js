@@ -41,7 +41,11 @@ const corsOption = {
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(morgan('dev'));
-app.use(express.json());
+app.use(express.json({
+    verify: (req, res, buf) => {
+        req.rawBody = buf.toString('utf8');
+    }
+}));
 app.use(cors(corsOption));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -103,4 +107,3 @@ process.on('SIGTERM', async () => {
     server.close();
     process.exit(0);
 });
-

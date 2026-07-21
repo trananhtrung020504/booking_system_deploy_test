@@ -1,6 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithRefresh } from '@/lib/baseQuery';
-import type { Booking, BookingsResponse, CreateBookingParams, ConfirmBookingParams } from '@/types';
+import type { Booking, BookingsResponse, CreateBookingParams } from '@/types';
 
 export const bookingAPI = createApi({
   reducerPath: 'bookingAPI',
@@ -10,14 +10,6 @@ export const bookingAPI = createApi({
     createBooking: builder.mutation<{ success: boolean; message: string; booking: Booking }, CreateBookingParams>({
       query: (body) => ({
         url: '/bookings/create',
-        method: 'POST',
-        body,
-      }),
-      invalidatesTags: ['Booking'],
-    }),
-    confirmBooking: builder.mutation<{ success: boolean; message: string; booking: Booking }, ConfirmBookingParams>({
-      query: (body) => ({
-        url: '/bookings/confirm',
         method: 'POST',
         body,
       }),
@@ -64,7 +56,6 @@ export const bookingAPI = createApi({
 
 export const {
   useCreateBookingMutation,
-  useConfirmBookingMutation,
   useGetUserBookingsQuery,
   useGetBookingDetailQuery,
   useCancelBookingMutation,

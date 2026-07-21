@@ -10,6 +10,7 @@ import { adminMovieAPI } from './api/adminMovieAPI';
 import { adminTheaterAPI } from './api/adminTheaterAPI';
 import { adminShowAPI } from './api/adminShowAPI';
 import { adminBookingAPI } from './api/adminBookingAPI';
+import { adminUserAPI } from './api/adminUserAPI';
 import { authSlice } from './slice/authSlice';
 import { bookingSlice } from './slice/bookingSlice';
 import { adminSlice } from './slice/adminSlice';
@@ -49,6 +50,7 @@ export const makeStore = () => {
       [adminTheaterAPI.reducerPath]: adminTheaterAPI.reducer,
       [adminShowAPI.reducerPath]: adminShowAPI.reducer,
       [adminBookingAPI.reducerPath]: adminBookingAPI.reducer,
+      [adminUserAPI.reducerPath]: adminUserAPI.reducer,
       ui: uiSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
@@ -67,6 +69,7 @@ export const makeStore = () => {
         adminTheaterAPI.middleware,
         adminShowAPI.middleware,
         adminBookingAPI.middleware,
+        adminUserAPI.middleware,
         rtkQueryLoadingMiddleware
       ),
   });

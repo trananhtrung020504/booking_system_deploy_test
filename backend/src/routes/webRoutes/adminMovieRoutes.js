@@ -9,10 +9,10 @@ router.use(verifyAdminRole);
 
 router.post('/', uploadPoster.single('poster'), adminMovieController.createMovie);
 router.get('/', adminMovieController.getAllMovies);
+router.delete('/:id/hard', adminMovieController.hardDeleteMovie); // Permanent delete
+router.get('/:id/analytics', adminMovieController.getMovieAnalytics);
 router.get('/:id', adminMovieController.getMovieById);
 router.put('/:id', uploadPoster.single('poster'), adminMovieController.updateMovie);
 router.delete('/:id', adminMovieController.deleteMovie); // Soft delete
-router.delete('/:id/hard', adminMovieController.hardDeleteMovie); // Permanent delete
-router.get('/:id/analytics', adminMovieController.getMovieAnalytics);
 
 export default router;

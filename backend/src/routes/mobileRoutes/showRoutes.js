@@ -4,7 +4,7 @@ import * as showController from '../../controllers/mobile/showController.js';
 const router = express.Router();
 
 router.get('/', showController.getShows);
-router.get('/:id', showController.getShow);
 router.get('/movie/:movieId', showController.getShowsByMovie);
+router.get('/:id', showController.getShow);
 
 export default router;

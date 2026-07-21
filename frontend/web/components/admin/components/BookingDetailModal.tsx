@@ -19,6 +19,13 @@ export default function BookingDetailModal({ bookingId, onClose }: BookingDetail
   const [reason, setReason] = useState('');
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
+  const getStatusLabel = (status: string) => {
+    if (status === 'CONFIRMED') return 'Đã thanh toán';
+    if (status === 'PENDING') return 'Chờ thanh toán';
+    if (status === 'EXPIRED') return 'Hết hạn';
+    return 'Đã hủy';
+  };
+
   const handleCancel = async () => {
     try {
       await cancelBooking({ id: bookingId, data: { reason } }).unwrap();
@@ -204,7 +211,7 @@ export default function BookingDetailModal({ bookingId, onClose }: BookingDetail
                     ? 'bg-amber-500/20 text-amber-500 border-amber-500/30'
                     : 'bg-destructive/20 text-destructive border-destructive/30'
                 }`}>
-                  {booking.status === 'CONFIRMED' ? 'Đã thanh toán' : booking.status === 'PENDING' ? 'Chờ thanh toán' : 'Đã hủy'}
+                  {getStatusLabel(booking.status)}
                 </span>
               </div>
             </div>

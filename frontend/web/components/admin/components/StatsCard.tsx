@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
 
 interface StatsCardProps {
   label: string;
@@ -7,48 +8,61 @@ interface StatsCardProps {
   icon: ReactNode;
   trend?: string;
   trendIsDown?: boolean;
+  trendIsUnavailable?: boolean;
 }
 
 const colorClasses = {
-  blue: 'text-primary',
-  purple: 'text-rose-500',
-  green: 'text-emerald-500',
-  orange: 'text-orange-500',
-  red: 'text-destructive',
-  gold: 'text-cinema-gold',
+  blue: 'text-sky-400 bg-sky-400/10 border-sky-400/15',
+  purple: 'text-fuchsia-400 bg-fuchsia-400/10 border-fuchsia-400/15',
+  green: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/15',
+  orange: 'text-orange-400 bg-orange-400/10 border-orange-400/15',
+  red: 'text-rose-400 bg-rose-400/10 border-rose-400/15',
+  gold: 'text-cinema-gold bg-cinema-gold/10 border-cinema-gold/15',
 };
 
-export default function StatsCard({ label, value, color, icon, trend, trendIsDown }: StatsCardProps) {
+export default function StatsCard({
+  label,
+  value,
+  color,
+  icon,
+  trend,
+  trendIsDown,
+  trendIsUnavailable,
+}: StatsCardProps) {
+  const TrendIcon = trendIsUnavailable ? Minus : trendIsDown ? ArrowDownRight : ArrowUpRight;
+
   return (
-    <div className="bg-card/40 backdrop-blur-md rounded-3xl p-6 border border-border/50 transition-all hover:scale-[1.02] duration-300 shadow-xl shadow-black/10 flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <div className={`p-3 rounded-2xl bg-muted/50 ${colorClasses[color === 'blue' ? 'gold' : color]}`}>
+    <div className="rounded-2xl border border-border/60 bg-card/45 p-5 shadow-lg shadow-black/10 transition-colors hover:border-primary/25">
+      <div className="flex items-start justify-between gap-4">
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${colorClasses[color]}`}>
           {icon}
         </div>
+
         {trend && (
-          <span className={`text-xs font-black px-2 py-1 rounded-lg ${trendIsDown ? 'bg-destructive/10 text-destructive' : 'bg-green-500/10 text-green-500'}`}>
+          <div
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black ${
+              trendIsUnavailable
+                ? 'bg-muted text-muted-foreground'
+                : trendIsDown
+                  ? 'bg-rose-500/10 text-rose-400'
+                  : 'bg-emerald-500/10 text-emerald-400'
+            }`}
+          >
+            <TrendIcon className="h-3.5 w-3.5" />
             {trend}
-          </span>
+          </div>
         )}
       </div>
-      
-      <div>
-        <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-1">{label}</p>
-        <p className="text-2xl font-black text-foreground">{value}</p>
+
+      <div className="mt-5">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+        <p className="mt-2 text-3xl font-black tracking-tight text-foreground">{value}</p>
       </div>
 
-      {/* Sparkline chart placeholder */}
-      <div className="mt-4 h-8 w-full overflow-hidden">
-        <svg viewBox="0 0 100 20" className="w-full h-full preserve-3d">
-          <path
-            d={trendIsDown ? "M0 5 Q 25 15, 50 10 T 100 18" : "M0 15 Q 25 5, 50 12 T 100 2"}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className={trendIsDown ? 'text-destructive' : 'text-green-500'}
-            strokeLinecap="round"
-          />
-        </svg>
+      <div className="mt-5 border-t border-border/50 pt-3">
+        <p className="text-xs font-medium text-muted-foreground">
+          {trend ? 'So với kỳ báo cáo trước' : 'Tổng lũy kế trong hệ thống'}
+        </p>
       </div>
     </div>
   );

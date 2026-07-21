@@ -19,14 +19,29 @@ export const getSocket = (): Socket => {
     const url = resolveSocketUrl();
     console.log('Initializing socket with URL:', url);
     socket = io(url, {
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'],
       withCredentials: true,
       autoConnect: false,
       reconnection: true,
     });
 
-    socket.on('connect_error', (err) => {
-      console.error('Socket connect error:', err.message);
+    socket.on('connect', () => {
+      console.info('Socket connected:', socket?.id, 'transport:', socket?.io.engine.transport.name);
+      socket?.io.engine.once('upgrade', (transport) => {
+        console.info('Socket transport upgraded:', transport.name);
+      });
+    });
+
+    socket.on('disconnect', (reason) => {
+      console.warn('Socket disconnected:', reason);
+    });
+
+    socket.on('connect_error', (err: any) => {
+      console.error('Socket connect error:', {
+        message: err.message,
+        description: err.description,
+        context: err.context,
+      });
     });
   }
   return socket;

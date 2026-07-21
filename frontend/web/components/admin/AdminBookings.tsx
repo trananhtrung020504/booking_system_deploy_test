@@ -51,6 +51,13 @@ export default function AdminBookings() {
     dispatch(setBookingPageNum(1));
   };
 
+  const getStatusLabel = (status: string) => {
+    if (status === 'CONFIRMED') return 'Thành công';
+    if (status === 'PENDING') return 'Chờ thanh toán';
+    if (status === 'EXPIRED') return 'Hết hạn';
+    return 'Đã hủy';
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -196,7 +203,7 @@ export default function AdminBookings() {
                               ? 'text-amber-500'
                               : 'text-destructive'
                           }`}>
-                            {booking.status === 'CONFIRMED' ? 'Thành công' : booking.status === 'PENDING' ? 'Chờ thanh toán' : 'Đã hủy'}
+                            {getStatusLabel(booking.status)}
                           </span>
                         </div>
                       </td>

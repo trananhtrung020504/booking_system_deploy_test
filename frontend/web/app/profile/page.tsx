@@ -2,7 +2,7 @@
 
 import { useAppSelector } from '@/store/hooks';
 import { useRouter } from 'next/navigation';
-import { User, Mail, ShieldAlert, Award, Calendar, DollarSign, Sparkles, MapPin, Phone, LogIn, ChevronLeft } from 'lucide-react';
+import { User, Mail, ShieldAlert, Award, Calendar, Phone, LogIn, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -24,7 +24,7 @@ export default function ProfilePage() {
             </div>
             <div className="space-y-2">
               <h2 className="text-xl font-bold uppercase tracking-tight">Yêu cầu đăng nhập</h2>
-              <p className="text-xs text-white/50 leading-relaxed">Vui lòng đăng nhập tài khoản của bạn để truy cập trang cá nhân và xem các thông tin thành viên đặc quyền.</p>
+              <p className="text-xs text-white/50 leading-relaxed">Vui lòng đăng nhập tài khoản của bạn để truy cập trang cá nhân và xem các thông tin thành viên.</p>
             </div>
             <Link href="/login" className="w-full">
               <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-primary to-[#ff4b4b] text-white font-bold uppercase tracking-wider text-xs shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-2">
@@ -52,13 +52,10 @@ export default function ProfilePage() {
         >
           <ChevronLeft className="w-4 h-4" /> Quay lại
         </Button>
-        <Badge className="bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 uppercase px-3 py-1 font-bold text-[10px] tracking-widest rounded-lg flex items-center gap-1.5 shadow-lg shadow-primary/10">
-          <Sparkles className="w-3 h-3 animate-pulse" /> Thành viên đặc quyền
-        </Badge>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
-        {/* Left Card - Quick Avatar & Tier Info */}
+        {/* Left Card - Avatar & Basic Info */}
         <div className="space-y-6">
           <Card className="bg-[#0d0d15]/80 border border-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl relative">
             <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-r from-primary/30 to-[#ff4b4b]/10 blur-xl opacity-30" />
@@ -77,50 +74,14 @@ export default function ProfilePage() {
               </h3>
               <p className="text-xs font-semibold text-white/40 mb-4">{user.email}</p>
 
-              <Badge className="bg-gradient-to-r from-[#fceabb] to-[#f8d49d] text-zinc-950 px-4 py-1.5 rounded-full font-extrabold uppercase text-[10px] tracking-wider border-none shadow-xl">
-                Cấp độ: Vàng (Gold)
+              <Badge className="bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 uppercase px-4 py-1.5 rounded-full font-bold text-[10px] tracking-wider">
+                Thành viên
               </Badge>
-
-              <div className="w-full border-t border-white/5 my-6" />
-
-              <div className="grid grid-cols-2 gap-4 w-full">
-                <div className="bg-white/5 border border-white/5 rounded-2xl p-4 text-left">
-                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-wider block mb-1">Điểm thưởng</span>
-                  <span className="text-lg font-black text-white">2,500 <span className="text-xs font-bold text-primary">R-pts</span></span>
-                </div>
-                <div className="bg-white/5 border border-white/5 rounded-2xl p-4 text-left">
-                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-wider block mb-1">Chi tiêu</span>
-                  <span className="text-lg font-black text-white">1.8Mđ</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Exclusive Vouchers preview */}
-          <Card className="bg-[#0d0d15]/50 border border-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl">
-            <CardContent className="p-6 space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-white/40">Voucher Độc Quyền</h4>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3.5 bg-gradient-to-r from-primary/10 to-transparent border border-primary/20 rounded-2xl">
-                  <div>
-                    <span className="text-xs font-bold text-white block uppercase">VOUCHER 20% OFF</span>
-                    <span className="text-[10px] text-white/40 block mt-0.5">Hạn dùng: 31/12/2026</span>
-                  </div>
-                  <Badge variant="outline" className="border-primary/30 text-primary text-[9px] font-black tracking-wider uppercase px-2 py-0.5">GIAM20</Badge>
-                </div>
-                <div className="flex items-center justify-between p-3.5 bg-white/5 border border-white/5 rounded-2xl opacity-60">
-                  <div>
-                    <span className="text-xs font-bold text-white block uppercase">COMBO BẮP NƯỚC FREE</span>
-                    <span className="text-[10px] text-white/40 block mt-0.5">Áp dụng khi mua từ 2 vé</span>
-                  </div>
-                  <Badge variant="outline" className="border-white/20 text-white/60 text-[9px] font-black tracking-wider uppercase px-2 py-0.5">FREEPOP</Badge>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Right Cards - Detailed Info & Loyalty Level details */}
+        {/* Right Cards - Detailed Info */}
         <div className="lg:col-span-2 space-y-6">
           <Card className="bg-[#0d0d15]/80 border border-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl">
             <CardContent className="p-8 space-y-6">
@@ -142,7 +103,7 @@ export default function ProfilePage() {
                     <input 
                       type="text" 
                       readOnly 
-                      value={user.name || 'Người dùng RoPhim'} 
+                      value={user.name || 'Chưa cập nhật'}
                       className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-12 pr-4 text-xs font-bold text-white outline-none focus:ring-1 focus:ring-primary/50" 
                     />
                   </div>
@@ -168,20 +129,20 @@ export default function ProfilePage() {
                     <input 
                       type="text" 
                       readOnly 
-                      value={user.phone || '090 123 4567'} 
+                      value={user.phone || 'Chưa cập nhật'}
                       className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-12 pr-4 text-xs font-bold text-white outline-none" 
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-white/30 uppercase tracking-wider block">Khu vực ưu thích</label>
+                  <label className="text-[10px] font-bold text-white/30 uppercase tracking-wider block">Ngày tham gia</label>
                   <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
                     <input 
                       type="text" 
                       readOnly 
-                      value="TP. Hồ Chí Minh" 
+                      value={user.createdAt ? new Date(user.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A'}
                       className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-12 pr-4 text-xs font-bold text-white outline-none" 
                     />
                   </div>
@@ -201,33 +162,6 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <Button variant="outline" className="border-white/10 hover:bg-white/5 text-[10px] font-bold uppercase tracking-wider px-6 py-2.5 h-auto transition-all">Đổi mật khẩu</Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Membership tier benefits progress */}
-          <Card className="bg-[#0d0d15]/80 border border-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl">
-            <CardContent className="p-8 space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                  <Award className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold uppercase tracking-wide">Tiến trình nâng cấp hội viên</h3>
-                  <p className="text-[10px] text-white/40 uppercase tracking-widest font-semibold mt-0.5">Đặt thêm vé để thăng hạng Platinum nhận thêm ưu đãi</p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex justify-between text-xs font-bold">
-                  <span className="text-white/40">VÀNG (GOLD)</span>
-                  <span className="text-primary font-black">75% (Còn 200,000đ nữa)</span>
-                  <span className="text-white/40">BẠCH KIM (PLATINUM)</span>
-                </div>
-                <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden border border-white/10 shadow-inner">
-                  <div className="h-full bg-gradient-to-r from-primary to-[#ff4b4b] rounded-full shadow-[0_0_15px_rgba(229,9,20,0.5)]" style={{ width: '75%' }} />
-                </div>
-                <p className="text-[10px] text-white/40 italic leading-relaxed text-center">Đặc quyền hội viên Platinum: Tích lũy 10% điểm thưởng trên mọi giao dịch, tặng bắp nước miễn phí vào ngày sinh nhật, được ưu tiên đặt trước các phim bom tấn hot nhất.</p>
               </div>
             </CardContent>
           </Card>

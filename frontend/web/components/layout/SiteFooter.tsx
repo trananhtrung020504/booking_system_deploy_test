@@ -35,7 +35,7 @@ export default function SiteFooter() {
               </div>
             </Link>
             <p className="max-w-md text-sm leading-7 text-white/45">
-              Giao diện đang được làm theo hướng website rạp chiếu phim hiện đại: có nội dung quảng bá, cảm giác hoạt động liên tục và nhiều điểm chạm trực quan hơn.
+              Nền tảng đặt vé xem phim trực tuyến hàng đầu — trải nghiệm điện ảnh đỉnh cao với công nghệ đặt chỗ thời gian thực và thanh toán an toàn.
             </p>
             <div className="grid gap-3 text-sm text-white/55">
               <div className="flex items-center gap-3">
@@ -44,11 +44,11 @@ export default function SiteFooter() {
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-cinema-gold" />
-                <span>Hotline mô phỏng: 1900 6017</span>
+                <span>Hotline: 1900 6017</span>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="h-4 w-4 text-cinema-gold" />
-                <span>support@rophim.local</span>
+                <span>support@rophim.vn</span>
               </div>
             </div>
           </div>
@@ -81,25 +81,25 @@ export default function SiteFooter() {
           </div>
 
           <div className="rounded-[2rem] border border-white/8 bg-white/4 p-6">
-            <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-cinema-gold">Campaign mock</div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-cinema-gold">Ưu đãi nổi bật</div>
             <h3 className="mt-3 text-2xl font-bold uppercase tracking-tight text-white">
-              Khối quảng bá để site trông sinh động hơn
+              Đặt vé online — nhận ngay voucher giảm giá
             </h3>
             <p className="mt-3 text-sm leading-6 text-white/45">
-              Bạn có thể giữ footer này như nơi cắm newsletter, app download, campaign hoặc social proof sau khi backend hoàn thiện hơn.
+              Đăng ký thành viên RoPhim để nhận ưu đãi độc quyền, tích điểm đổi quà và cập nhật lịch chiếu sớm nhất.
             </p>
             <Link
               href="/promotions"
               className={cn(buttonVariants({ variant: 'default' }), 'mt-6 h-12 rounded-full bg-white text-[11px] font-semibold text-black hover:bg-cinema-gold')}
             >
-              Xem khu khuyến mãi
+              Khám phá ưu đãi
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </div>
         </div>
 
         <div className="mt-10 border-t border-white/8 pt-5 text-xs text-white/35">
-          © 2026 RoPhim local showcase. Giao diện demo nâng cấp để mô phỏng sản phẩm hoàn chỉnh hơn.
+          © 2026 RoPhim. Hệ thống đặt vé xem phim trực tuyến. Bảo lưu mọi quyền.
         </div>
       </div>
     </footer>

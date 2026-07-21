@@ -8,11 +8,11 @@ router.use(verifyAdminRole);
 
 router.post('/', adminShowController.createShow);
 router.get('/', adminShowController.getAllShows);
-router.get('/:id', adminShowController.getShowById);
-router.put('/:id', adminShowController.updateShow);
-router.delete('/:id', adminShowController.deleteShow); // Soft delete
 router.delete('/:id/hard', adminShowController.hardDeleteShow); // Permanent delete
 router.get('/:id/analytics', adminShowController.getShowAnalytics);
 router.get('/:id/seats-status', adminShowController.getShowSeatsStatus);
+router.get('/:id', adminShowController.getShowById);
+router.put('/:id', adminShowController.updateShow);
+router.delete('/:id', adminShowController.deleteShow); // Soft delete
 
 export default router;

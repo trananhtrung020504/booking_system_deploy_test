@@ -10,7 +10,7 @@ export const verifyAdminRole = async (req, res, next) => {
 
         const user = await prisma.user.findUnique({
             where: { id: req.user.id },
-            select: { id: true, email: true, role: true }
+            select: { id: true, email: true, role: true, isActive: true }
         });
 
         if (!user) {
@@ -22,6 +22,10 @@ export const verifyAdminRole = async (req, res, next) => {
                 message: "Forbidden: Admin access required",
                 role: user.role 
             });
+        }
+
+        if (!user.isActive) {
+            return res.status(403).json({ message: "Account is locked" });
         }
 
         req.admin = user;

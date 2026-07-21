@@ -49,7 +49,6 @@ export default function BookingPage({ params }: { params: Promise<{ showId: stri
     if (!isAuthLoading && !isAuthenticated) router.replace('/login');
   }, [isAuthLoading, isAuthenticated, router]);
 
-  // Tự động hủy và giải phóng ghế đang "Chờ thanh toán" cũ của suất này duy nhất 1 lần khi người dùng quay lại trang chọn ghế
   const hasCleanedUpRef = useRef(false);
 
   useEffect(() => {
@@ -65,7 +64,6 @@ export default function BookingPage({ params }: { params: Promise<{ showId: stri
         try {
           await cancelBooking(pending.id).unwrap();
           refetchUserBookings();
-          // Refetch show data to get fresh seat status after cancel
           await refetchShow();
           toast.info("Đơn hàng đang chờ thanh toán trước đó đã được tự động giải phóng để bạn chọn lại ghế mới!");
         } catch (err) {
@@ -74,7 +72,6 @@ export default function BookingPage({ params }: { params: Promise<{ showId: stri
       };
       autoRelease();
     } else if (userBookingsData) {
-      // Đánh dấu đã dọn dẹp xong (hoặc không có gì để dọn dẹp) để không ảnh hưởng đến đơn hàng mới tạo
       hasCleanedUpRef.current = true;
     }
   }, [userBookingsData, showId, cancelBooking, refetchUserBookings, refetchShow, isCancellingBooking]);
@@ -94,14 +91,18 @@ export default function BookingPage({ params }: { params: Promise<{ showId: stri
       if (data.selecting) {
         const map: Record<string, string[]> = {};
         data.selecting.forEach((item: any) => {
-          if (String(item.userId) !== String(user?.id || '')) {
+          const itemUserId = String(item.userId);
+          const currentUserId = String(user?.id || '');
+          const currentGuestId = socket.id ? `guest-${socket.id}` : '';
+
+          if (itemUserId !== currentUserId && itemUserId !== currentGuestId) {
             map[item.userId] = item.seatIds;
           }
         });
         setOthersSelecting(map);
       }
     });
-    
+
     socket.on('global:notification', (data: { message: string; type: string }) => {
       if (data.type === 'success') toast.success(data.message, { duration: 5000 });
       else toast.info(data.message);
@@ -117,6 +118,7 @@ export default function BookingPage({ params }: { params: Promise<{ showId: stri
     });
 
     return () => {
+      socket.emit('seats:selecting', { showId, seatIds: [] });
       socket.emit('show:leave', showId);
       socket.off('show:seats-update');
       socket.off('global:notification');
@@ -125,36 +127,33 @@ export default function BookingPage({ params }: { params: Promise<{ showId: stri
     };
   }, [isAuthenticated, showId, dispatch, user?.id]);
 
-  // Auto-refetch seat status periodically as backup for socket updates (handles timeout bookings & network issues)
   useEffect(() => {
     if (!isAuthenticated || !showId) return;
 
     const interval = setInterval(() => {
-      console.log('🔄 Periodic show data refresh...');
       refetchShow();
-    }, 30000); // Refetch every 30 seconds
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [isAuthenticated, showId, refetchShow]);
 
-  // Real-time alert khi ghế đang chọn cục bộ bị người khác giữ/đặt mất
   useEffect(() => {
     if (!show) return;
-    const newlyHeldByOthers = localSelectedSeats.filter(id => 
+    const newlyHeldByOthers = localSelectedSeats.filter(id =>
       seatStatus?.booked.some(b => b.seatId === id) ||
       seatStatus?.held.some(h => h.seatId === id && String(h.userId) !== String(user?.id || '') && h.expiresAt > Date.now())
     );
     if (newlyHeldByOthers.length > 0) {
       const remainingSeats = localSelectedSeats.filter(id => !newlyHeldByOthers.includes(id));
       setLocalSelectedSeats(remainingSeats);
-      
+
       socketRef.current?.emit('seats:selecting', { showId, seatIds: remainingSeats });
-      
+
       const labels = newlyHeldByOthers.map(id => {
         const s = show?.screen?.seats?.find(st => st.id === id);
         return s ? `${s.row}${s.column}` : id;
       });
-      
+
       toast.info(`Ghế ${labels.join(', ')} vừa mới được người khác đặt hoặc giữ thanh toán!`);
     }
   }, [seatStatus?.held, seatStatus?.booked, show, user?.id, localSelectedSeats, showId]);
@@ -166,10 +165,10 @@ export default function BookingPage({ params }: { params: Promise<{ showId: stri
     const heldOther = seatStatus?.held.some(h => h.seatId === seat.id && h.userId !== user?.id && h.expiresAt > Date.now());
     if (booked || heldOther || !seat.isActive) return;
 
-    const newSeats = localSelectedSeats.includes(seat.id) 
-      ? localSelectedSeats.filter(id => id !== seat.id) 
+    const newSeats = localSelectedSeats.includes(seat.id)
+      ? localSelectedSeats.filter(id => id !== seat.id)
       : localSelectedSeats.length >= 8 ? localSelectedSeats : [...localSelectedSeats, seat.id];
-    
+
     setLocalSelectedSeats(newSeats);
     socketRef.current?.emit('seats:selecting', { showId, seatIds: newSeats });
   };
@@ -201,7 +200,7 @@ export default function BookingPage({ params }: { params: Promise<{ showId: stri
 
     const baseTotal = ticketTotal + comboTotal;
     const finalTotal = Math.max(0, baseTotal - discount);
-    
+
     return { ticketTotal, comboTotal, baseTotal, finalTotal };
   };
 
@@ -222,10 +221,10 @@ export default function BookingPage({ params }: { params: Promise<{ showId: stri
 
   const handleBooking = async () => {
     try {
-      const res = await createBooking({ 
-        showId, 
-        seatIds: localSelectedSeats, 
-        paymentMethod: 'VNPAY',
+      const res = await createBooking({
+        showId,
+        seatIds: localSelectedSeats,
+        paymentMethod: 'SEPAY',
         voucherCode: appliedVoucher || undefined,
         combos: Object.entries(selectedCombos).filter(([_, qty]) => qty > 0).map(([id, qty]) => ({ comboId: id, quantity: qty }))
       }).unwrap();
@@ -297,13 +296,13 @@ export default function BookingPage({ params }: { params: Promise<{ showId: stri
                   const heldByMe = seatStatus?.held.some(h => h.seatId === seat.id && h.userId === user?.id && h.expiresAt > Date.now());
                   const selectingByOther = allOthersSelecting.includes(seat.id);
                   const selected = localSelectedSeats.includes(seat.id) || heldByMe;
-                  
+
                   let cls = 'seat seat-available';
                   if (booked) cls = 'seat seat-booked';
                   else if (heldOther) cls = 'seat seat-held';
                   else if (selected) cls = 'seat seat-selected';
                   else if (selectingByOther) cls = 'seat seat-selecting-other';
-                  
+
                   if (seat.type === 'VIP' && !booked) cls += ' seat-vip';
                   if (seat.type === 'SWEETBOX' && !booked) cls += ' seat-sweetbox';
 
@@ -336,7 +335,7 @@ export default function BookingPage({ params }: { params: Promise<{ showId: stri
   return (
     <div className="relative min-h-screen">
       {show.movie?.poster?.source && (
-        <div 
+        <div
           className="fixed inset-0 -z-10 bg-cover bg-center opacity-10 blur-3xl scale-110 pointer-events-none"
           style={{ backgroundImage: `url(${show.movie.poster.source})` }}
         />
@@ -410,7 +409,7 @@ export default function BookingPage({ params }: { params: Promise<{ showId: stri
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                   <CheckCircle2 className="h-5 w-5 text-primary" /> Tóm tắt đơn hàng
                 </h3>
-                
+
                 {localSelectedSeats.length > 0 ? (
                   <div className="flex flex-wrap gap-1.5 py-2">
                     {localSelectedSeats.map(id => {
@@ -426,16 +425,16 @@ export default function BookingPage({ params }: { params: Promise<{ showId: stri
                   <div className="space-y-2">
                     <p className="text-xs font-semibold uppercase text-muted-foreground">Mã giảm giá</p>
                     <div className="flex gap-2">
-                      <Input 
-                        placeholder="Nhập mã..." 
-                        value={voucherCode} 
+                      <Input
+                        placeholder="Nhập mã..."
+                        value={voucherCode}
                         onChange={(e) => setVoucherCode(e.target.value)}
                         disabled={!!appliedVoucher || isApplyingVoucher}
                         className="bg-secondary/30 rounded-xl"
                       />
-                      <Button 
+                      <Button
                         variant={appliedVoucher ? "secondary" : "outline"}
-                        onClick={handleApplyVoucher} 
+                        onClick={handleApplyVoucher}
                         disabled={!voucherCode || !!appliedVoucher || isApplyingVoucher}
                         className="rounded-xl"
                       >
@@ -468,9 +467,9 @@ export default function BookingPage({ params }: { params: Promise<{ showId: stri
                   </div>
 
                   <div className="pt-2">
-                    <Button 
-                      className="w-full h-14 text-lg font-bold rounded-2xl shadow-lg shadow-primary/30" 
-                      onClick={handleBooking} 
+                    <Button
+                      className="w-full h-14 text-lg font-bold rounded-2xl shadow-lg shadow-primary/30"
+                      onClick={handleBooking}
                       disabled={isCreatingBooking}
                     >
                       {isCreatingBooking ? 'Đang xử lý...' : 'Thanh toán ngay'}

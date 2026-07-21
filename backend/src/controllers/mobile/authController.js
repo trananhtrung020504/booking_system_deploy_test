@@ -58,6 +58,9 @@ export const verifyOtp = async (req, res) => {
         if (!user) {
             user = await prisma.user.create({ data: { email } });
         }
+        if (!user.isActive) {
+            return res.status(403).json({ message: "Account is locked" });
+        }
 
         const { accessToken, refreshToken } = TokenUtils.generateTokens({ id: user.id, email: user.email });
         await TokenUtils.storeRefreshToken(user.id, refreshToken);
@@ -96,6 +99,11 @@ export const refreshToken = async (req, res) => {
         
         if (!user) {
             return res.status(401).json({ message: "Refresh token not found or mismatch" });
+        }
+
+        if (!user.isActive) {
+            await TokenUtils.deleteRefreshToken(user.id);
+            return res.status(403).json({ message: "Account is locked" });
         }
 
         const { accessToken, refreshToken } = TokenUtils.generateTokens({ id: user.id, email: user.email });

@@ -228,10 +228,24 @@ export default function HomePage() {
 
     setSelectedSeats(newSeats);
 
-    // Emit selecting so others see blinking
     if (socket?.connected) {
       socket.emit('seats:selecting', { showId: selectedShowId, seatIds: newSeats });
     }
+  };
+
+  const handleCloseModal = () => {
+    if (selectedShowId) {
+      const socket = getSocket();
+      if (socket?.connected) {
+        socket.emit('seats:selecting', { showId: selectedShowId, seatIds: [] });
+        socket.emit('show:leave', selectedShowId);
+      }
+    }
+    setShowTimeModal(false);
+    setSelectedSeats([]);
+    setSelectedShowId(null);
+    setSelectedTime(null);
+    setModalStep('times');
   };
 
   const handleHomeConfirmBooking = () => {
@@ -261,7 +275,6 @@ export default function HomePage() {
       return s ? `${s.row}${s.column}` : id;
     });
 
-    // Clear selecting states before redirecting
     const socket = getSocket();
     if (socket?.connected) {
       socket.emit('seats:selecting', { showId: selectedShowId, seatIds: [] });
@@ -270,7 +283,6 @@ export default function HomePage() {
     router.push(`/payment?showId=${selectedShowId}&seats=${seatLabels.join(',')}`);
   };
 
-  // Real-time alert when locally selected seats get held/booked by someone else
   useEffect(() => {
     if (!activeShow) return;
     const newlyHeldByOthers = selectedSeats.filter(id =>
@@ -298,8 +310,10 @@ export default function HomePage() {
   };
 
   const isSeatSelectingByOthers = (seatId: string) => {
+    const socket = getSocket();
+    const currentGuestId = socket?.id ? `guest-${socket.id}` : '';
     return Object.entries(selectingSeatsMap).some(([uid, sIds]) =>
-      String(uid) !== String(user?.id || '') && sIds.includes(seatId)
+      String(uid) !== String(user?.id || '') && String(uid) !== currentGuestId && sIds.includes(seatId)
     );
   };
 
@@ -429,12 +443,12 @@ export default function HomePage() {
                   <div className="space-y-1"><span className="text-[10px] font-bold text-cinema-gold uppercase tracking-widest">Khu vực</span><h4 className="text-2xl font-bold text-white uppercase tracking-tight">Chọn Rạp Chiếu</h4></div>
                   <div className="w-12 h-12 rounded-2xl bg-cinema-gold/10 flex items-center justify-center border border-cinema-gold/20 text-cinema-gold"><LayoutGrid className="w-6 h-6" /></div>
                 </div>
-                
+
                 <div className="flex-1 flex flex-col items-center justify-center py-6 relative z-10 opacity-60">
                   <div className="flex items-center gap-1.5 mb-3">
                     {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-3.5 h-3.5 text-cinema-gold fill-cinema-gold drop-shadow-lg" />)}
                   </div>
-                  <p className="text-[10px] font-bold text-white/50 text-center uppercase tracking-[0.2em] leading-relaxed max-w-[80%]">Hệ thống rạp chiếu phim<br/>đạt chuẩn quốc tế</p>
+                  <p className="text-[10px] font-bold text-white/50 text-center uppercase tracking-[0.2em] leading-relaxed max-w-[80%]">Hệ thống rạp chiếu phim<br />đạt chuẩn quốc tế</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
@@ -499,7 +513,7 @@ export default function HomePage() {
 
       {showTimeModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
-          <div onClick={() => { setShowTimeModal(false); setSelectedSeats([]); }} className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
+          <div onClick={handleCloseModal} className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
           <div className="relative w-full max-w-5xl bg-[#0a0a0f] border border-white/10 rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-300">
             <div className="grid grid-cols-1 md:grid-cols-12">
               <div className="md:col-span-4 bg-zinc-900/50 p-10 space-y-8 border-r border-white/5 z-20">
@@ -525,7 +539,7 @@ export default function HomePage() {
                   </div>
                   <div className="flex items-center gap-4">
                     {modalStep === 'seats' && <Button onClick={() => setModalStep('times')} variant="outline" className="w-10 h-10 rounded-full bg-white/5 border-white/10 flex items-center justify-center p-0"><ChevronLeftIcon className="w-5 h-5" /></Button>}
-                    <button onClick={() => { setShowTimeModal(false); setSelectedSeats([]); }} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition-all group"><X className="w-5 h-5 text-white/40 group-hover:text-white" /></button>
+                    <button onClick={handleCloseModal} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition-all group"><X className="w-5 h-5 text-white/40 group-hover:text-white" /></button>
                   </div>
                 </div>
 

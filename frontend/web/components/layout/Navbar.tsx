@@ -27,13 +27,11 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Search functionality states
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // Debouncing effect for search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(searchQuery);
@@ -41,7 +39,6 @@ export default function Navbar() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch movies matching debouncedQuery
   const { data: searchResultsData, isFetching: isSearchLoading } = useGetMoviesQuery(
     debouncedQuery ? { search: debouncedQuery, limit: 5 } : undefined,
     { skip: !debouncedQuery }
@@ -53,7 +50,6 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -105,7 +101,6 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Real-time Debounced Search Input Container */}
           <div ref={searchRef} className="hidden md:flex w-64 lg:w-80 relative">
             <div className="relative w-full group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20 group-focus-within:text-primary transition-colors" />
@@ -133,7 +128,6 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Debounced search results dropdown */}
             {showDropdown && (searchQuery || isSearchLoading) && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-[#0c0c14]/98 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden z-[150] w-80 lg:w-96 transition-all duration-300">
                 <div className="max-h-80 overflow-y-auto divide-y divide-white/5 scrollbar-thin scrollbar-thumb-white/10">

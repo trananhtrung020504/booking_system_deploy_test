@@ -1,4 +1,6 @@
 import prisma from '../../config/database.js';
+import redis from '../../config/redis.js';
+import { emitBookingUpdate, emitShowUpdate } from '../../socket/socket.js';
 
 export const getAllBookings = async (req, res) => {
     try {
@@ -46,9 +48,11 @@ export const getAllBookings = async (req, res) => {
                     show: {
                         include: {
                             movie: { select: { title: true } },
-                            theater: { select: { name: true, city: true } }
+                            theater: { select: { name: true, city: true } },
+                            screen: { select: { id: true, name: true } }
                         }
-                    }
+                    },
+                    seats: { select: { id: true, row: true, column: true, type: true } }
                 },
                 orderBy: { createdAt: 'desc' },
                 skip: (pageNum - 1) * limitNum,
@@ -83,9 +87,13 @@ export const getBookingDetail = async (req, res) => {
                 show: {
                     include: {
                         movie: { include: { poster: true } },
-                        theater: { include: { logo: true } }
+                        theater: { include: { logo: true } },
+                        screen: true
                     }
                 },
+                seats: true,
+                combos: { include: { combo: true } },
+                voucher: true,
                 transaction: true
             }
         });
@@ -107,7 +115,8 @@ export const cancelBooking = async (req, res) => {
         const { reason } = req.body;
 
         const booking = await prisma.booking.findUnique({
-            where: { id }
+            where: { id },
+            include: { seats: true }
         });
 
         if (!booking) {
@@ -118,22 +127,59 @@ export const cancelBooking = async (req, res) => {
             return res.status(400).json({ message: "Booking already cancelled" });
         }
 
-        const updatedBooking = await prisma.booking.update({
-            where: { id },
-            data: {
-                status: 'CANCELLED',
-                updatedAt: new Date()
-            },
-            include: {
-                user: { select: { id: true, email: true, name: true } },
-                show: {
-                    include: {
-                        movie: { select: { title: true } },
-                        theater: { select: { name: true } }
+        const updatedBooking = await prisma.$transaction(async (tx) => {
+            const updated = await tx.booking.update({
+                where: { id },
+                data: {
+                    status: 'CANCELLED',
+                    updatedAt: new Date()
+                },
+                include: {
+                    user: { select: { id: true, email: true, name: true } },
+                    show: {
+                        include: {
+                            movie: { select: { title: true } },
+                            theater: { select: { name: true } }
+                        }
                     }
                 }
+            });
+
+            if (booking.voucherId && booking.status === 'PENDING') {
+                await tx.voucher.updateMany({
+                    where: { id: booking.voucherId, usedCount: { gt: 0 } },
+                    data: { usedCount: { decrement: 1 } }
+                });
             }
+
+            if (booking.paymentId && booking.status === 'PENDING') {
+                await tx.transaction.updateMany({
+                    where: { transactionCode: booking.paymentId, status: 'PENDING' },
+                    data: { status: 'FAILED' }
+                });
+            }
+
+            return updated;
         });
+
+        for (const seat of booking.seats) {
+            await redis.del(`hold:${booking.showId}:${seat.id}`);
+        }
+        await prisma.seatHold.deleteMany({ where: { showId: booking.showId, userId: booking.userId } });
+        await redis.del(`payment_link:${booking.id}:VNPAY`);
+        await redis.del(`payment_link:${booking.id}:ZALOPAY`);
+        await redis.del(`payment_link:${booking.id}:SEPAY`);
+
+        const io = req.app.get('io');
+        if (io) {
+            await emitShowUpdate(io, booking.showId);
+            emitBookingUpdate(io, booking.userId, {
+                bookingId: updatedBooking.id,
+                bookingRef: updatedBooking.bookingRef,
+                status: 'CANCELLED',
+                source: 'admin_booking_cancelled'
+            });
+        }
 
 
         res.json({
@@ -199,8 +245,70 @@ export const getDashboardStats = async (req, res) => {
         const totalRevenue = transactionStats._sum?.amount || 0;
         const totalTransactions = transactionStats._count || 0;
 
+        const now = new Date();
+        const getComparisonRanges = () => {
+            let currentStart;
+            let currentEnd;
+
+            if (dateFrom || dateTo) {
+                currentStart = dateFrom ? new Date(dateFrom) : new Date(new Date(dateTo).getTime() - 30 * 24 * 60 * 60 * 1000);
+                currentEnd = dateTo ? new Date(dateTo) : now;
+                currentEnd.setHours(23, 59, 59, 999);
+            } else {
+                currentEnd = now;
+                currentStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            }
+
+            const periodMs = Math.max(1, currentEnd.getTime() - currentStart.getTime());
+            const previousEnd = new Date(currentStart.getTime());
+            const previousStart = new Date(currentStart.getTime() - periodMs);
+
+            return { currentStart, currentEnd, previousStart, previousEnd };
+        };
+
+        const { currentStart, currentEnd, previousStart, previousEnd } = getComparisonRanges();
+        const currentRange = { gte: currentStart, lte: currentEnd };
+        const previousRange = { gte: previousStart, lt: previousEnd };
+
+        const calcTrend = (current, previous) => {
+            if (previous === 0 && current === 0) return null;
+            if (previous === 0) return current > 0 ? 100 : null;
+            return parseFloat((((current - previous) / previous) * 100).toFixed(1));
+        };
+
+        const [usersRecent, usersPrev] = await Promise.all([
+            prisma.user.count({ where: { createdAt: currentRange } }),
+            prisma.user.count({ where: { createdAt: previousRange } })
+        ]);
+
+        const [revenueRecent, revenuePrev] = await Promise.all([
+            prisma.transaction.aggregate({
+                _sum: { amount: true },
+                where: { status: 'PAID', createdAt: currentRange }
+            }),
+            prisma.transaction.aggregate({
+                _sum: { amount: true },
+                where: { status: 'PAID', createdAt: previousRange }
+            })
+        ]);
+
+        const [bookingsRecent, bookingsPrev] = await Promise.all([
+            prisma.booking.count({ where: { status: 'CONFIRMED', createdAt: currentRange } }),
+            prisma.booking.count({ where: { status: 'CONFIRMED', createdAt: previousRange } })
+        ]);
+
+        const trends = {
+            users: calcTrend(usersRecent, usersPrev),
+            revenue: calcTrend(revenueRecent._sum?.amount || 0, revenuePrev._sum?.amount || 0),
+            bookings: calcTrend(bookingsRecent, bookingsPrev)
+        };
+
+        const confirmedBookingWhere = {
+            status: 'CONFIRMED',
+            ...(dateFilter.createdAt && { createdAt: dateFilter.createdAt })
+        };
+
         const topMovies = await prisma.movie.findMany({
-            take: 5,
             select: {
                 id: true,
                 title: true,
@@ -208,17 +316,15 @@ export const getDashboardStats = async (req, res) => {
                 shows: {
                     select: {
                         bookings: {
-                            where: { status: { in: ['CONFIRMED', 'PENDING'] } },
+                            where: confirmedBookingWhere,
                             select: { total: true }
                         }
                     }
                 }
             },
-            where: { isActive: true },
-            orderBy: {
-                shows: {
-                    _count: 'desc'
-                }
+            where: {
+                isActive: true,
+                shows: { some: { bookings: { some: confirmedBookingWhere } } }
             }
         });
 
@@ -230,10 +336,9 @@ export const getDashboardStats = async (req, res) => {
             revenue: m.shows.reduce((acc, s) => {
                 return acc + s.bookings.reduce((sum, b) => sum + b.total, 0);
             }, 0)
-        }));
+        })).sort((a, b) => b.revenue - a.revenue || b.bookings - a.bookings).slice(0, 5);
 
         const topTheaters = await prisma.theater.findMany({
-            take: 5,
             select: {
                 id: true,
                 name: true,
@@ -241,16 +346,14 @@ export const getDashboardStats = async (req, res) => {
                 shows: {
                     select: {
                         bookings: {
-                            where: { status: { in: ['CONFIRMED', 'PENDING'] } },
+                            where: confirmedBookingWhere,
                             select: { total: true }
                         }
                     }
                 }
             },
-            orderBy: {
-                shows: {
-                    _count: 'desc'
-                }
+            where: {
+                shows: { some: { bookings: { some: confirmedBookingWhere } } }
             }
         });
 
@@ -262,7 +365,7 @@ export const getDashboardStats = async (req, res) => {
             revenue: t.shows.reduce((acc, s) => {
                 return acc + s.bookings.reduce((sum, b) => sum + b.total, 0);
             }, 0)
-        }));
+        })).sort((a, b) => b.revenue - a.revenue || b.bookings - a.bookings).slice(0, 5);
 
         res.json({
             dateRange: dateFilter.createdAt || 'All time',
@@ -282,6 +385,7 @@ export const getDashboardStats = async (req, res) => {
                     totalRevenue
                 }
             },
+            trends,
             topMovies: topMoviesWithStats,
             topTheaters: topTheatersWithStats
         });
@@ -425,7 +529,8 @@ export const getRevenueReport = async (req, res) => {
             totalRevenue: transactions.reduce((sum, t) => sum + t.amount, 0),
             transactionCount: transactions.length,
             byPaymentMethod: {},
-            byType: {}
+            byType: {},
+            byDate: {}
         };
 
         transactions.forEach(t => {
@@ -440,11 +545,21 @@ export const getRevenueReport = async (req, res) => {
             }
             summary.byType[t.type].count++;
             summary.byType[t.type].amount += t.amount;
+
+            const date = new Date(t.createdAt).toISOString().split('T')[0];
+            if (!summary.byDate[date]) {
+                summary.byDate[date] = { date, amount: 0, count: 0 };
+            }
+            summary.byDate[date].amount += t.amount;
+            summary.byDate[date].count++;
         });
 
         res.json({
             dateRange: dateFilter.createdAt || 'All time',
-            summary,
+            summary: {
+                ...summary,
+                byDate: Object.values(summary.byDate).sort((a, b) => a.date.localeCompare(b.date))
+            },
             transactions: transactions.slice(0, 50) // Limit to first 50 for display
         });
     } catch (error) {

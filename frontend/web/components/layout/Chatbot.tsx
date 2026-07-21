@@ -169,11 +169,12 @@ export default function Chatbot() {
       bookingId: data.bookingId,
       bookingRef: data.bookingRef
     });
-    toast.success(`Thanh toán thành công! Vé ${data.bookingRef} đã được xác nhận.`);
 
     setMessages(prev => {
-      const alreadyNotified = prev.some(m => m.text.includes(`Giao dịch cho mã vé ${data.bookingRef} đã thành công`));
+      const alreadyNotified = prev.some(m => m.text.includes(data.bookingRef));
       if (alreadyNotified) return prev;
+
+      toast.success(`Thanh toán thành công! Vé ${data.bookingRef} đã được xác nhận.`);
 
       return [...prev, {
         id: 'msg_' + Date.now() + '_success',
@@ -245,27 +246,6 @@ export default function Chatbot() {
     const handleBookingUpdate = (data: any) => {
       if (data.status === 'CONFIRMED' && data.bookingRef) {
         appendPaymentSuccessMessage({ ...data, source: 'socket' });
-        return;
-        toast.success(`Thanh toán thành công! Vé ${data.bookingRef} đã được xác nhận.`);
-
-        setMessages(prev => {
-          // Tránh spam nếu đã có tin nhắn này
-          const alreadyNotified = prev.some(m => m.text.includes(`Giao dịch cho mã vé ${data.bookingRef} đã thành công`));
-          if (alreadyNotified) return prev;
-
-          return [...prev, {
-            id: 'msg_' + Date.now() + '_success',
-            sender: 'bot',
-            text: `🎉 Tuyệt vời! Giao dịch cho mã vé **${data.bookingRef}** đã thành công. Bạn có thể kiểm tra vé ở mục "Vé của tôi". Cảm ơn bạn đã đặt vé!`,
-          }];
-        });
-
-        // Mở chat lên nếu đang đóng để user thấy
-        setIsOpen(true);
-
-        // Tự động làm mới dữ liệu của trang hiện tại bằng cách xóa cache Redux
-        router.refresh();
-        dispatch(bookingAPI.util.invalidateTags(['Booking']));
       }
     };
 

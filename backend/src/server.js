@@ -78,8 +78,13 @@ app.use((err, req, res, next) => {
 
 async function bootstrapServer() {
     try {
-        await setupRabbitTopology();
-        await initAllConsumers();
+        try {
+            await setupRabbitTopology();
+            await initAllConsumers();
+        } catch (error) {
+            console.warn('RabbitMQ unavailable, continuing without queue:', error.message);
+        }
+
         await initOpenSearch();
         initBookingCleanupWorker(io);
 

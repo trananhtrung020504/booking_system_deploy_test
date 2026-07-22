@@ -248,6 +248,17 @@ export default function HomePage() {
     setModalStep('times');
   };
 
+  useEffect(() => {
+    if (!showTimeModal) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showTimeModal]);
+
   const handleHomeConfirmBooking = () => {
     if (!user) {
       toast.error('Vui lòng đăng nhập để tiếp tục thanh toán');
@@ -512,11 +523,11 @@ export default function HomePage() {
       </section>
 
       {showTimeModal && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-6 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[10000] overflow-y-auto overscroll-contain px-4 py-24 sm:p-6 animate-in fade-in duration-300">
           <div onClick={handleCloseModal} className="absolute inset-0 bg-black/72 backdrop-blur-xl" />
-          <div className="relative w-full max-w-5xl bg-[radial-gradient(circle_at_top_left,rgba(246,213,138,0.08),transparent_32%),linear-gradient(135deg,#241A0C,#17120B)] border border-cinema-gold/15 rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.55)] animate-in zoom-in-95 duration-300">
+          <div className="relative mx-auto w-full max-w-5xl bg-[radial-gradient(circle_at_top_left,rgba(246,213,138,0.08),transparent_32%),linear-gradient(135deg,#241A0C,#17120B)] border border-cinema-gold/15 rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.55)] animate-in zoom-in-95 duration-300">
             <div className="grid grid-cols-1 md:grid-cols-12">
-              <div className="md:col-span-4 bg-[#1E1910]/72 p-10 space-y-8 border-r border-cinema-gold/10 z-20">
+              <div className="md:col-span-4 bg-[#1E1910]/72 p-6 md:p-10 space-y-6 md:space-y-8 border-r border-cinema-gold/10 z-20">
                 <div className="aspect-[2/3] rounded-3xl overflow-hidden shadow-2xl border border-cinema-gold/15">{selectedMovie?.poster?.source ? <img src={selectedMovie.poster.source} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-[#2A2114] flex items-center justify-center"><Film className="w-10 h-10 text-cinema-gold/20" /></div>}</div>
                 <div className="space-y-4">
                   <h3 className="text-2xl font-bold uppercase tracking-tight text-white leading-none">{selectedMovie?.title}</h3>
@@ -528,12 +539,12 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="md:col-span-8 px-12 py-10 relative flex flex-col min-h-[650px] z-30 bg-[radial-gradient(circle_at_top_left,rgba(246,213,138,0.08),transparent_32%),linear-gradient(135deg,#241A0C,#17120B)] border-l border-cinema-gold/10 overflow-hidden">
-                <div className="flex items-center justify-between z-20 mb-8 pl-6">
+              <div className="md:col-span-8 px-6 py-8 md:px-12 md:py-10 relative flex flex-col min-h-[560px] md:min-h-[650px] z-30 bg-[radial-gradient(circle_at_top_left,rgba(246,213,138,0.08),transparent_32%),linear-gradient(135deg,#241A0C,#17120B)] border-l border-cinema-gold/10 overflow-hidden">
+                <div className="flex items-center justify-between z-20 mb-8 md:pl-6">
                   <div className="space-y-2">
                     <span className="text-[10px] font-bold text-primary uppercase tracking-[0.3em]">{modalStep === 'times' ? 'Bước 4' : 'Bước 5'}</span>
                     <div className="flex items-center gap-4">
-                      <h2 className="text-4xl font-bold uppercase tracking-tighter transition-all">{modalStep === 'times' ? 'Chọn suất chiếu' : 'Chọn vị trí ghế'}</h2>
+                      <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tighter transition-all">{modalStep === 'times' ? 'Chọn suất chiếu' : 'Chọn vị trí ghế'}</h2>
                       {modalStep === 'seats' && <Badge className="bg-cinema-gold/8 border-cinema-gold/15 text-white/55 gap-2 px-3 py-1 rounded-full"><Users className="w-3 h-3" /> {viewerCount} Đang xem</Badge>}
                     </div>
                   </div>

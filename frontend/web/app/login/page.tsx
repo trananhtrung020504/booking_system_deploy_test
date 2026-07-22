@@ -82,7 +82,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#050507]">
+    <div className="relative min-h-screen w-full overflow-x-hidden bg-[#050507] px-4 py-20">
       <div 
         className="absolute inset-0 z-0 scale-110 animate-subtle-zoom"
         style={{
@@ -119,8 +119,8 @@ export default function LoginPage() {
         ))}
       </div>
 
-      <div className="relative z-20 w-full max-w-[400px] px-6 py-4">
-        <div className="relative group overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#1E1910]/64 backdrop-blur-[30px] p-6 md:p-8 shadow-[0_0_100px_rgba(0,0,0,0.8)] transition-all duration-700 hover:border-primary/40">
+      <div className="relative z-20 mx-auto w-full max-w-[400px]">
+        <div className="relative group overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border border-white/10 bg-[#1E1910]/64 backdrop-blur-[30px] p-6 md:p-8 shadow-[0_0_100px_rgba(0,0,0,0.8)] transition-all duration-700 hover:border-primary/40">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-cinema-gold/5 pointer-events-none" />
           
           <div className="relative space-y-4">
@@ -225,7 +225,7 @@ export default function LoginPage() {
         </div>
       </div>
       
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 text-[8px] font-bold uppercase tracking-[0.4em] text-white/10 pointer-events-none">
+      <div className="fixed bottom-4 left-1/2 hidden -translate-x-1/2 text-[8px] font-bold uppercase tracking-[0.4em] text-white/10 pointer-events-none sm:block">
         Experience Excellence • RoPhim Premium
       </div>
     </div>

@@ -80,6 +80,17 @@ function PaymentContent() {
   const [conflictWarning, setConflictWarning] = useState('');
 
   useEffect(() => {
+    if (!showQrModal) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showQrModal]);
+
+  useEffect(() => {
     if (isAuthLoading) return;
     if (!isAuthenticated) {
       toast.error('Vui lòng đăng nhập để thực hiện thanh toán');
@@ -434,7 +445,7 @@ function PaymentContent() {
 
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#050507] py-20 px-6">
+    <div className="relative min-h-screen w-full overflow-x-hidden bg-[#050507] px-4 py-24 sm:px-6">
       <div
         className="absolute inset-0 z-0 scale-110 animate-subtle-zoom"
         style={{
@@ -477,9 +488,9 @@ function PaymentContent() {
         ))}
       </div>
 
-      <div className="relative z-20 w-full max-w-[1100px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="relative z-20 mx-auto w-full max-w-[1100px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-7 space-y-6">
-          <div className="relative group overflow-hidden rounded-[3rem] border border-white/10 bg-[#1E1910]/64 backdrop-blur-[40px] p-8 md:p-12 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+          <div className="relative group overflow-hidden rounded-[2rem] md:rounded-[3rem] border border-white/10 bg-[#1E1910]/64 backdrop-blur-[40px] p-6 md:p-12 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-cinema-gold/5 pointer-events-none" />
             <div className="relative space-y-10">
               <div className="space-y-4">
@@ -548,7 +559,7 @@ function PaymentContent() {
         </div>
 
         <div className="lg:col-span-5 space-y-6">
-          <div className="relative group overflow-hidden rounded-[3rem] border border-white/10 bg-[#1E1910]/72 backdrop-blur-[40px] p-8 md:p-10 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+          <div className="relative group overflow-hidden rounded-[2rem] md:rounded-[3rem] border border-white/10 bg-[#1E1910]/72 backdrop-blur-[40px] p-6 md:p-10 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
             <div className="absolute inset-0 bg-gradient-to-br from-cinema-gold/5 via-transparent to-primary/5 pointer-events-none" />
             <div className="relative space-y-8">
               <div className="flex items-center justify-between">
@@ -632,8 +643,8 @@ function PaymentContent() {
 
       {/* QR Code Premium Modal */}
       {showQrModal && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-[#14110B]/90 backdrop-blur-md p-4 animate-in fade-in duration-300">
-          <div className="relative w-full max-w-md overflow-hidden rounded-[3rem] border border-white/10 bg-[#1E1910]/72 backdrop-blur-[50px] p-8 md:p-10 shadow-[0_0_100px_rgba(246,213,138,0.22)] text-center space-y-6">
+        <div className="fixed inset-0 z-[10000] overflow-y-auto overscroll-contain bg-[#14110B]/90 px-4 py-8 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="relative mx-auto w-full max-w-md overflow-y-auto rounded-[2rem] md:rounded-[3rem] border border-white/10 bg-[#1E1910]/72 backdrop-blur-[50px] p-6 md:p-10 shadow-[0_0_100px_rgba(246,213,138,0.22)] text-center space-y-6">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-cinema-gold/10 pointer-events-none" />
 
             <div className="space-y-2">

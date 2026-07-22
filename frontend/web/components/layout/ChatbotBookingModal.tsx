@@ -150,6 +150,17 @@ export default function ChatbotBookingModal({
 
   useEffect(() => {
     if (!open) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
     setStep('schedule');
     setSelectedDateIndex(0);
     setShowAllDates(false);
@@ -326,8 +337,8 @@ export default function ChatbotBookingModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-[#14110B]/90 p-4 backdrop-blur-md">
-      <div className="relative max-h-[92vh] w-full max-w-6xl overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#09090d] shadow-[0_0_120px_rgba(0,0,0,0.75)]">
+    <div className="fixed inset-0 z-[10000] overflow-y-auto overscroll-contain bg-[#14110B]/90 px-4 py-8 backdrop-blur-md">
+      <div className="relative mx-auto w-full max-w-6xl overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border border-white/10 bg-[#09090d] shadow-[0_0_120px_rgba(0,0,0,0.75)]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(252,234,187,0.10),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(252,234,187,0.12),transparent_30%)]" />
 
         <button

@@ -67,6 +67,17 @@ function BookingsContent() {
 
   const bookingIdParam = searchParams.get('bookingId');
 
+  useEffect(() => {
+    if (!selectedQrBooking) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [selectedQrBooking]);
+
   const handleTabChange = (tab: 'ALL' | 'CONFIRMED' | 'PENDING' | 'CANCELLED') => {
     setActiveTab(tab);
     setPage(1);
@@ -431,11 +442,11 @@ function BookingsContent() {
       {/* QR Ticket Modal */}
       {selectedQrBooking && (
         <div
-          className="fixed inset-0 z-[10000] flex items-center justify-center bg-[#14110B]/90 backdrop-blur-md p-4 animate-fade-in"
+          className="fixed inset-0 z-[10000] overflow-y-auto overscroll-contain bg-[#14110B]/90 px-4 py-8 backdrop-blur-md animate-fade-in"
           onClick={() => setSelectedQrBooking(null)}
         >
           <div
-            className="relative w-full max-w-sm bg-[#1E1910] border border-white/10 rounded-[2.5rem] p-8 space-y-6 shadow-2xl text-center overflow-hidden"
+            className="relative mx-auto w-full max-w-sm bg-[#1E1910] border border-white/10 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 space-y-6 shadow-2xl text-center overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-cinema-gold/5 pointer-events-none" />

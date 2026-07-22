@@ -44,11 +44,11 @@ export default function SiteFooter() {
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-cinema-gold" />
-                <span>Hotline: 1900 6017</span>
+                <span>Hotline: 0766908557</span>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="h-4 w-4 text-cinema-gold" />
-                <span>support@rophim.vn</span>
+                <span>anhtrung02052004@gmail.com</span>
               </div>
             </div>
           </div>

@@ -102,7 +102,7 @@ export default function TheatersPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Phone className="w-4 h-4 text-white/30 flex-shrink-0" />
-                          <span>Hotline: 1900 6017</span>
+                          <span>Hotline: 0766908557</span>
                         </div>
                       </div>
                     </div>

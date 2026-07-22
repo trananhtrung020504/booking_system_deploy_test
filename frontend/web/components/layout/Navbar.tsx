@@ -33,6 +33,30 @@ export default function Navbar() {
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(searchQuery);
     }, 400); // 400ms debounce delay
@@ -83,13 +107,13 @@ export default function Navbar() {
 
   return (
     <header 
-      className={`fixed top-0 z-[100] w-full transition-all duration-500 ${
+      className={`fixed top-0 z-[10500] w-full transition-all duration-500 ${
         isScrolled
           ? 'bg-[#14110B]/90 backdrop-blur-md py-2 border-b border-primary/10 shadow-xl' 
           : 'bg-[#14110B] border-b border-primary/10 py-4'
       }`}
     >
-      <nav className="max-w-[1550px] mx-auto flex items-center justify-between px-6 md:px-10 gap-8">
+      <nav className="relative z-[10520] max-w-[1550px] mx-auto flex items-center justify-between px-6 md:px-10 gap-8">
         <div className="flex items-center gap-10 flex-shrink-0">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 transform group-hover:rotate-6 transition-transform duration-500">
@@ -235,20 +259,36 @@ export default function Navbar() {
             size="icon"
             className="xl:hidden text-white hover:bg-white/5 w-10 h-10"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-navigation"
+            aria-label={mobileMenuOpen ? 'Đóng menu' : 'Mở menu'}
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
         </div>
       </nav>
 
-      <div className={`xl:hidden fixed inset-0 z-[90] bg-[#14110B] pt-24 px-6 transition-transform duration-500 ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="flex flex-col gap-6">
+      <div
+        className={`xl:hidden fixed inset-0 z-[10510] bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${
+          mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setMobileMenuOpen(false)}
+        aria-hidden={!mobileMenuOpen}
+      />
+
+      <div
+        id="mobile-navigation"
+        className={`xl:hidden fixed right-0 top-0 z-[10515] flex h-dvh w-full max-w-[420px] flex-col overflow-y-auto bg-[#14110B] px-6 pb-10 pt-24 shadow-[-24px_0_80px_rgba(0,0,0,0.55)] transition-transform duration-300 ease-out ${
+          mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="flex flex-col gap-3">
           {navLinks.map((link) => (
             <Link 
               key={link.name} 
               href={link.href} 
               onClick={() => setMobileMenuOpen(false)}
-              className="text-xl font-bold uppercase tracking-wider text-white hover:text-primary transition-colors"
+              className="rounded-2xl border border-white/8 bg-white/[0.03] px-5 py-4 text-lg font-bold uppercase tracking-wider text-white transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
             >
               {link.name}
             </Link>

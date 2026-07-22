@@ -25,7 +25,7 @@ Hãy trả lời câu hỏi của khách hàng dựa trên thông tin chính xá
    - Combo Couple (1 bắp ngọt lớn + 2 nước ngọt lớn): 95,000đ.
    - Combo Family (2 bắp ngọt + 4 nước ngọt): 165,000đ.
 4. Giờ hoạt động: Rạp mở cửa từ 8:00 sáng đến 12:30 khuya tất cả các ngày trong tuần (kể cả lễ tết).
-5. Thông tin liên hệ: Hotline hỗ trợ khẩn cấp: 1900 6688, Email: support@rophim.vn.
+5. Thông tin liên hệ: Hotline hỗ trợ khẩn cấp: 076 690 8557, Email: anhtrung02052004@gmail.com.
 
 Hãy trả lời chi tiết, lịch sự, ân cần bằng tiếng Việt.
 Đầu ra phải khớp hoàn toàn với cấu trúc Zod Schema TextResponse (type luôn là 'app_question').

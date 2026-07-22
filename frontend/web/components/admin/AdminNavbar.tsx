@@ -71,7 +71,7 @@ export default function AdminNavbar({ user, onToggleSidebar }: AdminNavbarProps)
               Quản trị viên
             </p>
           </div>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-rose-500 p-[2px]">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] p-[2px]">
             <div className="w-full h-full rounded-full bg-card flex items-center justify-center overflow-hidden">
                <UserIcon className="h-5 w-5 text-muted-foreground" />
             </div>

@@ -14,7 +14,7 @@ function MovieCard({ movie, index }: { movie: Movie; index: number }) {
   return (
     <Link href={`/movies/${movie.id}`}>
       <div
-        className="group relative rounded-xl overflow-hidden bg-card border border-border/50 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5 animate-fade-in"
+        className="gsap-card luxury-sheen group relative rounded-xl overflow-hidden bg-card border border-border/50 hover:border-primary/50 transition-all duration-300 animate-fade-in"
         style={{ animationDelay: `${index * 60}ms` }}
       >
         <div className="relative aspect-[2/3] overflow-hidden">
@@ -115,13 +115,13 @@ export default function MoviesPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="mb-8">
+      <div data-gsap-hero className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Phim đang chiếu</h1>
         <p className="text-muted-foreground">Khám phá và đặt vé cho những bộ phim hay nhất</p>
       </div>
 
       {/* Search & Filters */}
-      <div className="space-y-4 mb-8">
+      <div data-gsap-reveal className="space-y-4 mb-8">
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -181,7 +181,7 @@ export default function MoviesPage() {
       </div>
 
       {/* Movies Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div data-gsap-reveal className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {isLoading
           ? Array.from({ length: 12 }).map((_, i) => (
               <div key={i} className="rounded-xl overflow-hidden bg-card border border-border/50">

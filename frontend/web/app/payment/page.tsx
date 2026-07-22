@@ -479,7 +479,7 @@ function PaymentContent() {
 
       <div className="relative z-20 w-full max-w-[1100px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-7 space-y-6">
-          <div className="relative group overflow-hidden rounded-[3rem] border border-white/10 bg-black/40 backdrop-blur-[40px] p-8 md:p-12 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+          <div className="relative group overflow-hidden rounded-[3rem] border border-white/10 bg-[#1E1910]/64 backdrop-blur-[40px] p-8 md:p-12 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-cinema-gold/5 pointer-events-none" />
             <div className="relative space-y-10">
               <div className="space-y-4">
@@ -489,12 +489,12 @@ function PaymentContent() {
 
               <div className="grid grid-cols-1 gap-4">
                 {[
-                  { id: 'SEPAY', name: 'Thanh toán Quét mã QR (Hỗ trợ 40+ Ngân Hàng, MoMo, ZaloPay)', icon: Wallet, color: 'text-blue-500' }
+                  { id: 'SEPAY', name: 'Thanh toán Quét mã QR (Hỗ trợ 40+ Ngân Hàng, MoMo, ZaloPay)', icon: Wallet, color: 'text-cinema-gold' }
                 ].map((m) => (
                   <div
                     key={m.id}
                     onClick={() => setPaymentMethod(m.id as any)}
-                    className={`relative p-6 rounded-3xl border transition-all cursor-pointer flex flex-col gap-4 group ${paymentMethod === m.id ? 'bg-white/10 border-primary shadow-[0_0_20px_rgba(239,68,68,0.2)]' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
+                    className={`relative p-6 rounded-3xl border transition-all cursor-pointer flex flex-col gap-4 group ${paymentMethod === m.id ? 'bg-white/10 border-primary shadow-[0_0_20px_rgba(246,213,138,0.22)]' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
                   >
                     <div className={`w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center ${paymentMethod === m.id ? m.color : 'text-white/20'}`}>
                       <m.icon className="w-6 h-6" />
@@ -528,7 +528,7 @@ function PaymentContent() {
                   ? 'bg-gray-600 text-white/60 cursor-not-allowed opacity-50'
                   : isRedirecting || isConfirmingCancel
                     ? 'bg-gray-600 text-white/60 cursor-not-allowed opacity-50'
-                    : 'bg-primary text-white shadow-[0_15px_40px_rgba(239,68,68,0.3)] hover:shadow-[0_20px_50px_rgba(239,68,68,0.5)] hover:scale-[1.02] active:scale-[0.98]'
+                    : 'bg-primary text-white shadow-[0_15px_40px_rgba(246,213,138,0.28)] hover:shadow-[0_20px_50px_rgba(246,213,138,0.42)] hover:scale-[1.02] active:scale-[0.98]'
                   }`}
               >
                 {isProcessingPayment ? (
@@ -548,7 +548,7 @@ function PaymentContent() {
         </div>
 
         <div className="lg:col-span-5 space-y-6">
-          <div className="relative group overflow-hidden rounded-[3rem] border border-white/10 bg-black/60 backdrop-blur-[40px] p-8 md:p-10 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+          <div className="relative group overflow-hidden rounded-[3rem] border border-white/10 bg-[#1E1910]/72 backdrop-blur-[40px] p-8 md:p-10 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
             <div className="absolute inset-0 bg-gradient-to-br from-cinema-gold/5 via-transparent to-primary/5 pointer-events-none" />
             <div className="relative space-y-8">
               <div className="flex items-center justify-between">
@@ -557,7 +557,7 @@ function PaymentContent() {
               </div>
 
               <div className="flex gap-6 items-start">
-                <div className="w-24 h-32 rounded-2xl overflow-hidden border border-white/10 flex-shrink-0 bg-zinc-900 flex items-center justify-center">
+                <div className="w-24 h-32 rounded-2xl overflow-hidden border border-white/10 flex-shrink-0 bg-[#1E1910] flex items-center justify-center">
                   {activeMovie?.poster?.source ? (
                     <img src={activeMovie.poster.source} className="w-full h-full object-cover" alt={activeMovie.title} />
                   ) : (
@@ -579,7 +579,7 @@ function PaymentContent() {
                   <span className="text-white font-bold uppercase">{activeTheater?.name}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-3 text-white/40 font-bold uppercase"><Calendar className="w-4 h-4 text-blue-400" /> Ngày</div>
+                  <div className="flex items-center gap-3 text-white/40 font-bold uppercase"><Calendar className="w-4 h-4 text-cinema-gold" /> Ngày</div>
                   <span className="text-white font-bold uppercase">
                     {activeShow?.startTime ? new Date(activeShow.startTime).toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}
                   </span>
@@ -632,8 +632,8 @@ function PaymentContent() {
 
       {/* QR Code Premium Modal */}
       {showQrModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-300">
-          <div className="relative w-full max-w-md overflow-hidden rounded-[3rem] border border-white/10 bg-black/60 backdrop-blur-[50px] p-8 md:p-10 shadow-[0_0_100px_rgba(239,68,68,0.2)] text-center space-y-6">
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-[#14110B]/90 backdrop-blur-md p-4 animate-in fade-in duration-300">
+          <div className="relative w-full max-w-md overflow-hidden rounded-[3rem] border border-white/10 bg-[#1E1910]/72 backdrop-blur-[50px] p-8 md:p-10 shadow-[0_0_100px_rgba(246,213,138,0.22)] text-center space-y-6">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-cinema-gold/10 pointer-events-none" />
 
             <div className="space-y-2">

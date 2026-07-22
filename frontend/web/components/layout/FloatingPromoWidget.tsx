@@ -60,8 +60,8 @@ export default function FloatingPromoWidget() {
 
   return (
     <div className="fixed bottom-5 right-5 z-[120] hidden w-[320px] xl:block">
-      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#0d0d15]/94 p-5 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(252,234,187,0.16),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(239,68,68,0.14),transparent_40%)]" />
+      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-card/94 p-5 shadow-[0_25px_80px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(252,234,187,0.16),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(252,234,187,0.12),transparent_40%)]" />
         <button
           onClick={() => setVisible(false)}
           className="absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-black/20 text-white/50 transition-colors hover:text-white"

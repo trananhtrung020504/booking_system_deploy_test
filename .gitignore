@@ -3,6 +3,7 @@ node_modules/
 .DS_Store
 dist/
 build/
+frontend_reactjs/
 
 # Ignore unnecessary root files and documentation
 explain/

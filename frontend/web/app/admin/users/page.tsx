@@ -81,7 +81,7 @@ export default function AdminUsersPage() {
         </div>
 
         <div className="bg-card/40 border border-border p-5 rounded-2xl flex items-center gap-4">
-          <div className="p-3 bg-rose-500/10 rounded-xl text-rose-500">
+          <div className="p-3 bg-cinema-gold/10 rounded-xl text-cinema-gold">
             <UserX className="h-6 w-6" />
           </div>
           <div>
@@ -123,7 +123,7 @@ export default function AdminUsersPage() {
               {users.map((user) => (
                 <tr key={user.id} className="hover:bg-muted/10 transition-colors">
                   <td className="px-6 py-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-rose-500/20 border border-primary/20 flex items-center justify-center font-bold text-primary flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-cinema-gold/20 border border-primary/20 flex items-center justify-center font-bold text-primary flex-shrink-0">
                       {(user.name || user.email).charAt(0).toUpperCase()}
                     </div>
                     <div>
@@ -146,7 +146,7 @@ export default function AdminUsersPage() {
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold ${
                       user.role === 'ADMIN' 
-                        ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' 
+                        ? 'bg-cinema-gold/10 text-cinema-gold border border-cinema-gold/20' 
                         : 'bg-primary/10 text-primary border border-primary/20'
                     }`}>
                       <Shield className="h-3.5 w-3.5" />
@@ -163,7 +163,7 @@ export default function AdminUsersPage() {
                     <span className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
                       user.isActive 
                         ? 'bg-green-500/10 text-green-500 border border-green-500/20' 
-                        : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
+                        : 'bg-cinema-gold/10 text-cinema-gold border border-cinema-gold/20'
                     }`}>
                       {user.isActive ? 'Đang hoạt động' : 'Đang Khóa'}
                     </span>
@@ -175,7 +175,7 @@ export default function AdminUsersPage() {
                         disabled={isToggling}
                         className={`p-1.5 rounded-lg transition-all ${
                           user.isActive
-                            ? 'text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10'
+                            ? 'text-muted-foreground hover:text-cinema-gold hover:bg-cinema-gold/10'
                             : 'text-muted-foreground hover:text-green-500 hover:bg-green-500/10'
                         }`}
                         title={user.isActive ? 'Khóa tài khoản' : 'Kích hoạt tài khoản'}

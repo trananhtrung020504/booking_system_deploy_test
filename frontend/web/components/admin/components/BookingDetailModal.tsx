@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Loader2, Calendar, MapPin, User, Ticket, Coffee, CreditCard, AlertCircle } from 'lucide-react';
 import { useGetAdminBookingDetailQuery, useCancelAdminBookingMutation } from '@/store/api/adminBookingAPI';
 import { formatCurrency } from '@/lib/utils';
@@ -18,6 +19,15 @@ export default function BookingDetailModal({ bookingId, onClose }: BookingDetail
   const [cancelBooking, { isLoading: isCancelling }] = useCancelAdminBookingMutation();
   const [reason, setReason] = useState('');
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
 
   const getStatusLabel = (status: string) => {
     if (status === 'CONFIRMED') return 'Đã thanh toán';
@@ -37,13 +47,13 @@ export default function BookingDetailModal({ bookingId, onClose }: BookingDetail
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/85 backdrop-blur-sm" onClick={onClose} />
+  return createPortal(
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center overflow-hidden p-4 md:p-6">
+      <div className="absolute inset-0 bg-[#14110B]/86 backdrop-blur-md" onClick={onClose} />
 
-      <div className="relative bg-card w-full max-w-2xl rounded-2xl border border-border shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="relative flex max-h-[calc(100dvh-3rem)] w-full max-w-3xl flex-col overflow-hidden rounded-[2rem] border border-cinema-gold/20 bg-[radial-gradient(circle_at_top_left,rgba(246,213,138,0.08),transparent_34%),linear-gradient(135deg,#241A0C,#17120B)] shadow-[0_24px_90px_rgba(0,0,0,0.55)] animate-in fade-in zoom-in duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border bg-muted/30">
+        <div className="flex shrink-0 items-center justify-between border-b border-cinema-gold/15 bg-[#1E1910]/88 p-5 md:p-6">
           <div>
             <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
               <Ticket className="h-5 w-5 text-primary" />
@@ -55,7 +65,7 @@ export default function BookingDetailModal({ bookingId, onClose }: BookingDetail
               </p>
             )}
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-colors">
+          <button onClick={onClose} className="rounded-full border border-cinema-gold/15 bg-cinema-gold/8 p-2 transition-colors hover:bg-cinema-gold/12">
             <X className="h-5 w-5 text-muted-foreground" />
           </button>
         </div>
@@ -70,13 +80,13 @@ export default function BookingDetailModal({ bookingId, onClose }: BookingDetail
             Không tìm thấy thông tin đặt vé
           </div>
         ) : (
-          <div className="overflow-y-auto max-h-[calc(100vh-200px)] p-6 space-y-6">
+          <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-5 md:p-6">
             {/* Main Info Columns */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column: Customer and Show details */}
               <div className="space-y-5">
                 {/* Customer Card */}
-                <div className="bg-muted/40 p-4 rounded-xl border border-border space-y-3">
+                <div className="rounded-2xl border border-cinema-gold/15 bg-cinema-gold/8 p-4 space-y-3">
                   <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                     <User className="h-3 w-3 text-primary" />
                     Khách hàng
@@ -91,7 +101,7 @@ export default function BookingDetailModal({ bookingId, onClose }: BookingDetail
                 </div>
 
                 {/* Show Details */}
-                <div className="bg-muted/40 p-4 rounded-xl border border-border space-y-3">
+                <div className="rounded-2xl border border-cinema-gold/15 bg-cinema-gold/8 p-4 space-y-3">
                   <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                     <Calendar className="h-3 w-3 text-primary" />
                     Suất chiếu
@@ -117,7 +127,7 @@ export default function BookingDetailModal({ bookingId, onClose }: BookingDetail
               {/* Right Column: Seats, Snack Combos, Payment */}
               <div className="space-y-5">
                 {/* Seats and Combos */}
-                <div className="bg-muted/40 p-4 rounded-xl border border-border space-y-3">
+                <div className="rounded-2xl border border-cinema-gold/15 bg-cinema-gold/8 p-4 space-y-3">
                   <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                     <Ticket className="h-3 w-3 text-primary" />
                     Ghế & Đồ ăn nước uống
@@ -128,7 +138,7 @@ export default function BookingDetailModal({ bookingId, onClose }: BookingDetail
                       <div className="text-xs text-muted-foreground mb-1">Ghế đã đặt:</div>
                       <div className="flex flex-wrap gap-1.5">
                         {booking.seats?.map(s => (
-                          <span key={s.id} className="bg-background px-2.5 py-1 rounded border border-border text-xs font-mono font-bold text-foreground">
+                          <span key={s.id} className="rounded border border-cinema-gold/20 bg-[#1E1910]/70 px-2.5 py-1 text-xs font-mono font-bold text-foreground">
                             {s.row}{s.column}
                           </span>
                         ))}
@@ -155,7 +165,7 @@ export default function BookingDetailModal({ bookingId, onClose }: BookingDetail
                 </div>
 
                 {/* Financial breakdown */}
-                <div className="bg-muted/40 p-4 rounded-xl border border-border space-y-2">
+                <div className="rounded-2xl border border-cinema-gold/15 bg-cinema-gold/8 p-4 space-y-2">
                   <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                     <CreditCard className="h-3 w-3 text-primary" />
                     Chi tiết thanh toán
@@ -181,7 +191,7 @@ export default function BookingDetailModal({ bookingId, onClose }: BookingDetail
             </div>
 
             {/* Transaction Block */}
-            <div className="p-4 bg-muted/30 border border-border rounded-xl flex flex-wrap gap-6 items-center justify-between text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-6 rounded-2xl border border-cinema-gold/15 bg-[#1E1910]/62 p-4 text-xs">
               <div className="space-y-1">
                 <span className="text-muted-foreground">Phương thức:</span>{' '}
                 <span className="font-bold text-foreground">{booking.paymentMethod}</span>
@@ -267,6 +277,7 @@ export default function BookingDetailModal({ bookingId, onClose }: BookingDetail
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

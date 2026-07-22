@@ -21,7 +21,7 @@ const promoCards = [
     description: 'Áp dụng mã giảm giá trực tiếp khi đặt vé và thanh toán trực tuyến.',
     cta: 'Xem khuyến mãi',
     href: '/promotions',
-    accent: 'from-rose-500/25 via-rose-500/10 to-transparent',
+    accent: 'from-cinema-gold/25 via-cinema-gold/10 to-transparent',
   },
   {
     icon: Popcorn,
@@ -39,7 +39,7 @@ const promoCards = [
     description: 'Quản lý thông tin cá nhân và lịch sử đặt vé trong một nơi.',
     cta: 'Xem hồ sơ',
     href: '/profile',
-    accent: 'from-sky-400/25 via-sky-400/10 to-transparent',
+    accent: 'from-cinema-gold/20 via-cinema-gold/8 to-transparent',
   },
 ];
 
@@ -73,11 +73,11 @@ const trustPillars = [
 export default function HomeShowcaseSections() {
   return (
     <div className="space-y-24">
-      <section className="relative overflow-hidden rounded-[2.5rem] border border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(239,68,68,0.18),transparent_35%),linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] p-8 md:p-10 shadow-[0_25px_120px_rgba(0,0,0,0.35)]">
+      <section data-gsap-reveal className="gsap-card luxury-sheen relative overflow-hidden rounded-[2.5rem] border border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(252,234,187,0.14),transparent_35%),linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-8 md:p-10 shadow-[0_25px_120px_rgba(0,0,0,0.35)]">
         <div className="absolute inset-y-6 left-1/2 hidden w-px bg-white/8 lg:block" />
         <div className="grid gap-8 lg:grid-cols-[1.25fr_1fr]">
           <div className="space-y-6">
-            <Badge className="rounded-full border border-rose-400/30 bg-rose-500/10 px-4 py-1 text-[10px] font-bold uppercase tracking-[0.35em] text-rose-200">
+            <Badge className="rounded-full border border-primary/30 bg-primary/10 px-4 py-1 text-[10px] font-bold uppercase tracking-[0.35em] text-cinema-gold">
               Trải nghiệm đặt vé
             </Badge>
             <div className="space-y-3">
@@ -90,7 +90,7 @@ export default function HomeShowcaseSections() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {quickStats.map((item) => (
-                <div key={item.label} className="rounded-[1.75rem] border border-white/8 bg-black/20 p-5 backdrop-blur-sm">
+                <div key={item.label} className="gsap-card rounded-[1.75rem] border border-white/8 bg-black/20 p-5 backdrop-blur-sm">
                   <div className="text-3xl font-black tracking-tight text-white">{item.value}</div>
                   <div className="mt-2 text-xs font-bold uppercase tracking-[0.22em] text-white/75">{item.label}</div>
                   <p className="mt-2 text-xs leading-5 text-white/40">{item.note}</p>
@@ -101,7 +101,7 @@ export default function HomeShowcaseSections() {
 
           <div className="grid gap-4 self-start">
             {trustPillars.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="rounded-[1.75rem] border border-white/8 bg-white/5 p-5 backdrop-blur-xl">
+              <div key={title} className="gsap-card rounded-[1.75rem] border border-white/8 bg-white/5 p-5 backdrop-blur-xl">
                 <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/8 text-cinema-gold">
                     <Icon className="h-5 w-5" />
@@ -117,7 +117,7 @@ export default function HomeShowcaseSections() {
         </div>
       </section>
 
-      <section className="space-y-10">
+      <section data-gsap-reveal className="space-y-10">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-3">
             <div className="flex items-center gap-3">
@@ -138,7 +138,7 @@ export default function HomeShowcaseSections() {
 
         <div className="grid items-stretch gap-6 lg:grid-cols-3">
           {promoCards.map(({ icon: Icon, eyebrow, title, description, cta, href, accent }) => (
-            <div key={title} className="group relative flex min-h-[25.5rem] overflow-hidden rounded-[2.25rem] border border-white/8 bg-[#101018] p-7 shadow-2xl">
+            <div key={title} className="gsap-card luxury-sheen group relative flex min-h-[25.5rem] overflow-hidden rounded-[2.25rem] border border-white/8 bg-card p-7 shadow-2xl">
               <div className={`absolute inset-0 bg-gradient-to-br ${accent} opacity-90`} />
               <div className="absolute inset-x-6 bottom-0 h-px bg-white/10" />
               <div className="relative z-10 flex w-full flex-col">
@@ -167,20 +167,20 @@ export default function HomeShowcaseSections() {
         </div>
       </section>
 
-      <section className="space-y-10">
+      <section data-gsap-reveal className="space-y-10">
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <div className="h-px w-10 bg-sky-400" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-sky-400">Sự kiện & chiến dịch</span>
+            <div className="h-px w-10 bg-cinema-gold" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-cinema-gold">Sự kiện & chiến dịch</span>
           </div>
           <h2 className="text-3xl font-bold uppercase tracking-tight text-white md:text-4xl">
             Lịch sự kiện nổi bật trong tuần
           </h2>
         </div>
 
-        <div className="overflow-hidden rounded-[2.5rem] border border-white/8 bg-[linear-gradient(135deg,rgba(14,165,233,0.10),rgba(255,255,255,0.02)),#0d0d14] p-8 md:p-10">
+        <div className="gsap-card luxury-sheen overflow-hidden rounded-[2.5rem] border border-white/8 bg-[linear-gradient(135deg,rgba(246,213,138,0.10),rgba(255,255,255,0.02)),var(--card)] p-8 md:p-10">
           <div className="flex flex-wrap items-center gap-3">
-            <Badge className="rounded-full border border-sky-400/20 bg-sky-400/10 px-4 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-sky-200">
+            <Badge className="rounded-full border border-cinema-gold/20 bg-cinema-gold/10 px-4 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-cinema-gold">
               Đang mở đăng ký
             </Badge>
             <Badge className="rounded-full border border-white/10 bg-white/5 px-4 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-white/60">
@@ -189,8 +189,8 @@ export default function HomeShowcaseSections() {
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {eventCards.map((item) => (
-              <div key={item.title} className="rounded-[1.75rem] border border-white/8 bg-black/20 p-5">
-                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.25em] text-sky-200">
+              <div key={item.title} className="gsap-card rounded-[1.75rem] border border-white/8 bg-black/20 p-5">
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.25em] text-cinema-gold">
                   <CalendarDays className="h-3.5 w-3.5" />
                   {item.label}
                 </div>

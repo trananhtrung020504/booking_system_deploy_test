@@ -107,13 +107,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="h-screen flex bg-background text-foreground overflow-hidden">
       {/* Sidebar - Full height */}
-      <aside className={`bg-card/40 backdrop-blur-md border-r border-border overflow-y-auto hidden md:flex flex-col transition-all duration-300 relative ${
+      <aside className={`bg-card/40 backdrop-blur-md border-r border-border overflow-y-auto overflow-x-hidden hidden md:flex flex-col transition-all duration-300 relative ${
         isCollapsed ? 'w-20' : 'w-72'
       }`}>
         {/* Floating toggle button */}
         <button
           onClick={toggleSidebar}
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-6 h-6 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground shadow-md z-50 transition-all duration-300 hover:scale-110 active:scale-95"
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground shadow-md z-50 transition-all duration-300 hover:scale-110 active:scale-95"
           title={isCollapsed ? "Mở rộng Sidebar" : "Thu gọn Sidebar"}
         >
           {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
@@ -122,7 +122,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className={`p-8 ${isCollapsed ? 'px-4' : ''}`}>
           {/* Logo */}
           <div className={`flex items-center gap-3 mb-10 transition-all duration-300 ${isCollapsed ? 'justify-center' : ''}`}>
-            <div className="w-10 h-10 bg-gradient-to-br from-primary via-rose-500 to-cinema-gold rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
+            <div className="w-10 h-10 bg-gradient-to-br from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
               <Film className="text-white h-5 w-5" />
             </div>
             {!isCollapsed && (

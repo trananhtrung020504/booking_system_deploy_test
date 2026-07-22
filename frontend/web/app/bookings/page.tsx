@@ -165,7 +165,7 @@ function BookingsContent() {
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
               className={`flex-1 py-3 text-xs md:text-sm font-bold uppercase tracking-wider rounded-xl transition-all duration-300 ${isActive
-                  ? 'bg-gradient-to-r from-primary to-rose-400 text-white shadow-lg shadow-primary/20 scale-105 z-10'
+                  ? 'bg-gradient-to-r from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] text-white shadow-lg shadow-primary/20 scale-105 z-10'
                   : 'text-white/40 hover:text-white/85 hover:bg-white/[0.04]'
                 }`}
             >
@@ -186,7 +186,7 @@ function BookingsContent() {
               status = {
                 label: 'Đã diễn ra',
                 icon: CheckCircle2,
-                className: 'text-zinc-400 bg-zinc-400/10 border-zinc-400/30'
+                className: 'text-muted-foreground bg-muted/50 border-border'
               };
             }
             const StatusIcon = status.icon;
@@ -212,8 +212,8 @@ function BookingsContent() {
                           alt={movie.title}
                           className="w-full aspect-[2/3] object-cover group-hover:scale-110 group-hover:blur-[2px] transition-all duration-500"
                         />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
-                          <span className="text-[9px] font-bold text-white uppercase tracking-widest px-3 py-1.5 border border-white/40 bg-black/40 backdrop-blur-sm rounded-full">Xem phim</span>
+                        <div className="absolute inset-0 bg-[#1E1910]/64 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                          <span className="text-[9px] font-bold text-white uppercase tracking-widest px-3 py-1.5 border border-white/40 bg-[#1E1910]/64 backdrop-blur-sm rounded-full">Xem phim</span>
                         </div>
                       </div>
                     )}
@@ -249,7 +249,7 @@ function BookingsContent() {
                       {show && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-muted-foreground bg-white/5 rounded-xl p-3.5 border border-white/5">
                           <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-blue-400" />
+                            <Calendar className="h-4 w-4 text-cinema-gold" />
                             <span className="font-medium text-white/80">{format(new Date(show.startTime), 'dd/MM/yyyy')}</span>
                           </div>
                           <div className="flex items-center gap-2">
@@ -301,8 +301,8 @@ function BookingsContent() {
                           <span>Thanh toán thành công. Vui lòng chuẩn bị vé QR khi vào rạp.</span>
                         </div>
                       ) : booking.status === 'CONFIRMED' && !isFuture ? (
-                        <div className="text-[10px] text-zinc-400 bg-white/5 border border-white/10 rounded-xl p-2.5 font-medium flex items-center gap-2 w-fit">
-                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-zinc-400" />
+                        <div className="text-[10px] text-muted-foreground bg-white/5 border border-white/10 rounded-xl p-2.5 font-medium flex items-center gap-2 w-fit">
+                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                           <span>Suất chiếu đã kết thúc. Cảm ơn bạn đã sử dụng dịch vụ!</span>
                         </div>
                       ) : booking.status === 'CANCELLED' ? (
@@ -431,11 +431,11 @@ function BookingsContent() {
       {/* QR Ticket Modal */}
       {selectedQrBooking && (
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in"
+          className="fixed inset-0 z-[10000] flex items-center justify-center bg-[#14110B]/90 backdrop-blur-md p-4 animate-fade-in"
           onClick={() => setSelectedQrBooking(null)}
         >
           <div
-            className="relative w-full max-w-sm bg-zinc-950 border border-white/10 rounded-[2.5rem] p-8 space-y-6 shadow-2xl text-center overflow-hidden"
+            className="relative w-full max-w-sm bg-[#1E1910] border border-white/10 rounded-[2.5rem] p-8 space-y-6 shadow-2xl text-center overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-cinema-gold/5 pointer-events-none" />
@@ -453,7 +453,7 @@ function BookingsContent() {
                 alt="Ticket QR Code"
                 className="w-full h-auto object-contain"
               />
-              <span className="text-[10px] font-bold text-zinc-900 mt-3 tracking-widest uppercase">{selectedQrBooking.bookingRef}</span>
+              <span className="text-[10px] font-bold text-[#171007] mt-3 tracking-widest uppercase">{selectedQrBooking.bookingRef}</span>
             </div>
 
             <div className="space-y-4">
@@ -478,7 +478,7 @@ function BookingsContent() {
 
               <Button
                 onClick={() => setSelectedQrBooking(null)}
-                className="w-full h-12 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold uppercase tracking-widest border border-white/5"
+                className="w-full h-12 rounded-2xl bg-[#2A2114] hover:bg-[#3A2A14] text-white text-xs font-bold uppercase tracking-widest border border-white/5"
               >
                 Đóng
               </Button>

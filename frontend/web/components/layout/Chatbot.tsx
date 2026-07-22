@@ -459,9 +459,9 @@ export default function Chatbot() {
       {/* 🟢 NÚT BẤM FLOATING CHATBOT (GÓC DƯỚI PHẢI) */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full bg-gradient-to-tr from-primary to-rose-500 flex items-center justify-center text-white shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 group shadow-primary/20"
+        className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full bg-gradient-to-tr from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] flex items-center justify-center text-white shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 group shadow-primary/20"
       >
-        <span className="absolute -inset-1 rounded-full bg-gradient-to-tr from-primary to-rose-500 opacity-30 blur-md group-hover:opacity-75 transition duration-300 animate-pulse"></span>
+        <span className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] opacity-30 blur-md group-hover:opacity-75 transition duration-300 animate-pulse"></span>
         {isOpen ? (
           <X className="w-6 h-6 relative z-10 transition-transform duration-300 rotate-90" />
         ) : (
@@ -471,12 +471,12 @@ export default function Chatbot() {
 
       {/* 🟢 CỬA SỔ CHAT GRAPH GLASSMORPHISM */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-[9999] w-[92vw] sm:w-[400px] h-[550px] max-h-[80vh] rounded-2xl border border-white/10 bg-black/85 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 animate-in slide-in-from-bottom-6">
+        <div className="fixed bottom-24 right-6 z-[9999] w-[92vw] sm:w-[400px] h-[550px] max-h-[80vh] rounded-2xl border border-white/10 bg-[#14110B]/90 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 animate-in slide-in-from-bottom-6">
 
           {/* Header */}
-          <div className="p-4 border-b border-white/10 bg-gradient-to-r from-primary/10 to-rose-500/10 flex items-center justify-between">
+          <div className="p-4 border-b border-white/10 bg-gradient-to-r from-primary/10 to-cinema-gold/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-rose-500 flex items-center justify-center shadow-lg shadow-primary/30 animate-pulse">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] flex items-center justify-center shadow-lg shadow-primary/30 animate-pulse">
                 <Bot className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -546,7 +546,7 @@ export default function Chatbot() {
                   {/* Bong bóng tin nhắn */}
                   <div
                     className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-line shadow-md ${msg.sender === 'user'
-                      ? 'bg-gradient-to-tr from-primary to-rose-500 text-white rounded-tr-none'
+                      ? 'bg-gradient-to-tr from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] text-white rounded-tr-none'
                       : 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none'
                       }`}
                   >
@@ -612,7 +612,7 @@ export default function Chatbot() {
                                 setIsOpen(false);
                                 router.push(`/booking/${show.id}`);
                               }}
-                              className="flex flex-col items-center justify-center px-3 py-1 bg-gradient-to-tr from-primary to-rose-500 hover:opacity-90 rounded-lg text-white font-semibold shadow-lg shadow-primary/20 transition-all"
+                              className="flex flex-col items-center justify-center px-3 py-1 bg-gradient-to-tr from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] hover:opacity-90 rounded-lg text-white font-semibold shadow-lg shadow-primary/20 transition-all"
                             >
                               <span className="text-xs">{timeStr}</span>
                               <span className="text-[8px] text-white/80">{dateStr}</span>
@@ -631,7 +631,7 @@ export default function Chatbot() {
                           setCurrentFlow({ movie: msg.movie });
                           setBookingModalOpen(true);
                         }}
-                        className="w-full py-2.5 rounded-xl bg-gradient-to-tr from-primary to-rose-500 text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                        className="w-full py-2.5 rounded-xl bg-gradient-to-tr from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                       >
                         <Ticket className="w-4 h-4" />
                         Mở Bảng Đặt Vé
@@ -689,7 +689,7 @@ export default function Chatbot() {
                                   {bookingDate.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' })}
                                 </p>
                                 <p className="text-white/60 flex items-center gap-1">
-                                  <Ticket className="w-3 h-3 text-rose-400" />
+                                  <Ticket className="w-3 h-3 text-cinema-gold" />
                                   Ghế: {booking.seats.join(', ')}
                                 </p>
                               </div>
@@ -710,7 +710,7 @@ export default function Chatbot() {
               <div className="flex flex-col items-start">
                 <div className="bg-white/5 border border-white/10 rounded-2xl rounded-tl-none px-4 py-3 flex items-center gap-1.5 shadow-md">
                   <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                  <span className="w-2 h-2 rounded-full bg-rose-400 animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                  <span className="w-2 h-2 rounded-full bg-cinema-gold animate-bounce" style={{ animationDelay: '150ms' }}></span>
                   <span className="w-2 h-2 rounded-full bg-white/40 animate-bounce" style={{ animationDelay: '300ms' }}></span>
                 </div>
                 {showSlowResponseNotice && (
@@ -725,7 +725,7 @@ export default function Chatbot() {
           </div>
 
           {/* Quick Suggestions Pills */}
-          <div className="flex gap-2 py-2 overflow-x-auto px-4 border-t border-white/5 bg-black/20 no-scrollbar flex-shrink-0">
+          <div className="flex gap-2 py-2 overflow-x-auto px-4 border-t border-white/5 bg-[#1E1910]/58 no-scrollbar flex-shrink-0">
             <button
               onClick={() => handleSendMessage('🎬 Phim đang chiếu')}
               className="flex-shrink-0 text-[10px] text-white/70 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-3 py-1 hover:text-white transition-all font-medium"
@@ -758,7 +758,7 @@ export default function Chatbot() {
               e.preventDefault();
               handleSendMessage(inputText);
             }}
-            className="p-3 border-t border-white/10 bg-black/40 flex items-center gap-2 flex-shrink-0"
+            className="p-3 border-t border-white/10 bg-[#1E1910]/64 flex items-center gap-2 flex-shrink-0"
           >
             <input
               type="text"
@@ -777,7 +777,7 @@ export default function Chatbot() {
             <button
               type="submit"
               disabled={loading || !inputText.trim()}
-              className="bg-gradient-to-tr from-primary to-rose-500 hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:scale-100 rounded-xl p-2.5 text-white shadow-md shadow-primary/20 transition-all flex items-center justify-center flex-shrink-0"
+              className="bg-gradient-to-tr from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:scale-100 rounded-xl p-2.5 text-white shadow-md shadow-primary/20 transition-all flex items-center justify-center flex-shrink-0"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

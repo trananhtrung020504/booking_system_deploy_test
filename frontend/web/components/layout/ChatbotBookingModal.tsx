@@ -326,9 +326,9 @@ export default function ChatbotBookingModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md">
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-[#14110B]/90 p-4 backdrop-blur-md">
       <div className="relative max-h-[92vh] w-full max-w-6xl overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#09090d] shadow-[0_0_120px_rgba(0,0,0,0.75)]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(252,234,187,0.10),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(239,68,68,0.14),transparent_30%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(252,234,187,0.10),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(252,234,187,0.12),transparent_30%)]" />
 
         <button
           onClick={onClose}
@@ -344,7 +344,7 @@ export default function ChatbotBookingModal({
                 {TEXT.badge}
               </Badge>
 
-              <div className="overflow-hidden rounded-[2rem] border border-white/8 bg-black/20">
+              <div className="overflow-hidden rounded-[2rem] border border-white/8 bg-[#1E1910]/58">
                 {movie.poster ? (
                   <img src={movie.poster} alt={movie.title} className="aspect-[2/3] w-full object-cover" />
                 ) : (
@@ -405,7 +405,7 @@ export default function ChatbotBookingModal({
               <div className="mt-8 space-y-8">
                 <div>
                   <div className="mb-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.28em] text-white/40">
-                    <Calendar className="h-4 w-4 text-sky-400" />
+                    <Calendar className="h-4 w-4 text-cinema-gold" />
                     {TEXT.chooseDate}
                   </div>
                   <div className="flex flex-wrap gap-3">
@@ -419,7 +419,7 @@ export default function ChatbotBookingModal({
                             setSelectedDateIndex(actualIndex);
                             setSelectedShowId(null);
                           }}
-                          className={`rounded-2xl border px-4 py-3 text-left transition-all ${selectedDateIndex === actualIndex ? 'border-sky-400 bg-sky-500/15 text-white' : 'border-white/10 bg-white/5 text-white/45 hover:bg-white/10'}`}
+                          className={`rounded-2xl border px-4 py-3 text-left transition-all ${selectedDateIndex === actualIndex ? 'border-cinema-gold bg-cinema-gold/15 text-white' : 'border-white/10 bg-white/5 text-white/45 hover:bg-white/10'}`}
                         >
                           <div className="text-[10px] font-bold uppercase tracking-[0.22em]">{format(new Date(date), 'EEE', { locale: vi })}</div>
                           <div className="mt-1 text-lg font-bold">{format(new Date(date), 'dd/MM')}</div>
@@ -462,7 +462,7 @@ export default function ChatbotBookingModal({
                               <button
                                 key={show.id}
                                 onClick={() => setSelectedShowId(show.id)}
-                                className={`rounded-2xl border p-4 text-left transition-all ${selectedShowId === show.id ? 'border-primary bg-primary/15 text-white shadow-[0_0_24px_rgba(239,68,68,0.16)]' : 'border-white/10 bg-black/20 text-white/55 hover:bg-white/10'}`}
+                                className={`rounded-2xl border p-4 text-left transition-all ${selectedShowId === show.id ? 'border-primary bg-primary/15 text-white shadow-[0_0_24px_rgba(246,213,138,0.16)]' : 'border-white/10 bg-[#1E1910]/58 text-white/55 hover:bg-white/10'}`}
                               >
                                 <div className="text-lg font-bold">{format(new Date(show.startTime), 'HH:mm')}</div>
                                 <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.22em]">{show.format}</div>
@@ -507,12 +507,12 @@ export default function ChatbotBookingModal({
                 ) : (
                   <>
                     <div className="flex flex-col items-center gap-2">
-                      <div className="h-1 w-[80%] rounded-full bg-primary/40 shadow-[0_10px_30px_rgba(239,68,68,0.45)]" />
+                      <div className="h-1 w-[80%] rounded-full bg-primary/40 shadow-[0_10px_30px_rgba(246,213,138,0.38)]" />
                       <span className="text-[10px] font-bold uppercase tracking-[0.45em] text-white/25">{TEXT.screenLabel}</span>
                     </div>
 
                     <div
-                      className="mx-auto grid gap-2 overflow-auto rounded-[1.75rem] border border-white/8 bg-black/20 p-5"
+                      className="mx-auto grid gap-2 overflow-auto rounded-[1.75rem] border border-white/8 bg-[#1E1910]/58 p-5"
                       style={{
                         gridTemplateColumns: `repeat(${activeShow?.screen?.cols || 10}, minmax(0, 1fr))`
                       }}
@@ -533,7 +533,7 @@ export default function ChatbotBookingModal({
                               : isHeld
                                 ? 'border-cinema-gold/25 bg-cinema-gold/10 text-cinema-gold/60'
                                 : isSelected
-                                  ? 'border-primary bg-primary text-white shadow-[0_0_15px_rgba(239,68,68,0.45)]'
+                                  ? 'border-primary bg-primary text-white shadow-[0_0_15px_rgba(246,213,138,0.38)]'
                                   : isSelecting
                                     ? 'border-amber-400/40 bg-amber-400/10 text-amber-300 animate-pulse'
                                     : 'border-white/10 bg-white/5 text-white/50 hover:border-primary/40 hover:bg-white/10'
@@ -599,7 +599,7 @@ export default function ChatbotBookingModal({
                   <Button
                     onClick={handleCreateBooking}
                     disabled={isSubmitting || !selectedSeats.length}
-                    className="h-14 w-full rounded-full bg-gradient-to-r from-primary via-primary to-rose-500 px-6 text-base font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:scale-[1.01] hover:shadow-primary/30 active:scale-[0.99] disabled:scale-100 disabled:opacity-50"
+                    className="h-14 w-full rounded-full bg-gradient-to-r from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] px-6 text-base font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:scale-[1.01] hover:shadow-primary/30 active:scale-[0.99] disabled:scale-100 disabled:opacity-50"
                   >
                     <span className="flex w-full items-center justify-center gap-2">
                       {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" /> : null}

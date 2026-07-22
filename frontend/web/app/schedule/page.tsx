@@ -51,9 +51,9 @@ export default function SchedulePage() {
   const moviesWithShows = Object.values(moviesWithShowsMap);
 
   return (
-    <div className="min-h-screen bg-[#06060a] text-white pt-28 pb-16 px-6 md:px-10 max-w-[1450px] mx-auto relative overflow-hidden">
+    <div className="min-h-screen bg-background text-white pt-28 pb-16 px-6 md:px-10 max-w-[1450px] mx-auto relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(229,9,20,0.06),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(246,213,138,0.08),transparent_50%)]" />
       <div className="absolute bottom-[20%] right-[-10%] w-[35rem] h-[35rem] bg-primary/5 rounded-full blur-[130px] pointer-events-none" />
 
       {/* Header */}
@@ -70,7 +70,7 @@ export default function SchedulePage() {
       </div>
 
       {/* Filter Selection Panel */}
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-4 gap-6 mb-10 bg-[#0d0d15]/50 border border-white/5 backdrop-blur-xl p-6 rounded-[2rem] shadow-2xl">
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-4 gap-6 mb-10 bg-card/50 border border-white/5 backdrop-blur-xl p-6 rounded-[2rem] shadow-2xl">
         {/* Theater Select */}
         <div className="lg:col-span-1 space-y-2">
           <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest block">Chọn Rạp Chiếu</label>
@@ -82,15 +82,15 @@ export default function SchedulePage() {
               className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-xs font-bold text-white outline-none cursor-pointer hover:bg-white/10 focus:ring-1 focus:ring-primary/50 transition-all appearance-none"
             >
               {isLoadingTheaters ? (
-                <option className="bg-[#0a0a0f] text-white py-2">Đang tải rạp...</option>
+                <option className="bg-[#1E1910] text-white py-2">Đang tải rạp...</option>
               ) : theaters.length > 0 ? (
                 theaters.map((t) => (
-                  <option key={t.id} value={t.id} className="bg-[#0a0a0f] text-white py-2">
+                  <option key={t.id} value={t.id} className="bg-[#1E1910] text-white py-2">
                     {t.name} ({t.city})
                   </option>
                 ))
               ) : (
-                <option className="bg-[#0a0a0f] text-white py-2">Không tìm thấy rạp</option>
+                <option className="bg-[#1E1910] text-white py-2">Không tìm thấy rạp</option>
               )}
             </select>
           </div>
@@ -109,7 +109,7 @@ export default function SchedulePage() {
                   onClick={() => setSelectedDateIndex(idx)}
                   className={`flex flex-col items-center justify-center p-3 min-w-[75px] h-16 rounded-2xl border transition-all ${
                     isSelected
-                      ? 'bg-gradient-to-b from-[#e50914] to-[#ff4b4b] border-primary text-white shadow-lg shadow-primary/20 scale-[1.02]'
+                      ? 'bg-gradient-to-b from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] border-primary text-white shadow-lg shadow-primary/20 scale-[1.02]'
                       : 'bg-white/5 border-white/10 hover:bg-white/10 text-white/60 hover:text-white'
                   }`}
                 >
@@ -135,12 +135,12 @@ export default function SchedulePage() {
           moviesWithShows.map(({ movie, shows }) => (
             <Card
               key={movie.id}
-              className="bg-[#0d0d15]/80 border border-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl p-6 md:p-8 hover:border-primary/20 transition-all duration-500"
+              className="bg-card/80 border border-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl p-6 md:p-8 hover:border-primary/20 transition-all duration-500"
             >
               <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                 {/* Movie Poster & Meta */}
                 <div className="md:col-span-1 space-y-4 flex flex-col md:items-start items-center">
-                  <div className="w-40 aspect-[2/3] bg-zinc-900 rounded-3xl overflow-hidden border border-white/5 shadow-2xl flex-shrink-0 flex items-center justify-center">
+                  <div className="w-40 aspect-[2/3] bg-[#1E1910] rounded-3xl overflow-hidden border border-white/5 shadow-2xl flex-shrink-0 flex items-center justify-center">
                     {movie.poster?.source ? (
                       <img src={movie.poster.source} alt={movie.title} className="w-full h-full object-cover" />
                     ) : (
@@ -199,7 +199,7 @@ export default function SchedulePage() {
             </Card>
           ))
         ) : (
-          <div className="p-20 text-center bg-[#0d0d15]/50 border border-white/5 rounded-[2.5rem] backdrop-blur-xl">
+          <div className="p-20 text-center bg-card/50 border border-white/5 rounded-[2.5rem] backdrop-blur-xl">
             <AlertCircle className="w-12 h-12 text-primary mx-auto mb-4" />
             <h3 className="text-lg font-bold uppercase tracking-wider text-white">Không có suất chiếu nào</h3>
             <p className="text-xs text-white/40 mt-1 max-w-sm mx-auto">Hiện tại chưa có suất chiếu được lên lịch tại rạp này cho ngày đã chọn.</p>

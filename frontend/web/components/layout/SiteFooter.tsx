@@ -20,8 +20,8 @@ const highlightLinks = [
 
 export default function SiteFooter() {
   return (
-    <footer className="relative mt-auto overflow-hidden border-t border-white/8 bg-[#08080d]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(239,68,68,0.10),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(252,234,187,0.10),transparent_28%)]" />
+    <footer className="relative mt-auto overflow-hidden border-t border-white/8 bg-[#14110B]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(252,234,187,0.10),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(252,234,187,0.10),transparent_28%)]" />
       <div className="relative mx-auto max-w-[1550px] px-6 py-14 md:px-10">
         <div className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr_0.8fr_1fr]">
           <div className="space-y-5">
@@ -89,10 +89,10 @@ export default function SiteFooter() {
               Đăng ký thành viên RoPhim để nhận ưu đãi độc quyền, tích điểm đổi quà và cập nhật lịch chiếu sớm nhất.
             </p>
             <Link
-              href="/promotions"
+              href="/signup"
               className={cn(buttonVariants({ variant: 'default' }), 'mt-6 h-12 rounded-full bg-white text-[11px] font-semibold text-black hover:bg-cinema-gold')}
             >
-              Khám phá ưu đãi
+              Gia nhập RoPhim
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </div>

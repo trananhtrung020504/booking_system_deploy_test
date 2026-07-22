@@ -124,7 +124,7 @@ export default function VoucherFormModal({ voucher, onClose }: VoucherFormModalP
   const isSubmitting = isCreating || isUpdating;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
       <form onSubmit={handleSubmit} className="w-full max-w-2xl overflow-hidden rounded-3xl border border-border bg-card shadow-2xl">
         <div className="flex items-center justify-between border-b border-border p-6">
           <div className="flex items-center gap-3">

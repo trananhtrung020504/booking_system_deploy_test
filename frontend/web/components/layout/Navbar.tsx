@@ -85,8 +85,8 @@ export default function Navbar() {
     <header 
       className={`fixed top-0 z-[100] w-full transition-all duration-500 ${
         isScrolled
-          ? 'bg-[#0a0a0f]/90 backdrop-blur-md py-2 border-b border-white/5 shadow-xl' 
-          : 'bg-[#0a0a0f] border-b border-white/5 py-4'
+          ? 'bg-[#14110B]/90 backdrop-blur-md py-2 border-b border-primary/10 shadow-xl' 
+          : 'bg-[#14110B] border-b border-primary/10 py-4'
       }`}
     >
       <nav className="max-w-[1550px] mx-auto flex items-center justify-between px-6 md:px-10 gap-8">
@@ -129,7 +129,7 @@ export default function Navbar() {
             </div>
 
             {showDropdown && (searchQuery || isSearchLoading) && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-[#0c0c14]/98 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden z-[150] w-80 lg:w-96 transition-all duration-300">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-[#1E1910]/98 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden z-[150] w-80 lg:w-96 transition-all duration-300">
                 <div className="max-h-80 overflow-y-auto divide-y divide-white/5 scrollbar-thin scrollbar-thumb-white/10">
                   {isSearchLoading ? (
                     <div className="flex flex-col items-center justify-center py-10 gap-2">
@@ -147,7 +147,7 @@ export default function Navbar() {
                         }}
                         className="flex items-center gap-4 p-3 hover:bg-white/5 transition-all group"
                       >
-                        <div className="w-10 h-14 bg-zinc-900 rounded-lg overflow-hidden border border-white/5 flex-shrink-0 flex items-center justify-center">
+                        <div className="w-10 h-14 bg-[#1E1910] rounded-lg overflow-hidden border border-white/5 flex-shrink-0 flex items-center justify-center">
                           {movie.poster?.source ? (
                             <img src={movie.poster.source} alt={movie.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                           ) : (
@@ -202,7 +202,7 @@ export default function Navbar() {
                   </Avatar>
                   <ChevronDown className="h-3.5 w-3.5 text-white/20 group-hover:text-primary mr-2" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-[#0a0a0f] border-white/5 text-white rounded-xl mt-2 p-2">
+              <DropdownMenuContent align="end" className="w-56 bg-[#1E1910] border-primary/15 text-white rounded-xl mt-2 p-2">
                 <DropdownMenuItem 
                   onClick={() => router.push('/profile')}
                   className="focus:bg-primary/10 focus:text-primary cursor-pointer rounded-lg gap-3 py-2.5 text-xs font-bold"
@@ -241,7 +241,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      <div className={`xl:hidden fixed inset-0 z-[90] bg-[#0a0a0f] pt-24 px-6 transition-transform duration-500 ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`xl:hidden fixed inset-0 z-[90] bg-[#14110B] pt-24 px-6 transition-transform duration-500 ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col gap-6">
           {navLinks.map((link) => (
             <Link 

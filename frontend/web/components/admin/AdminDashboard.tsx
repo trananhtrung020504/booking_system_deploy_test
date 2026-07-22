@@ -50,7 +50,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8 animate-fade-in pb-10">
-      <div className="relative bg-gradient-to-r from-primary to-rose-600 rounded-[2rem] p-8 md:p-10 overflow-hidden shadow-2xl shadow-primary/20">
+      <div className="relative bg-gradient-to-r from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] rounded-[2rem] p-8 md:p-10 overflow-hidden shadow-2xl shadow-primary/20">
         <div className="relative z-10 max-w-xl">
           <h2 className="text-4xl font-bold text-white mb-3">Bảng điều hành RoPhim</h2>
           <p className="text-white/80 mb-8 font-medium text-lg leading-relaxed">
@@ -64,7 +64,7 @@ export default function AdminDashboard() {
           <TrendingUp className="w-64 h-64 text-white" />
         </div>
         <div className="absolute -right-20 -top-20 w-80 h-80 bg-white/10 rounded-full blur-[100px]" />
-        <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-black/20 rounded-full blur-[100px]" />
+        <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-[#1E1910]/58 rounded-full blur-[100px]" />
       </div>
 
       <div className="flex flex-wrap gap-4 items-center justify-between bg-card/40 backdrop-blur-md p-6 rounded-[2rem] border border-border/50">
@@ -225,10 +225,10 @@ export default function AdminDashboard() {
         <div className="bg-card/40 backdrop-blur-md rounded-[2rem] border border-border/50 overflow-hidden shadow-2xl">
           <div className="p-8 border-b border-border/50 bg-muted/20 flex items-center justify-between">
              <div className="flex items-center gap-3">
-                <Theater className="h-6 w-6 text-rose-500" />
+                <Theater className="h-6 w-6 text-cinema-gold" />
                 <h3 className="text-xl font-bold text-foreground">Rạp hiệu quả</h3>
              </div>
-             <Link href="/admin/theaters" className="text-xs font-bold text-rose-500 hover:underline">Tất cả</Link>
+             <Link href="/admin/theaters" className="text-xs font-bold text-cinema-gold hover:underline">Tất cả</Link>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -241,9 +241,9 @@ export default function AdminDashboard() {
               </thead>
               <tbody className="divide-y divide-border/30">
                 {stats.topTheaters.length > 0 ? stats.topTheaters.map((theater) => (
-                  <tr key={theater.id} className="hover:bg-rose-500/5 transition-colors group">
+                  <tr key={theater.id} className="hover:bg-cinema-gold/5 transition-colors group">
                     <td className="py-5 px-8">
-                      <div className="text-sm font-bold text-foreground group-hover:text-rose-500 transition-colors">{theater.name}</div>
+                      <div className="text-sm font-bold text-foreground group-hover:text-cinema-gold transition-colors">{theater.name}</div>
                       <div className="text-[10px] text-muted-foreground uppercase font-bold">{theater.city}</div>
                     </td>
                     <td className="py-5 px-8 text-sm text-center font-bold text-muted-foreground">{theater.bookings}</td>

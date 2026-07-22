@@ -12,11 +12,11 @@ interface StatsCardProps {
 }
 
 const colorClasses = {
-  blue: 'text-sky-400 bg-sky-400/10 border-sky-400/15',
+  blue: 'text-cinema-gold bg-cinema-gold/10 border-cinema-gold/15',
   purple: 'text-fuchsia-400 bg-fuchsia-400/10 border-fuchsia-400/15',
   green: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/15',
   orange: 'text-orange-400 bg-orange-400/10 border-orange-400/15',
-  red: 'text-rose-400 bg-rose-400/10 border-rose-400/15',
+  red: 'text-destructive bg-destructive/10 border-destructive/15',
   gold: 'text-cinema-gold bg-cinema-gold/10 border-cinema-gold/15',
 };
 
@@ -44,7 +44,7 @@ export default function StatsCard({
               trendIsUnavailable
                 ? 'bg-muted text-muted-foreground'
                 : trendIsDown
-                  ? 'bg-rose-500/10 text-rose-400'
+                  ? 'bg-cinema-gold/10 text-cinema-gold'
                   : 'bg-emerald-500/10 text-emerald-400'
             }`}
           >

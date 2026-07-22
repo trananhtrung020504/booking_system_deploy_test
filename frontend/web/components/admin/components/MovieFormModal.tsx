@@ -117,7 +117,7 @@ export default function MovieFormModal({ movieId, onClose }: MovieFormModalProps
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-[10000] p-4 md:p-10">
-      <div className="bg-zinc-900/90 border border-white/10 rounded-[2.5rem] p-8 max-w-4xl w-full max-h-full overflow-y-auto shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in duration-300">
+      <div className="bg-[#1E1910]/92 border border-white/10 rounded-[2.5rem] p-8 max-w-4xl w-full max-h-full overflow-y-auto shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in duration-300">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic">
@@ -179,11 +179,11 @@ export default function MovieFormModal({ movieId, onClose }: MovieFormModalProps
                   <div className="relative">
                     <Shield className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20" />
                     <select name="certification" value={formData.certification} onChange={handleInputChange} className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-primary outline-none text-sm font-bold text-white appearance-none">
-                      <option value="P" className="bg-zinc-900">P - Mọi lứa tuổi</option>
-                      <option value="K" className="bg-zinc-900">K - Dưới 13 (Cần PH)</option>
-                      <option value="T13" className="bg-zinc-900">T13 - Trên 13 tuổi</option>
-                      <option value="T16" className="bg-zinc-900">T16 - Trên 16 tuổi</option>
-                      <option value="T18" className="bg-zinc-900">T18 - Trên 18 tuổi</option>
+                      <option value="P" className="bg-[#1E1910]">P - Mọi lứa tuổi</option>
+                      <option value="K" className="bg-[#1E1910]">K - Dưới 13 (Cần PH)</option>
+                      <option value="T13" className="bg-[#1E1910]">T13 - Trên 13 tuổi</option>
+                      <option value="T16" className="bg-[#1E1910]">T16 - Trên 16 tuổi</option>
+                      <option value="T18" className="bg-[#1E1910]">T18 - Trên 18 tuổi</option>
                     </select>
                   </div>
                 </div>

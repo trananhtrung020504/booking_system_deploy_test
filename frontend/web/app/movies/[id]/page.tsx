@@ -270,7 +270,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="h-[50vh] bg-zinc-900 animate-pulse" />
+        <div className="h-[50vh] bg-[#1E1910] animate-pulse" />
         <div className="container mx-auto px-4 -mt-32 relative z-10 space-y-8">
           <div className="flex flex-col md:flex-row gap-8">
             <Skeleton className="w-full md:w-72 aspect-[2/3] rounded-[2rem] shadow-2xl" />
@@ -315,16 +315,16 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
           <div className="w-full md:w-[320px] shrink-0 group relative z-10">
             <div
               onClick={() => movie.trailerUrl && setShowTrailerModal(true)}
-              className={`relative rounded-[2.5rem] overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.6)] border border-white/10 transition-all duration-700 ${movie.trailerUrl ? 'cursor-pointer group-hover:border-primary/50' : ''}`}
+              className={`relative rounded-[2.5rem] overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.6)] border border-cinema-gold/15 transition-all duration-700 ${movie.trailerUrl ? 'cursor-pointer group-hover:border-primary/50' : ''}`}
             >
-              {movie.poster?.source ? <img src={movie.poster.source} alt={movie.title} className="w-full aspect-[2/3] object-cover group-hover:scale-105 transition-transform duration-1000" /> : <div className="w-full aspect-[2/3] bg-zinc-900 flex items-center justify-center"><Film className="h-16 w-16 text-white/10" /></div>}
+              {movie.poster?.source ? <img src={movie.poster.source} alt={movie.title} className="w-full aspect-[2/3] object-cover group-hover:scale-105 transition-transform duration-1000" /> : <div className="w-full aspect-[2/3] bg-[#1E1910] flex items-center justify-center"><Film className="h-16 w-16 text-cinema-gold/20" /></div>}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
                 <div className="bg-primary p-4 rounded-full shadow-2xl shadow-primary/40 transform scale-75 group-hover:scale-100 transition-all duration-500"><Play className="h-8 w-8 fill-white text-white" /></div>
               </div>
             </div>
             <div className="mt-8 flex flex-wrap gap-2.5 justify-center md:justify-start">
-               {movie.format?.map((f) => <Badge key={f} className="bg-white/5 text-white/80 border-white/10 px-4 py-1.5 rounded-full text-[9px] font-semibold uppercase tracking-wider backdrop-blur-xl">{f}</Badge>)}
-               <Badge className="bg-rose-500/20 text-rose-500 border-rose-500/20 px-4 py-1.5 rounded-full text-[9px] font-semibold uppercase tracking-wider backdrop-blur-xl">{movie.certification}</Badge>
+               {movie.format?.map((f) => <Badge key={f} className="bg-cinema-gold/8 text-white/80 border-cinema-gold/15 px-4 py-1.5 rounded-full text-[9px] font-semibold uppercase tracking-wider backdrop-blur-xl">{f}</Badge>)}
+               <Badge className="bg-cinema-gold/15 text-cinema-gold border-cinema-gold/20 px-4 py-1.5 rounded-full text-[9px] font-semibold uppercase tracking-wider backdrop-blur-xl">{movie.certification}</Badge>
             </div>
           </div>
 
@@ -336,22 +336,22 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                   <Star className="h-4 w-4 text-cinema-gold fill-cinema-gold" />
                   <span className="text-cinema-gold font-bold text-lg leading-none">{movie.rating || 'N/A'}</span>
                 </div>
-                <div className="h-5 w-px bg-white/10" />
-                <span className="text-white/40 text-[9px] font-bold uppercase tracking-widest">{(movie.votes || 0).toLocaleString()} Reviews</span>
+                <div className="h-5 w-px bg-cinema-gold/12" />
+                <span className="text-white/55 text-[9px] font-bold uppercase tracking-widest">{(movie.votes || 0).toLocaleString()} Reviews</span>
               </div>
               <div className="flex flex-wrap items-center gap-6 text-[10px] text-white/50 font-black uppercase tracking-wider">
-                <div className="flex items-center gap-2.5 group"><div className="p-2 bg-white/5 rounded-lg border border-white/5"><Clock className="h-3.5 w-3.5" /></div><span>{movie.duration} Phút</span></div>
-                <div className="flex items-center gap-2.5 group"><div className="p-2 bg-white/5 rounded-lg border border-white/5"><Calendar className="h-3.5 w-3.5" /></div><span>{format(new Date(movie.releaseDate), 'dd/MM/yyyy', { locale: vi })}</span></div>
-                <div className="flex items-center gap-2.5 group"><div className="p-2 bg-white/5 rounded-lg border border-white/5"><Globe className="h-3.5 w-3.5" /></div><span>{Array.isArray(movie.languages) ? movie.languages.join(' / ') : movie.languages}</span></div>
+                <div className="flex items-center gap-2.5 group"><div className="p-2 bg-cinema-gold/8 rounded-lg border border-cinema-gold/10"><Clock className="h-3.5 w-3.5" /></div><span>{movie.duration} Phút</span></div>
+                <div className="flex items-center gap-2.5 group"><div className="p-2 bg-cinema-gold/8 rounded-lg border border-cinema-gold/10"><Calendar className="h-3.5 w-3.5" /></div><span>{format(new Date(movie.releaseDate), 'dd/MM/yyyy', { locale: vi })}</span></div>
+                <div className="flex items-center gap-2.5 group"><div className="p-2 bg-cinema-gold/8 rounded-lg border border-cinema-gold/10"><Globe className="h-3.5 w-3.5" /></div><span>{Array.isArray(movie.languages) ? movie.languages.join(' / ') : movie.languages}</span></div>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-4 pt-2">
-              {movie.trailerUrl && <Button onClick={() => setShowTrailerModal(true)} className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-14 px-8 rounded-xl font-black uppercase tracking-wider text-[10px] gap-2.5 transition-all shadow-xl"><Play className="h-4 w-4 fill-white" /> Xem Trailer</Button>}
+              {movie.trailerUrl && <Button onClick={() => setShowTrailerModal(true)} className="bg-cinema-gold/8 hover:bg-cinema-gold/12 text-white border border-cinema-gold/15 h-14 px-8 rounded-xl font-black uppercase tracking-wider text-[10px] gap-2.5 transition-all shadow-xl"><Play className="h-4 w-4 fill-white" /> Xem Trailer</Button>}
               <Button onClick={handleOpenBooking} className="bg-primary hover:bg-primary/90 text-white h-14 px-8 rounded-xl font-black uppercase tracking-wider text-[10px] gap-2.5 shadow-2xl shadow-primary/30 active:scale-95">Đặt vé ngay <ChevronRight className="h-4 w-4" /></Button>
             </div>
 
-            <div className="relative p-8 md:p-10 bg-white/[0.03] border border-white/5 rounded-[2.5rem] backdrop-blur-xl overflow-hidden group">
+            <div className="relative p-8 md:p-10 bg-white/[0.03] border border-cinema-gold/10 rounded-[2.5rem] backdrop-blur-xl overflow-hidden group">
               <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity"><Info className="h-24 w-24 text-white" /></div>
               <h3 className="text-[10px] font-black text-primary uppercase tracking-widest mb-4 flex items-center gap-2.5"><div className="w-6 h-px bg-primary" /> Storyline</h3>
               <p className="text-white/70 leading-relaxed font-medium text-base md:text-lg drop-shadow-sm">{movie.description}</p>
@@ -361,7 +361,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
       </div>
 
       <Dialog open={showTrailerModal} onOpenChange={setShowTrailerModal}>
-        <DialogContent className="sm:max-w-4xl bg-black/95 border border-white/10 backdrop-blur-2xl p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-4xl bg-black/95 border border-cinema-gold/15 backdrop-blur-2xl p-0 overflow-hidden">
           <DialogHeader className="px-6 pt-6">
             <DialogTitle className="text-lg font-bold uppercase tracking-tight text-white">
               Trailer: {movie.title}
@@ -369,7 +369,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
           </DialogHeader>
           <div className="px-6 pb-6">
             {trailerEmbedUrl ? (
-              <div className="relative aspect-video overflow-hidden rounded-3xl border border-white/10 bg-black">
+              <div className="relative aspect-video overflow-hidden rounded-3xl border border-cinema-gold/15 bg-black">
                 <iframe
                   src={trailerEmbedUrl}
                   title={`${movie.title} trailer`}
@@ -379,7 +379,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                 />
               </div>
             ) : (
-              <div className="flex min-h-[240px] items-center justify-center rounded-3xl border border-dashed border-white/10 bg-white/[0.03] text-sm font-medium text-white/50">
+              <div className="flex min-h-[240px] items-center justify-center rounded-3xl border border-dashed border-cinema-gold/15 bg-white/[0.03] text-sm font-medium text-white/50">
                 Chưa có link trailer hợp lệ.
               </div>
             )}
@@ -392,14 +392,14 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
           <div className="space-y-2">
             <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tighter uppercase flex items-center gap-4"><Calendar className="h-8 w-8 text-primary" /> Lịch chiếu</h2>
-            <p className="text-white/20 text-[9px] font-black uppercase tracking-widest ml-12">Chọn suất chiếu và trải nghiệm điện ảnh</p>
+            <p className="text-cinema-gold/35 text-[9px] font-black uppercase tracking-widest ml-12">Chọn suất chiếu và trải nghiệm điện ảnh</p>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
             {dates?.map((date) => {
               const d = new Date(date);
               const isSelected = selectedDate === date;
               return (
-                <button key={date} onClick={() => setSelectedDate(date)} className={`shrink-0 flex flex-col items-center justify-center w-20 h-24 rounded-2xl transition-all duration-500 border ${isSelected ? 'bg-primary border-primary text-white shadow-lg scale-105 z-10' : 'bg-white/[0.03] border-white/5 text-white/30 hover:bg-white/[0.08] hover:border-white/10'}`}>
+                <button key={date} onClick={() => setSelectedDate(date)} className={`shrink-0 flex flex-col items-center justify-center w-20 h-24 rounded-2xl transition-all duration-500 border ${isSelected ? 'bg-primary border-primary text-white shadow-lg scale-105 z-10' : 'bg-white/[0.03] border-cinema-gold/10 text-white/30 hover:bg-white/[0.08] hover:border-cinema-gold/15'}`}>
                   <span className="text-[9px] font-black uppercase tracking-tighter mb-1.5">{format(d, 'EEE', { locale: vi })}</span>
                   <span className="text-2xl font-black">{format(d, 'dd')}</span>
                   <span className="text-[8px] font-black opacity-30 mt-1">THÁNG {format(d, 'MM')}</span>
@@ -415,7 +415,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
           ) : showsData?.theaters && showsData.theaters.length > 0 ? (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
               {showsData.theaters.map(({ theater, shows }) => (
-                <div key={theater.id} className="group relative bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8 hover:bg-white/[0.04] hover:border-primary/20 transition-all duration-700 overflow-hidden">
+                <div key={theater.id} className="group relative bg-white/[0.02] border border-cinema-gold/10 rounded-[2.5rem] p-8 hover:bg-white/[0.04] hover:border-primary/20 transition-all duration-700 overflow-hidden">
                   <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:opacity-5 transition-all duration-700"><MapPin className="h-32 w-32" /></div>
                   <div className="flex items-center gap-6 mb-8 relative">
                     <div className="w-16 h-16 bg-white rounded-2xl p-2.5 flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform duration-700">{theater.logo?.source ? <img src={theater.logo.source} alt={theater.name} className="w-full h-full object-contain" /> : <Film className="h-8 w-8 text-black" />}</div>
@@ -430,8 +430,8 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                           onClick={() => handlePageShowClick(show.id)} 
                           className={`group/btn px-6 py-3 border rounded-xl transition-all duration-500 text-left min-w-[110px] shadow-lg relative overflow-visible ${
                             isActive 
-                              ? 'bg-primary border-primary scale-110 shadow-[0_0_20px_rgba(239,68,68,0.4)] ring-2 ring-primary ring-offset-2 ring-offset-black z-10' 
-                              : 'bg-white/5 border-white/10 hover:border-primary/50'
+                              ? 'bg-primary border-primary scale-110 shadow-[0_0_20px_rgba(246,213,138,0.34)] ring-2 ring-primary ring-offset-2 ring-offset-black z-10' 
+                              : 'bg-cinema-gold/8 border-cinema-gold/15 hover:border-primary/50'
                           }`}
                         >
                           <div className={`font-black text-xl mb-0.5 leading-none transition-colors ${isActive ? 'text-white' : 'text-white/80 group-hover/btn:text-white'}`}>
@@ -460,40 +460,40 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-32 bg-white/[0.01] border border-dashed border-white/5 rounded-[3rem]"><div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-6"><Calendar className="h-10 w-10 text-white/10" /></div><p className="text-xl font-black text-white/10 uppercase tracking-widest">No Screenings</p></div>
+            <div className="flex flex-col items-center justify-center py-32 bg-white/[0.01] border border-dashed border-cinema-gold/10 rounded-[3rem]"><div className="w-24 h-24 bg-cinema-gold/8 rounded-full flex items-center justify-center mb-6"><Calendar className="h-10 w-10 text-cinema-gold/20" /></div><p className="text-xl font-black text-cinema-gold/20 uppercase tracking-widest">No Screenings</p></div>
           )}
         </div>
       </div>
 
       {/* --- BOOKING MODAL (Sliding Version) --- */}
       {showBookingModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
-           <div onClick={handleCloseModal} className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
-           <div className="relative w-full max-w-5xl bg-[#0a0a0f] border border-white/10 rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-6 animate-in fade-in duration-300">
+           <div onClick={handleCloseModal} className="absolute inset-0 bg-black/72 backdrop-blur-xl" />
+           <div className="relative w-full max-w-5xl bg-[radial-gradient(circle_at_top_left,rgba(246,213,138,0.08),transparent_32%),linear-gradient(135deg,#241A0C,#17120B)] border border-cinema-gold/15 rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.55)] animate-in zoom-in-95 duration-300">
               <div className="grid grid-cols-1 md:grid-cols-12">
                  {/* Left: Summary */}
-                 <div className="md:col-span-4 bg-zinc-900/50 p-10 space-y-8 relative z-40">
-                    <div className="aspect-[2/3] rounded-3xl overflow-hidden shadow-2xl border border-white/10">{movie.poster?.source ? <img src={movie.poster.source} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-zinc-800 flex items-center justify-center"><Film className="w-10 h-10 text-white/10" /></div>}</div>
+                 <div className="md:col-span-4 bg-[#1E1910]/72 p-10 space-y-8 relative z-40">
+                    <div className="aspect-[2/3] rounded-3xl overflow-hidden shadow-2xl border border-cinema-gold/15">{movie.poster?.source ? <img src={movie.poster.source} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-[#2A2114] flex items-center justify-center"><Film className="w-10 h-10 text-cinema-gold/20" /></div>}</div>
                     <div className="space-y-4">
                        <h3 className="text-2xl font-bold uppercase tracking-tight text-white leading-none">{movie.title}</h3>
                        <div className="flex flex-col gap-3">
-                          <div className="flex items-center gap-3 text-white/40 text-xs font-bold uppercase"><MapPin className="w-4 h-4 text-cinema-gold" /> {selectedTheater?.name || 'Vui lòng chọn rạp'}</div>
-                          <div className="flex items-center gap-3 text-white/40 text-xs font-bold uppercase"><Calendar className="w-4 h-4 text-blue-400" /> {selectedDate ? format(new Date(selectedDate), 'dd/MM/yyyy') : '...'}</div>
+                          <div className="flex items-center gap-3 text-white/55 text-xs font-bold uppercase"><MapPin className="w-4 h-4 text-cinema-gold" /> {selectedTheater?.name || 'Vui lòng chọn rạp'}</div>
+                          <div className="flex items-center gap-3 text-white/55 text-xs font-bold uppercase"><Calendar className="w-4 h-4 text-cinema-gold" /> {selectedDate ? format(new Date(selectedDate), 'dd/MM/yyyy') : '...'}</div>
                           {activeShowId && <div className="flex items-center gap-3 text-primary text-xs font-bold uppercase animate-fade-in"><Clock className="w-4 h-4" /> Suất: {selectedShowData ? format(new Date(selectedShowData.startTime), 'HH:mm') : '...'}</div>}
                        </div>
                     </div>
                  </div>
 
                  {/* Right: Times or Seats */}
-                 <div className="md:col-span-8 px-12 py-10 relative flex flex-col min-h-[650px] z-30 bg-[#0a0a0f] border-l border-white/5 overflow-hidden">
+                 <div className="md:col-span-8 px-12 py-10 relative flex flex-col min-h-[650px] z-30 bg-[radial-gradient(circle_at_top_left,rgba(246,213,138,0.08),transparent_32%),linear-gradient(135deg,#241A0C,#17120B)] border-l border-cinema-gold/10 overflow-hidden">
                     <div className="flex items-center justify-between z-20 mb-8 pl-6">
                        <div className="space-y-2">
                           <span className="text-[10px] font-bold text-primary uppercase tracking-[0.3em]">{modalStep === 'times' ? 'Bước 4' : 'Bước 5'}</span>
                           <h2 className="text-4xl font-bold uppercase tracking-tighter">{modalStep === 'times' ? 'Chọn suất chiếu' : 'Chọn vị trí ghế'}</h2>
                        </div>
                        <div className="flex items-center gap-4">
-                          {modalStep === 'seats' && <Button onClick={() => setModalStep('times')} variant="outline" className="w-10 h-10 rounded-full bg-white/5 border-white/10 flex items-center justify-center p-0"><ChevronLeft className="w-5 h-5" /></Button>}
-                          <button onClick={handleCloseModal} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition-all group"><X className="w-5 h-5 text-white/40 group-hover:text-white" /></button>
+                          {modalStep === 'seats' && <Button onClick={() => setModalStep('times')} variant="outline" className="w-10 h-10 rounded-full bg-cinema-gold/8 border-cinema-gold/15 flex items-center justify-center p-0"><ChevronLeft className="w-5 h-5" /></Button>}
+                          <button onClick={handleCloseModal} className="w-10 h-10 rounded-full bg-cinema-gold/8 hover:bg-cinema-gold/12 border border-cinema-gold/15 flex items-center justify-center transition-all group"><X className="w-5 h-5 text-white/55 group-hover:text-white" /></button>
                        </div>
                     </div>
 
@@ -503,7 +503,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                           <div className="space-y-10 h-[400px] overflow-y-auto pl-6 pr-4 scrollbar-hide pb-10 overflow-x-visible">
                              {showsData?.theaters.map(({ theater, shows }) => (
                                <div key={theater.id} className="space-y-6">
-                                  <div className="flex items-center gap-4"><span className="text-xs font-bold text-white/60 uppercase tracking-widest bg-white/5 px-4 py-1.5 rounded-full border border-white/5">{theater.name}</span><div className="h-px flex-1 bg-white/5" /></div>
+                                  <div className="flex items-center gap-4"><span className="text-xs font-bold text-white/60 uppercase tracking-widest bg-cinema-gold/8 px-4 py-1.5 rounded-full border border-cinema-gold/10">{theater.name}</span><div className="h-px flex-1 bg-cinema-gold/8" /></div>
                                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
                                      {shows.map(s => {
                                        const isActive = activeShowId === s.id;
@@ -513,8 +513,8 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                                            onClick={() => setActiveShowId(prev => prev === s.id ? null : s.id)} 
                                            className={`h-14 rounded-full border transition-all duration-500 font-bold relative flex items-center justify-center overflow-hidden group/btn ${
                                              isActive 
-                                               ? 'bg-gradient-to-r from-primary to-rose-400 border-transparent text-white scale-110 shadow-[0_10px_25px_rgba(239,68,68,0.4)] z-10' 
-                                               : 'bg-white/5 border-white/10 text-white/40 hover:border-primary/50 hover:bg-white/10 hover:text-white'
+                                               ? 'bg-gradient-to-r from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] border-transparent text-white scale-110 shadow-[0_10px_25px_rgba(246,213,138,0.34)] z-10' 
+                                               : 'bg-cinema-gold/8 border-cinema-gold/15 text-white/55 hover:border-primary/50 hover:bg-cinema-gold/12 hover:text-white'
                                            }`}
                                          >
                                            {/* Glossy overlay for active state */}
@@ -553,7 +553,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                                </div>
                              ) : (
                                <div className="space-y-8 flex flex-col items-center pt-4">
-                                  <div className="w-full flex flex-col items-center gap-2"><div className="w-[80%] h-1 bg-primary/40 rounded-full shadow-[0_10px_30px_rgba(239,68,68,0.5)]" /><span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.5em]">Màn hình rạp chiếu</span></div>
+                                  <div className="w-full flex flex-col items-center gap-2"><div className="w-[80%] h-1 bg-primary/40 rounded-full shadow-[0_10px_30px_rgba(246,213,138,0.42)]" /><span className="text-[10px] font-bold text-cinema-gold/35 uppercase tracking-[0.5em]">Màn hình rạp chiếu</span></div>
                                    
                                   {selectedSeats.some(id => isSeatSelectingByOthers(id)) && (
                                     <div className="w-full max-w-md mx-auto py-2.5 px-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[10px] font-bold text-amber-500/90 flex items-center gap-2 justify-center animate-pulse">
@@ -579,11 +579,11 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                                            key={seat.id} 
                                            onClick={() => !isBooked && !isHeld && handleSeatClick(seat.id)} 
                                            className={`w-6 h-6 md:w-8 md:h-8 rounded-lg flex items-center justify-center text-[8px] font-bold transition-all cursor-pointer border relative group/seat ${
-                                             isBooked ? 'bg-white/5 border-white/5 text-white/10 cursor-not-allowed opacity-30 pointer-events-none' : 
-                                             isHeld ? 'bg-white/10 border-white/10 text-white/20 cursor-not-allowed animate-pulse pointer-events-none' : 
-                                             isSelected ? 'bg-primary border-primary text-white shadow-[0_0_15px_rgba(239,68,68,0.5)] scale-110 z-10' : 
+                                             isBooked ? 'bg-cinema-gold/8 border-cinema-gold/10 text-cinema-gold/20 cursor-not-allowed opacity-30 pointer-events-none' : 
+                                             isHeld ? 'bg-cinema-gold/12 border-cinema-gold/15 text-cinema-gold/35 cursor-not-allowed animate-pulse pointer-events-none' : 
+                                             isSelected ? 'bg-primary border-primary text-white shadow-[0_0_15px_rgba(246,213,138,0.42)] scale-110 z-10' : 
                                              isSelectingByOthers ? 'bg-amber-500/10 border-amber-500/30 text-amber-500 animate-pulse' :
-                                             'bg-white/5 border-white/10 text-white/40 hover:border-primary/50 hover:bg-white/10'
+                                             'bg-cinema-gold/8 border-cinema-gold/15 text-white/55 hover:border-primary/50 hover:bg-cinema-gold/12'
                                            }`}
                                          >
                                            {label}
@@ -601,17 +601,17 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
                     </div>
 
                      {modalStep === 'seats' && (
-                        <div className="absolute bottom-[144px] left-10 right-10 flex flex-wrap justify-center gap-4 text-[9px] font-bold uppercase tracking-wider text-white/40 py-2 border-t border-white/5 bg-[#0b0b0f]/95 backdrop-blur-sm z-20">
-                           <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded bg-white/10" /> Trống</div>
+                        <div className="absolute bottom-[144px] left-10 right-10 flex flex-wrap justify-center gap-4 text-[9px] font-bold uppercase tracking-wider text-white/55 py-2 border-t border-cinema-gold/10 bg-[#1E1910]/96 backdrop-blur-sm z-20">
+                           <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded bg-cinema-gold/12" /> Trống</div>
                            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded bg-primary" /> Đang chọn</div>
                            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-500 animate-pulse" /> Ai đó đang xem (Có thể tranh chọn)</div>
-                           <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded bg-white/10 border border-cinema-gold animate-pulse" /> Đang thanh toán (Khóa tạm thời)</div>
-                           <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded bg-white/5 opacity-30" /> Đã đặt</div>
+                           <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded bg-cinema-gold/12 border border-cinema-gold animate-pulse" /> Đang thanh toán (Khóa tạm thời)</div>
+                           <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded bg-cinema-gold/8 opacity-30" /> Đã đặt</div>
                         </div>
                      )}
 
-                    <div className="absolute bottom-0 left-0 right-0 p-10 flex items-center justify-between border-t border-white/5 bg-[#0a0a0f]/90 backdrop-blur-md z-30">
-                       <div className="flex flex-col"><span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{modalStep === 'times' ? 'Suất chiếu' : 'Tổng cộng'}</span><span className="text-xl font-bold text-white uppercase">
+                    <div className="absolute bottom-0 left-0 right-0 p-10 flex items-center justify-between border-t border-cinema-gold/10 bg-[#241A0C]/94 backdrop-blur-md z-30">
+                       <div className="flex flex-col"><span className="text-[10px] font-bold text-cinema-gold/35 uppercase tracking-widest">{modalStep === 'times' ? 'Suất chiếu' : 'Tổng cộng'}</span><span className="text-xl font-bold text-white uppercase">
                              {modalStep === 'times' ? (activeShowId ? format(new Date(activeShow?.startTime || showsData?.theaters.flatMap(t => t.shows).find(s => s.id === activeShowId)?.startTime || ''), 'HH:mm') : '--:--') : `${(selectedSeats.length * (activeShow?.priceMap?.STANDARD || 95000)).toLocaleString()} VNĐ`}
                            </span></div>
                        {modalStep === 'times' ? (

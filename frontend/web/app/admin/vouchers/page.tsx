@@ -139,7 +139,7 @@ export default function AdminVouchersPage() {
                     </div>
                     <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
                       isExpired
-                        ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
+                        ? 'bg-cinema-gold/10 text-cinema-gold border border-cinema-gold/20'
                         : voucher.isActive
                           ? 'bg-green-500/10 text-green-500 border border-green-500/20'
                           : 'bg-muted text-muted-foreground'
@@ -187,7 +187,7 @@ export default function AdminVouchersPage() {
                     <button
                       onClick={() => handleDeleteVoucher(voucher)}
                       disabled={isDeleting}
-                      className="p-1.5 text-muted-foreground hover:text-rose-500 rounded-lg hover:bg-rose-500/10 transition-all disabled:opacity-50"
+                      className="p-1.5 text-muted-foreground hover:text-cinema-gold rounded-lg hover:bg-cinema-gold/10 transition-all disabled:opacity-50"
                       title="Xóa"
                     >
                       <Trash2 className="h-4 w-4" />

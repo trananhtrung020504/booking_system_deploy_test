@@ -15,9 +15,9 @@ export default function ProfilePage() {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen bg-[#06060a] text-white flex items-center justify-center px-6 pt-24 pb-16">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(229,9,20,0.08),transparent_50%)]" />
-        <Card className="w-full max-w-md bg-[#0d0d15]/90 border border-white/10 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl relative z-10">
+      <div className="min-h-screen bg-background text-white flex items-center justify-center px-6 pt-24 pb-16">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(246,213,138,0.08),transparent_50%)]" />
+        <Card className="w-full max-w-md bg-card/90 border border-white/10 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl relative z-10">
           <CardContent className="p-8 text-center flex flex-col items-center gap-6">
             <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 shadow-inner">
               <ShieldAlert className="w-8 h-8 text-primary" />
@@ -27,7 +27,7 @@ export default function ProfilePage() {
               <p className="text-xs text-white/50 leading-relaxed">Vui lòng đăng nhập tài khoản của bạn để truy cập trang cá nhân và xem các thông tin thành viên.</p>
             </div>
             <Link href="/login" className="w-full">
-              <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-primary to-[#ff4b4b] text-white font-bold uppercase tracking-wider text-xs shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-2">
+              <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] text-white font-bold uppercase tracking-wider text-xs shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-2">
                 <LogIn className="w-4 h-4" /> Đăng nhập ngay
               </Button>
             </Link>
@@ -38,9 +38,9 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#06060a] text-white pt-28 pb-16 px-6 md:px-10 max-w-[1400px] mx-auto relative overflow-hidden">
+    <div className="min-h-screen bg-background text-white pt-28 pb-16 px-6 md:px-10 max-w-[1400px] mx-auto relative overflow-hidden">
       {/* Dynamic Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(229,9,20,0.06),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(246,213,138,0.08),transparent_50%)]" />
       <div className="absolute top-[20%] left-[-10%] w-[30rem] h-[30rem] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
       {/* Breadcrumb / Back Button */}
@@ -57,12 +57,12 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
         {/* Left Card - Avatar & Basic Info */}
         <div className="space-y-6">
-          <Card className="bg-[#0d0d15]/80 border border-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl relative">
-            <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-r from-primary/30 to-[#ff4b4b]/10 blur-xl opacity-30" />
+          <Card className="bg-card/80 border border-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl relative">
+            <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-r from-primary/30 to-cinema-gold/10 blur-xl opacity-30" />
             <CardContent className="p-8 text-center flex flex-col items-center relative z-10">
               <div className="relative group mb-4">
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary to-[#ff4b4b] rounded-full blur opacity-65 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
-                <Avatar className="h-24 w-24 rounded-full border-4 border-[#0d0d15] relative z-10 shadow-2xl">
+                <div className="absolute -inset-1 bg-gradient-to-r from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] rounded-full blur opacity-65 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
+                <Avatar className="h-24 w-24 rounded-full border-4 border-[#1E1910] relative z-10 shadow-2xl">
                   <AvatarFallback className="bg-gradient-to-tr from-primary/30 to-primary text-white text-3xl font-extrabold uppercase">
                     {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
                   </AvatarFallback>
@@ -83,7 +83,7 @@ export default function ProfilePage() {
 
         {/* Right Cards - Detailed Info */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="bg-[#0d0d15]/80 border border-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl">
+          <Card className="bg-card/80 border border-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl">
             <CardContent className="p-8 space-y-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">

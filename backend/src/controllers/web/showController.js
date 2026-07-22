@@ -42,8 +42,8 @@ export const getShows = async (req, res) => {
 
 export const getShow = async (req, res) => {
     try {
-        const show = await prisma.show.findUnique({
-            where: { id: req.params.id },
+        const show = await prisma.show.findFirst({
+            where: { id: req.params.id, isActive: true, endTime: { gte: new Date() } },
             include: {
                 movie: { include: { poster: true } },
                 theater: { include: { logo: true } },

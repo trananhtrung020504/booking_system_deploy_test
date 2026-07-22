@@ -93,12 +93,12 @@ export default function AdminCombosPage() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary/10 to-rose-500/10 flex items-center justify-center">
+                  <div className="w-full h-full bg-gradient-to-br from-primary/10 to-cinema-gold/10 flex items-center justify-center">
                     <Coffee className="h-12 w-12 text-primary/40" />
                   </div>
                 )}
                 {/* Price tag */}
-                <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 text-white font-bold text-sm">
+                <div className="absolute top-4 right-4 bg-[#1E1910]/72 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 text-white font-bold text-sm">
                   {formatCurrency(combo.price)}
                 </div>
               </div>
@@ -133,7 +133,7 @@ export default function AdminCombosPage() {
                     <button 
                       onClick={() => handleDeleteCombo(combo.id)}
                       disabled={isDeleting}
-                      className="p-1.5 text-muted-foreground hover:text-rose-500 rounded-lg hover:bg-rose-500/10 transition-all disabled:opacity-50"
+                      className="p-1.5 text-muted-foreground hover:text-cinema-gold rounded-lg hover:bg-cinema-gold/10 transition-all disabled:opacity-50"
                       title="Xóa"
                     >
                       <Trash2 className="h-4.5 w-4.5" />

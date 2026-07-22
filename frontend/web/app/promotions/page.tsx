@@ -14,7 +14,7 @@ export default function PromotionsPage() {
   const { data: response, isLoading } = useGetVouchersQuery();
 
   const gradients = [
-    'from-[#e50914] via-[#b30710] to-[#80050b]',
+    'from-[#fff0b8] via-[#d8a94f] to-[#9b6b24]',
     'from-[#d97706] to-[#b45309]',
     'from-[#059669] to-[#047857]',
     'from-[#2563eb] to-[#1d4ed8]',
@@ -41,9 +41,9 @@ export default function PromotionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#06060a] text-white pt-28 pb-16 px-6 md:px-10 max-w-[1450px] mx-auto relative overflow-hidden">
+    <div className="min-h-screen bg-background text-white pt-28 pb-16 px-6 md:px-10 max-w-[1450px] mx-auto relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(229,9,20,0.06),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(246,213,138,0.08),transparent_50%)]" />
       <div className="absolute bottom-[20%] left-[-10%] w-[35rem] h-[35rem] bg-primary/5 rounded-full blur-[130px] pointer-events-none" />
 
       {/* Header */}
@@ -70,7 +70,7 @@ export default function PromotionsPage() {
           {promos.map((promo) => (
             <Card 
               key={promo.id} 
-              className="bg-[#0d0d15]/80 border border-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl hover:border-primary/30 hover:shadow-primary/5 hover:scale-[1.01] transition-all duration-500 flex flex-col justify-between group"
+              className="bg-card/80 border border-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl hover:border-primary/30 hover:shadow-primary/5 hover:scale-[1.01] transition-all duration-500 flex flex-col justify-between group"
             >
               {/* Promo Header Graphic */}
               <div className={`h-40 bg-gradient-to-tr ${promo.gradient} p-8 flex flex-col justify-between relative overflow-hidden`}>
@@ -111,7 +111,7 @@ export default function PromotionsPage() {
                 {/* Copy coupon button */}
                 <Button 
                   onClick={() => handleCopy(promo.code)}
-                  className="flex-1 py-5 h-auto rounded-xl bg-gradient-to-r from-primary to-[#ff4b4b] border border-primary/20 hover:scale-[1.02] shadow-xl shadow-primary/10 text-white text-[11px] font-bold uppercase tracking-wider transition-all gap-2"
+                  className="flex-1 py-5 h-auto rounded-xl bg-gradient-to-r from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] border border-primary/20 hover:scale-[1.02] shadow-xl shadow-primary/10 text-white text-[11px] font-bold uppercase tracking-wider transition-all gap-2"
                 >
                   {copiedCode === promo.code ? (
                     <>
@@ -138,7 +138,7 @@ export default function PromotionsPage() {
         ))}
       </div>
       ) : (
-        <div className="p-20 text-center bg-[#0d0d15]/50 border border-white/5 rounded-[2.5rem] backdrop-blur-xl relative z-10 max-w-lg mx-auto">
+        <div className="p-20 text-center bg-card/50 border border-white/5 rounded-[2.5rem] backdrop-blur-xl relative z-10 max-w-lg mx-auto">
           <AlertCircle className="w-12 h-12 text-primary mx-auto mb-4 animate-bounce" />
           <h3 className="text-lg font-bold uppercase tracking-wider text-white">Không có khuyến mãi</h3>
           <p className="text-xs text-white/40 mt-1">Hiện tại hệ thống chưa có chương trình ưu đãi nào hoạt động. Vui lòng kiểm tra lại sau!</p>

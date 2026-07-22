@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -93,6 +94,15 @@ export default function HomeExperienceGuide() {
     setHasHydrated(true);
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
   const handleDismiss = () => {
     window.localStorage.setItem(storageKey, '1');
     setIsOpen(false);
@@ -108,7 +118,7 @@ export default function HomeExperienceGuide() {
 
   return (
     <>
-      <section className="relative overflow-hidden rounded-[2.5rem] border border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(252,234,187,0.14),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(239,68,68,0.14),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-6 md:p-8 shadow-[0_25px_100px_rgba(0,0,0,0.32)]">
+      <section data-gsap-reveal className="gsap-card luxury-sheen relative overflow-hidden rounded-[2.5rem] border border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(252,234,187,0.14),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(252,234,187,0.12),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-6 md:p-8 shadow-[0_25px_100px_rgba(0,0,0,0.32)]">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-3">
             <Badge className="rounded-full border border-cinema-gold/20 bg-cinema-gold/10 px-4 py-1 text-[10px] font-bold uppercase tracking-[0.32em] text-cinema-gold">
@@ -135,10 +145,10 @@ export default function HomeExperienceGuide() {
         </div>
       </section>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/72 p-4 backdrop-blur-md">
-          <div className="relative max-h-[88vh] w-full max-w-5xl overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#0a0a0f] shadow-[0_0_120px_rgba(0,0,0,0.65)]">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(252,234,187,0.10),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(239,68,68,0.12),transparent_30%)]" />
+      {isOpen && createPortal(
+        <div className="fixed inset-0 isolate z-[11000] flex items-center justify-center bg-black/72 p-4 backdrop-blur-md">
+          <div className="relative z-[11001] max-h-[88vh] w-full max-w-5xl overflow-hidden rounded-[2.5rem] border border-white/10 bg-card shadow-[0_0_120px_rgba(0,0,0,0.5)]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(252,234,187,0.10),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(252,234,187,0.10),transparent_30%)]" />
             <button
               onClick={handleDismiss}
               className="absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition-colors hover:text-white"
@@ -171,7 +181,7 @@ export default function HomeExperienceGuide() {
                     </div>
                     <div className="mt-5 space-y-4">
                       {realtimeFlow.map((item, index) => (
-                        <div key={item} className="flex gap-4 rounded-[1.5rem] border border-white/8 bg-black/20 p-4">
+                        <div key={item} className="gsap-card flex gap-4 rounded-[1.5rem] border border-white/8 bg-black/20 p-4">
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-black text-white">
                             {index + 1}
                           </div>
@@ -181,9 +191,9 @@ export default function HomeExperienceGuide() {
                     </div>
                   </div>
 
-                  <div className="rounded-[2rem] border border-white/8 bg-[linear-gradient(135deg,rgba(14,165,233,0.10),rgba(255,255,255,0.02)),#0f1017] p-6 md:p-7">
+                  <div className="rounded-[2rem] border border-white/8 bg-[linear-gradient(135deg,rgba(246,213,138,0.10),rgba(255,255,255,0.02)),var(--card)] p-6 md:p-7">
                     <div className="flex items-center gap-3">
-                      <Bot className="h-5 w-5 text-sky-300" />
+                      <Bot className="h-5 w-5 text-cinema-gold" />
                       <h3 className="text-lg font-bold uppercase tracking-[0.18em] text-white">
                         {GUIDE_TEXT.chatbotTitle}
                       </h3>
@@ -196,19 +206,19 @@ export default function HomeExperienceGuide() {
                   </div>
                 </div>
 
-                <div className="rounded-[2rem] border border-sky-400/15 bg-[linear-gradient(135deg,rgba(14,165,233,0.12),rgba(255,255,255,0.03))] p-6">
+                <div className="rounded-[2rem] border border-cinema-gold/15 bg-[linear-gradient(135deg,rgba(246,213,138,0.12),rgba(255,255,255,0.03))] p-6">
                   <div className="flex items-center gap-3">
-                    <MessageSquareText className="h-5 w-5 text-sky-300" />
+                    <MessageSquareText className="h-5 w-5 text-cinema-gold" />
                     <h3 className="text-lg font-bold uppercase tracking-[0.18em] text-white">
                       {GUIDE_TEXT.bookingGuideTitle}
                     </h3>
                   </div>
                   <div className="mt-5 grid gap-3 md:grid-cols-2">
-                    <div className="rounded-[1.5rem] border border-white/8 bg-black/20 p-4 text-sm leading-6 text-white/60">
+                    <div className="gsap-card rounded-[1.5rem] border border-white/8 bg-black/20 p-4 text-sm leading-6 text-white/60">
                       <p className="font-bold uppercase tracking-[0.16em] text-white">{GUIDE_TEXT.methodOne}</p>
                       <p className="mt-2">{bookingExamples[0]}</p>
                     </div>
-                    <div className="rounded-[1.5rem] border border-white/8 bg-black/20 p-4 text-sm leading-6 text-white/60">
+                    <div className="gsap-card rounded-[1.5rem] border border-white/8 bg-black/20 p-4 text-sm leading-6 text-white/60">
                       <p className="font-bold uppercase tracking-[0.16em] text-white">{GUIDE_TEXT.methodTwo}</p>
                       <p className="mt-2">{bookingExamples[1]}</p>
                     </div>
@@ -217,7 +227,7 @@ export default function HomeExperienceGuide() {
 
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {highlightItems.map(({ icon: Icon, title, description }) => (
-                    <div key={title} className="rounded-[1.75rem] border border-white/8 bg-white/4 p-5">
+                    <div key={title} className="gsap-card rounded-[1.75rem] border border-white/8 bg-white/4 p-5">
                       <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/8 text-cinema-gold">
                         <Icon className="h-5 w-5" />
                       </div>
@@ -248,7 +258,8 @@ export default function HomeExperienceGuide() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

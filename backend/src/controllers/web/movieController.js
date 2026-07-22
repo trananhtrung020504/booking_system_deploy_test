@@ -62,8 +62,8 @@ export const getMovies = async (req, res) => {
 
 export const getMovie = async (req, res) => {
     try {
-        const movie = await prisma.movie.findUnique({
-            where: { id: req.params.id },
+        const movie = await prisma.movie.findFirst({
+            where: { id: req.params.id, isActive: true },
             include: {
                 poster: true,
                 shows: {

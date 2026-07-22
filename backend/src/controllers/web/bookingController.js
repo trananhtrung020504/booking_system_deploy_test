@@ -41,7 +41,9 @@ export const createBooking = async (req, res) => {
         }
 
         const show = await prisma.show.findUnique({ where: { id: showId }, include: { screen: true } });
-        if (!show || !show.isActive) return res.status(404).json({ message: "Show not found" });
+        if (!show || !show.isActive || new Date(show.startTime) <= new Date()) {
+            return res.status(404).json({ message: "Show not found" });
+        }
 
         const seats = await prisma.seat.findMany({
             where: {
@@ -379,7 +381,7 @@ export const holdSeats = async (req, res) => {
         }
 
         const show = await prisma.show.findUnique({ where: { id: showId } });
-        if (!show || !show.isActive) {
+        if (!show || !show.isActive || new Date(show.startTime) <= new Date()) {
             return res.status(404).json({ message: "Show not found" });
         }
 
@@ -444,7 +446,7 @@ export const holdSeats = async (req, res) => {
                     if (existing) {
                         try {
                             const parsed = JSON.parse(existing);
-                            if (String(parsed.userId) !== String(userId)) {
+                            if (String(parsed.userId) === String(userId)) {
                                 await redis.del(`hold:${showId}:${r.seatId}`);
                             }
                         } catch (e) {

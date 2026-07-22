@@ -184,7 +184,7 @@ export default function SignupPage() {
       </div>
 
       <div className="relative z-20 w-full max-w-[460px] px-6 py-4">
-        <div className="relative group overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-[30px] p-6 md:p-8 shadow-[0_0_100px_rgba(0,0,0,0.8)] transition-all duration-700 hover:border-primary/40">
+        <div className="relative group overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#1E1910]/64 backdrop-blur-[30px] p-6 md:p-8 shadow-[0_0_100px_rgba(0,0,0,0.8)] transition-all duration-700 hover:border-primary/40">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-cinema-gold/5 pointer-events-none" />
 
           <div className="relative space-y-4">
@@ -264,7 +264,7 @@ export default function SignupPage() {
                 <div className="pt-2">
                   <Button 
                     type="submit" 
-                    className="w-full h-11 rounded-xl bg-primary text-white font-bold uppercase tracking-widest text-[9px] shadow-[0_10px_30px_rgba(239,68,68,0.2)] hover:shadow-[0_15px_40px_rgba(239,68,68,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all gap-2" 
+                    className="w-full h-11 rounded-xl bg-primary text-white font-bold uppercase tracking-widest text-[9px] shadow-[0_10px_30px_rgba(246,213,138,0.22)] hover:shadow-[0_15px_40px_rgba(246,213,138,0.34)] hover:scale-[1.02] active:scale-[0.98] transition-all gap-2" 
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -377,7 +377,7 @@ export default function SignupPage() {
                 <div className="pt-2">
                   <Button 
                     type="submit" 
-                    className="w-full h-11 rounded-xl bg-primary text-white font-bold uppercase tracking-widest text-[9px] shadow-[0_10px_30px_rgba(239,68,68,0.2)] hover:shadow-[0_15px_40px_rgba(239,68,68,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all gap-2" 
+                    className="w-full h-11 rounded-xl bg-primary text-white font-bold uppercase tracking-widest text-[9px] shadow-[0_10px_30px_rgba(246,213,138,0.22)] hover:shadow-[0_15px_40px_rgba(246,213,138,0.34)] hover:scale-[1.02] active:scale-[0.98] transition-all gap-2" 
                     disabled={isSendingOtp}
                   >
                     {isSendingOtp ? (

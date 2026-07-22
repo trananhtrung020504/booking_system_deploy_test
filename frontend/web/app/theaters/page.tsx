@@ -28,9 +28,9 @@ export default function TheatersPage() {
   const filteredTheaters = theatersResponse?.theaters || [];
 
   return (
-    <div className="min-h-screen bg-[#06060a] text-white pt-28 pb-16 px-6 md:px-10 max-w-[1450px] mx-auto relative overflow-hidden">
+    <div className="min-h-screen bg-background text-white pt-28 pb-16 px-6 md:px-10 max-w-[1450px] mx-auto relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(229,9,20,0.06),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(246,213,138,0.08),transparent_50%)]" />
       <div className="absolute bottom-[10%] right-[-10%] w-[35rem] h-[35rem] bg-primary/5 rounded-full blur-[130px] pointer-events-none" />
 
       {/* Header */}
@@ -54,8 +54,8 @@ export default function TheatersPage() {
             onClick={() => setSelectedCity(city)}
             className={`px-8 py-6 h-auto rounded-2xl font-bold uppercase tracking-wider text-xs border transition-all ${
               selectedCity === city
-                ? 'bg-gradient-to-b from-[#e50914] to-[#ff4b4b] border-primary text-white shadow-xl shadow-primary/20 hover:scale-[1.02]'
-                : 'bg-[#0d0d15]/60 hover:bg-white/5 border-white/10 text-white/70 hover:text-white'
+                ? 'bg-gradient-to-b from-[#fff0b8] via-[#d8a94f] to-[#9b6b24] border-primary text-white shadow-xl shadow-primary/20 hover:scale-[1.02]'
+                : 'bg-card/60 hover:bg-white/5 border-white/10 text-white/70 hover:text-white'
             }`}
           >
             <MapPin className="w-3.5 h-3.5 mr-2" /> {city}
@@ -78,7 +78,7 @@ export default function TheatersPage() {
           ) : filteredTheaters.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredTheaters.map((theater) => (
-                <Card key={theater.id} className="bg-[#0d0d15]/80 border border-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl hover:border-primary/40 hover:shadow-primary/5 transition-all duration-500 group">
+                <Card key={theater.id} className="bg-card/80 border border-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl hover:border-primary/40 hover:shadow-primary/5 transition-all duration-500 group">
                   <CardContent className="p-8 space-y-6 flex flex-col h-full justify-between">
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
@@ -132,7 +132,7 @@ export default function TheatersPage() {
               ))}
             </div>
           ) : (
-            <div className="p-20 text-center bg-[#0d0d15]/50 border border-white/5 rounded-[2.5rem] backdrop-blur-xl">
+            <div className="p-20 text-center bg-card/50 border border-white/5 rounded-[2.5rem] backdrop-blur-xl">
               <AlertCircle className="w-12 h-12 text-primary mx-auto mb-4" />
               <h3 className="text-lg font-bold uppercase tracking-wider text-white">Không có rạp nào tại {selectedCity}</h3>
               <p className="text-xs text-white/40 mt-1 max-w-sm mx-auto">Vui lòng chọn thành phố khác hoặc liên hệ bộ phận hỗ trợ.</p>
@@ -145,7 +145,7 @@ export default function TheatersPage() {
           <h3 className="text-lg font-bold uppercase tracking-wider flex items-center gap-2 mb-2">
             <CreditCard className="w-5 h-5 text-primary" /> Bảng giá vé RoPhim
           </h3>
-          <Card className="bg-[#0d0d15]/90 border border-white/10 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl relative">
+          <Card className="bg-card/90 border border-white/10 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl relative">
             <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-r from-primary/20 to-transparent blur-xl opacity-30" />
             <CardContent className="p-8 space-y-6 relative z-10">
               <div className="flex items-center gap-2.5">

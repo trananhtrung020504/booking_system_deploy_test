@@ -3,19 +3,19 @@ import prisma from '../config/database.js';
 import { checkAndExpireBookings } from '../controllers/web/bookingController.js';
 
 export const globalLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: 1 * 60 * 1000, 
+  max: 100, 
   message: {
     success: false,
     message: 'Bạn đã gửi quá nhiều yêu cầu lên máy chủ. Vui lòng quay lại sau 1 phút.'
   },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  standardHeaders: true, 
+  legacyHeaders: false, 
 });
 
 export const authLimiter = rateLimit({
-  windowMs: 15 * 1000, // 15 seconds window
-  max: 5, // Limit each IP to 5 requests per windowMs
+  windowMs: 15 * 1000, 
+  max: 5, 
   message: {
     success: false,
     message: 'Bạn đang thao tác quá nhanh. Vui lòng thử lại sau 15 giây.'
@@ -25,8 +25,8 @@ export const authLimiter = rateLimit({
 });
 
 export const chatbotLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute window
-  max: 5, // Limit each IP to 5 questions per windowMs
+  windowMs: 1 * 60 * 1000, 
+  max: 5, 
   message: {
     success: false,
     message: 'Chatbot cần thời gian suy nghĩ. Vui lòng đợi 1 phút trước khi hỏi câu tiếp theo!'
@@ -38,8 +38,8 @@ export const chatbotLimiter = rateLimit({
 export const validateChatInput = (req, res, next) => {
   const { question } = req.body;
   if (question) {
-    const repPattern = /(.)\1{5,}/; // Any character repeating 6 times or more (e.g. "aaaaaa", "??????")
-    const stringRepeatPattern = /(..*)\1{4,}/; // Any string repeating 5 times or more
+    const repPattern = /(.)\1{5,}/; 
+    const stringRepeatPattern = /(..*)\1{4,}/; 
     
     if (repPattern.test(question) || stringRepeatPattern.test(question)) {
       return res.status(400).json({

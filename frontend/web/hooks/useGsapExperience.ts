@@ -15,6 +15,7 @@ export function useGsapExperience(rootRef: RefObject<HTMLElement | null>, signat
     if (reduceMotion) return;
 
     const hoverCleanups: Array<() => void> = [];
+    const refreshScrollTriggers = () => ScrollTrigger.refresh();
 
     const context = gsap.context(() => {
       gsap.fromTo(
@@ -53,7 +54,8 @@ export function useGsapExperience(rootRef: RefObject<HTMLElement | null>, signat
             clearProps: 'transform,opacity,visibility',
             scrollTrigger: {
               trigger: element,
-              start: 'top 82%',
+              start: 'top 98%',
+              invalidateOnRefresh: true,
               once: true,
             },
           }
@@ -87,9 +89,16 @@ export function useGsapExperience(rootRef: RefObject<HTMLElement | null>, signat
           card.removeEventListener('mouseleave', leave);
         });
       });
+
+      requestAnimationFrame(refreshScrollTriggers);
     }, root);
 
+    const refreshTimeout = window.setTimeout(refreshScrollTriggers, 350);
+    window.addEventListener('load', refreshScrollTriggers, { once: true });
+
     return () => {
+      window.clearTimeout(refreshTimeout);
+      window.removeEventListener('load', refreshScrollTriggers);
       hoverCleanups.forEach((cleanup) => cleanup());
       context.revert();
     };

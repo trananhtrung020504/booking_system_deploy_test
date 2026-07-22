@@ -41,7 +41,12 @@ export function useGsapExperience(rootRef: RefObject<HTMLElement | null>, signat
         clearProps: 'transform,opacity,visibility',
       });
 
-      gsap.utils.toArray<HTMLElement>('[data-gsap-reveal]').forEach((element) => {
+      const revealElements = gsap
+        .utils
+        .toArray<HTMLElement>('[data-gsap-reveal]')
+        .filter((element) => !element.parentElement?.closest('[data-gsap-reveal]'));
+
+      revealElements.forEach((element) => {
         gsap.fromTo(
           element,
           { autoAlpha: 0, y: 44, scale: 0.985 },
